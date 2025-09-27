@@ -1,0 +1,96 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\Peerless2012\\.ohos\\config\\default_FinBook_Ovk1cVRnBsa2uxphH5abVj8E-AurGgvEH7FSjKG9XJI=.cer",
+          "storePassword": "0000001A06F0F884E3835F3B6B1DB1FE989DD6D4C69E2532909375D1468B3FC151CEB6D588DFEB6AAF4E",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001A67EAFFB4E9C01F9677BBBB5E0CBC6F87DF0EA0B2E77EB13937C932E686EEA22E40795F6E987D",
+          "profile": "C:\\Users\\Peerless2012\\.ohos\\config\\default_FinBook_Ovk1cVRnBsa2uxphH5abVj8E-AurGgvEH7FSjKG9XJI=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\Peerless2012\\.ohos\\config\\default_FinBook_Ovk1cVRnBsa2uxphH5abVj8E-AurGgvEH7FSjKG9XJI=.p12"
+        }
+      },
+      {
+        "name": "publish",
+        "type": "HarmonyOS",
+        "material": {
+          "storePassword": "0000002A23BBD7DA0A39CFA7DFDE9E63C75F26372CB28808B3675EB95D56790ED247025C781C9920EB9B99ADEBF0B5F57AE1A0E6A3D3D369B7B7",
+          "certpath": "D:/Develop/Keystore/OHPG/OHPG_Publish.cer",
+          "keyAlias": "Publish",
+          "keyPassword": "0000002ADB4926A9D82A187CE727F75BF39074EEF1380BFE2B97DC820D687B71E0DB2C253ED721080F0B942F16F3E79BF3723BB790A7A79862A1",
+          "profile": "D:/Develop/Keystore/OHPG/FinBookPublishRelease.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "D:/Develop/Keystore/OHPG/OHPG.p12"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "compatibleSdkVersion": "5.0.4(16)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      },
+      {
+        "name": "publish",
+        "signingConfig": "publish",
+        "compatibleSdkVersion": "5.0.4(16)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug",
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default","publish"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "core",
+      "srcPath": "../FinCore/lib_core"
+    },
+    {
+      "name": "framework",
+      "srcPath": "../FinCore/lib_framework"
+    },
+    {
+      "name": "network",
+      "srcPath": "../FinSdk/network"
+    },
+    {
+      "name": "jellyfin",
+      "srcPath": "../FinSdk/jellyfin"
+    }
+  ]
+}
