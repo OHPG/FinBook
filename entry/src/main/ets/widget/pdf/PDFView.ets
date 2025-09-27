@@ -1,226 +1,144 @@
-import { pdfService } from '@kit.PDFKit';
-import { image } from '@kit.ImageKit';
-import { PullToRefresh } from './PullToRefresh/PullToRefresh'
-import LoadingDialog from './Loading/loadingView'
-
-class BasicDataSource implements IDataSource {
-  private listeners: DataChangeListener[] = [];
-  private originDataArray: StringData[] = [];
-
-  public totalCount(): number {
-    return 0;
-  }
-
-  public getData(index: number): StringData {
-    return this.originDataArray[index];
-  }
-
-  registerDataChangeListener(listener: DataChangeListener): void {
-    if (this.listeners.indexOf(listener) < 0) {
-      console.info('add listener');
-      this.listeners.push(listener);
-    }
-  }
-
-  unregisterDataChangeListener(listener: DataChangeListener): void {
-    const pos = this.listeners.indexOf(listener);
-    if (pos >= 0) {
-      console.info('remove listener');
-      this.listeners.splice(pos, 1);
-    }
-  }
-
-  notifyDataReload(): void {
-    this.listeners.forEach(listener => {
-      listener.onDataReloaded();
-    })
-  }
-
-  notifyDataAdd(index: number): void {
-    this.listeners.forEach(listener => {
-      listener.onDataAdd(index);
-    })
-  }
-
-  notifyDataChange(index: number): void {
-    this.listeners.forEach(listener => {
-      listener.onDataChange(index);
-    })
-  }
-
-  notifyDataDelete(index: number): void {
-    this.listeners.forEach(listener => {
-      listener.onDataDelete(index);
-    })
-  }
-
-  notifyDataMove(from: number, to: number): void {
-    this.listeners.forEach(listener => {
-      listener.onDataMove(from, to);
-    })
-  }
-}
-
-class MyDataSource extends BasicDataSource {
-  private dataArray: StringData[] = [];
-
-  public dataReload(): void {
-    this.dataArray = []; // 清空数组
-    this.notifyDataReload(); // 通知数据已重新加载
-  }
-
-  public totalCount(): number {
-    return this.dataArray.length;
-  }
-
-  public getData(index: number): StringData {
-    return this.dataArray[index];
-  }
-
-  public addData(index: number, data: StringData): void {
-    this.dataArray.splice(index, 0, data);
-    this.notifyDataAdd(index);
-  }
-
-  public pushData(data: StringData): void {
-    this.dataArray.push(data);
-    this.notifyDataAdd(this.dataArray.length - 1);
-    console.log('this.dataArray',this.dataArray.length)
-  }
-
-  public deleteData(index: number): void {
-    this.dataArray.splice(index, 0);
-    this.notifyDataDelete(index);
-  }
-}
-
-class StringData {
-  imgSrc: image.PixelMap;
-
-  constructor(imgSrc: image.PixelMap) {
-    this.imgSrc = imgSrc;
-  }
-}
+import { CommonConstants } from '../../common/CommonConstants';
+import LazyDataSource from '../../common/LazyDataSource';
+import { PDFLoader } from './PDFLoader';
+import { PdfPageInfo } from './PdfPageInfo';
 
 @Component
 export struct PDFView {
-  @State data: MyDataSource = new MyDataSource();
-  @State totalPage: number = 0;
-  @State pageIndex: number = 0;
-  @State scrollerPageIndex: number = 0;
-  @State currentPdfIndex: number = 0;
-  @State pagesPerLoadOn: number = 0
 
-  @Prop pdfPath: string = '';
-  header?: Record<string, string> = undefined
-  @Prop pagesPerLoad: number = 0
-  pdfInit: (totalPage: number,pagesPerLoad: number) => void  = () => {};
-  onReachEnd: (totalPage: number) => void  = () => {};
-  onScrollIndex: (pageIndex: number) => void  = () => {};
+  @StorageProp('currentBreakpoint') currentBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_MD;
 
-  private document: pdfService.PdfDocument = new pdfService.PdfDocument()
-  private scroller: Scroller = new Scroller();
+  private dataSource: LazyDataSource<PdfPageInfo> = new LazyDataSource<PdfPageInfo>();
+
+  private index: number = 0
+
+  @Require @Prop pdfPath: string = '';
+
+  @Provide pdfLoader: PDFLoader = new PDFLoader()
 
   aboutToAppear() {
-    LoadingDialog.showLoading('加载中...')
-    this.openFile(this.pdfPath);
+    this.pdfLoader.load(this.pdfPath)
+      .then((count) => {
+        this.constructData(count)
+      })
+      .catch((error: Error) => {
+        // 显示错误，重试等
+      })
   }
 
-  // 释放PDF文档
-  aboutToDisappear() {
-    this.document.releaseDocument()
-  }
-
-  getSubstringAfterLastSlash(str: string): string | undefined {
-    const parts = str.split('/'); // 使用 / 来分割字符串
-    return parts.pop(); // 返回分割后的数组中的最后一个元素
-  }
-
-  openFile(filePath: string){
-    // 加载PDF
-    let loadResult: pdfService.ParseResult = this.document.loadDocument(filePath, '');
-
-    if (loadResult === 0) {
-      // 总页数
-      this.totalPage = this.document.getPageCount();
-
-      // 如果PDF页数大于10页，就做分页
-      if(this.totalPage > 10 && !this.pagesPerLoad){
-        this.pagesPerLoadOn = 10;
-      }
-
-      // 如果有传入分页，就做分页
-      if(this.pagesPerLoad && this.pagesPerLoad < this.totalPage){
-        this.pagesPerLoadOn = this.pagesPerLoad;
-      }
-
-      this.pdfInit(this.totalPage,this.pagesPerLoadOn)
-
-      this.loadPages(0);
+  private constructData(count: number) {
+    let dataArray = new Array<PdfPageInfo>()
+    for (let i = 0; i < count; i++) {
+      dataArray.push({
+        index: i,
+        count: count
+      })
     }
-  }
-
-  // 加载页面的递归函数
-  async loadPages(startIndex: number) {
-    let endIndex: number = this.totalPage;
-    if(this.pagesPerLoadOn){
-      endIndex = startIndex + this.pagesPerLoadOn;
-    }
-    for (let index = startIndex; index < endIndex && index < this.totalPage; index++) {
-      let page = await this.document.getPage(index);
-      let _pixelMaps = await page.getPagePixelMap();
-      await this.data.pushData(new StringData(_pixelMaps))
-    }
-
-    LoadingDialog.hide()
-    this.pageIndex = this.data.totalCount()
+    this.dataSource.pushArrayData(dataArray)
   }
 
   build() {
-    Column() {
-      Row() {
-        PullToRefresh({
-          data: $data,
-          scroller: this.scroller,
-          customList: () => {
-            this.getListView();
-          },
-          onLoadMore: () => {
-            return new Promise<string>((resolve, reject) => {
-              if (this.pageIndex != this.totalPage) {
-                this.loadPages(this.pageIndex)
-                resolve('');
-              } else {
-                reject('');
-              }
-            });
-          },
-          customLoad: null,
-          customRefresh: null,
+    Stack() {
+      Swiper() {
+        LazyForEach(this.dataSource, (info: PdfPageInfo) => {
+          PdfPage({info: info})
         })
       }
+      .displayCount(this.currentBreakpoint >= WidthBreakpoint.WIDTH_LG ? 2 : 1, true)
+      .indicator(false)
       .width('100%')
       .height('100%')
+      .loop(false)
+      .onChange((index) => {
+        this.index = index;
+      })
     }
+    .width('100%')
+    .height('100%')
   }
 
-  @Builder
-  private getListView() {
-    List({ scroller: this.scroller }) {
-      LazyForEach(this.data, (item: StringData, index: number) => {
-        ListItem() {
-          Image(item.imgSrc)
-            .width('100%')
-        }
-      }, (item: StringData, index: number) => index.toString())
-    }
-    .cachedCount(3)
-    .onScrollIndex((firstIndex: number, lastIndex: number, centerIndex: number) => {
-      this.scrollerPageIndex = centerIndex + 1
-      this.onScrollIndex(lastIndex + 1)
-    })
-    .backgroundColor('#ddd')
-    .divider({ strokeWidth: 1, color: 0x222222 })
-    .edgeEffect(EdgeEffect.None) // 必须设置列表为滑动到边缘无效果
+  aboutToDisappear() {
+    this.pdfLoader.release()
   }
+
+}
+
+@Reusable
+@Component
+struct PdfPage {
+
+  @Consume pdfLoader: PDFLoader
+
+  @Require @State info?: PdfPageInfo = undefined
+
+  @State pixel?: PixelMap = undefined
+
+  @State loading: boolean = false
+
+  aboutToAppear(): void {
+    this.updateImage()
+  }
+
+  aboutToReuse(params: Record<string, ESObject>): void {
+    this.info = params['info']
+    this.updateImage()
+  }
+
+  private updateImage() {
+    let index = this.info!.index
+    this.pixel = this.pdfLoader.peekPage(index)
+    this.loading = false
+    if (this.pixel) return
+    this.loading = true
+    this.pdfLoader.getPage(index)
+      .then((pixel) => {
+        // TODO 考虑一致性问题
+        this.pixel = pixel
+        this.loading = false
+      })
+      .catch((error: Error) => {
+        this.loading = false
+      })
+  }
+
+  build() {
+    Stack() {
+      // pdf
+      Image(this.pixel)
+        .objectFit(ImageFit.Contain)
+        .width(CommonConstants.FULL_PERCENT)
+        .height(CommonConstants.FULL_PERCENT)
+
+      // 错误和重试
+      Text("加载出错，点击重试！")
+        .visibility(Visibility.Hidden)
+
+      // loading
+      LoadingProgress()
+        .visibility(this.loading ? Visibility.Visible : Visibility.Hidden)
+        .width($r('sys.float.ohos_id_progress_default_diameter'))
+        .height($r('sys.float.ohos_id_progress_default_diameter'))
+        .color($r('sys.color.brand'))
+
+    }
+    .width(CommonConstants.FULL_PERCENT)
+    .height(CommonConstants.FULL_PERCENT)
+    .onClick(() => {
+      this.retryIfNeed()
+    })
+  }
+
+  private retryIfNeed() {
+    if (this.loading || this.pixel) return
+    this.updateImage()
+  }
+
+  aboutToRecycle(): void {
+
+  }
+
+  aboutToDisappear(): void {
+
+  }
+
 }
