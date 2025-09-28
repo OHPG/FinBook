@@ -4,6 +4,8 @@ import { AppViewModel } from "../../lifecycle/AppViewModel";
 import { MediaArgs } from "../detail/MediaArgs";
 import { request } from "@kit.BasicServicesKit";
 import fs from '@ohos.file.fs';
+import { FileUtil } from "../../util/FileUtil";
+
 /**
  * @Author peerless2012
  * @Email peerless2012@126.com
@@ -27,12 +29,12 @@ export class ReaderViewModel extends AppViewModel implements SimpleRepository {
     let url = await this.repository.getBookUrl(item.id)
     let filePath = this.context.filesDir + "/" + item.id;
     let exists = await fs.access(filePath, fs.AccessModeType.EXIST)
-    if (exists) {
-      return filePath
-    } else {
+    if (!exists) {
       // download
-      return this.download(url, filePath)
+      filePath = await this.download(url, filePath)
     }
+    let pdf = await FileUtil.isPdf(filePath)
+    return filePath
   }
 
   private async download(url: string, path: string): Promise<string> {
