@@ -1,10 +1,10 @@
 import { CommonConstants } from '../../common/CommonConstants';
 import LazyDataSource from '../../common/LazyDataSource';
-import { PDFLoader } from './PDFLoader';
+import { PdfLoader } from './PdfLoader';
 import { PdfPageInfo } from './PdfPageInfo';
 
 @Component
-export struct PDFView {
+export struct PdfView {
 
   @StorageProp('currentBreakpoint') currentBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_MD;
 
@@ -14,7 +14,7 @@ export struct PDFView {
 
   @Require @Prop pdfPath: string = '';
 
-  @Provide pdfLoader: PDFLoader = new PDFLoader()
+  @Provide pdfLoader: PdfLoader = new PdfLoader()
 
   aboutToAppear() {
     this.pdfLoader.load(this.pdfPath)
@@ -42,7 +42,7 @@ export struct PDFView {
       Swiper() {
         LazyForEach(this.dataSource, (info: PdfPageInfo) => {
           PdfPage({info: info})
-        })
+        }, (item: PdfPageInfo, index: number) => item.index.toString())
       }
       .displayCount(this.currentBreakpoint >= WidthBreakpoint.WIDTH_LG ? 2 : 1, true)
       .indicator(false)
@@ -67,13 +67,11 @@ export struct PDFView {
 @Component
 struct PdfPage {
 
-  @Consume pdfLoader: PDFLoader
+  @Consume pdfLoader: PdfLoader
 
   @Require @State info?: PdfPageInfo = undefined
 
   @State pixel?: PixelMap = undefined
-
-  @State loading: boolean = false
 
   aboutToAppear(): void {
     this.updateImage()
@@ -86,55 +84,26 @@ struct PdfPage {
 
   private updateImage() {
     let index = this.info!.index
-    this.pixel = this.pdfLoader.peekPage(index)
-    this.loading = false
-    if (this.pixel) return
-    this.loading = true
-    this.pdfLoader.getPage(index)
-      .then((pixel) => {
-        // TODO 考虑一致性问题
-        this.pixel = pixel
-        this.loading = false
-      })
-      .catch((error: Error) => {
-        this.loading = false
-      })
+    this.pixel = this.pdfLoader.getPage(index)
   }
 
   build() {
-    Stack() {
+    Stack({alignContent: Alignment.Bottom}) {
       // pdf
       Image(this.pixel)
         .objectFit(ImageFit.Contain)
         .width(CommonConstants.FULL_PERCENT)
         .height(CommonConstants.FULL_PERCENT)
 
-      // 错误和重试
-      Text("加载出错，点击重试！")
-        .visibility(Visibility.Hidden)
-
-      // loading
-      LoadingProgress()
-        .visibility(this.loading ? Visibility.Visible : Visibility.Hidden)
-        .width($r('sys.float.ohos_id_progress_default_diameter'))
-        .height($r('sys.float.ohos_id_progress_default_diameter'))
-        .color($r('sys.color.brand'))
-
+      // index
+      Text((this.info!.index + 1) + "/" + this.info!.count)
+        .margin(CommonConstants.SPACE_16)
     }
     .width(CommonConstants.FULL_PERCENT)
     .height(CommonConstants.FULL_PERCENT)
-    .onClick(() => {
-      this.retryIfNeed()
-    })
-  }
-
-  private retryIfNeed() {
-    if (this.loading || this.pixel) return
-    this.updateImage()
   }
 
   aboutToRecycle(): void {
-
   }
 
   aboutToDisappear(): void {

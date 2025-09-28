@@ -4,7 +4,8 @@ import { ScrollRefreshView, ToolBar } from '@ohpg/fin-framework'
 import { CommonConstants } from '../../common/CommonConstants'
 import { ReaderViewModel } from './ReaderViewModel'
 import { MediaArgs } from '../detail/MediaArgs'
-import { PDFView } from '../../widget/pdf/PDFView'
+import { PdfView } from '../../widget/pdf/PdfView'
+import { FinItemType } from '@ohpg/fin-core'
 
 @Entry
 @Component
@@ -15,12 +16,13 @@ struct ReaderPage {
 
   @StorageProp("currentAvoidArea") avoidArea?: window.AvoidArea = undefined
 
+
   aboutToAppear(): void {
   }
 
   @Builder
   bookView(path: string) {
-    PDFView({
+    PdfView({
         pdfPath: path,
     })
       .width(CommonConstants.FULL_PERCENT)
