@@ -10,7 +10,7 @@
     "@abner/refresh": "1.4.3",
     "@ohpg/network": 'file:../../FinSdk/network',
     "@ohpg/jellyfin": 'file:../../FinSdk/jellyfin',
-    "@ohpg/fin-core": 'file:../../FinCore/lib_core',
-    "@ohpg/fin-framework": 'file:../../FinCore/lib_framework'
+    "@ohpg/fin-core": 'file:../../FinFramework/lib_core',
+    "@ohpg/fin-framework": 'file:../../FinFramework/lib_framework'
   }
 }
