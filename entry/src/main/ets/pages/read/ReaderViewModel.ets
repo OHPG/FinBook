@@ -5,6 +5,7 @@ import { MediaArgs } from "../detail/MediaArgs";
 import { request } from "@kit.BasicServicesKit";
 import fs from '@ohos.file.fs';
 import { FileUtil } from "../../util/FileUtil";
+import { FinBookRawSource } from "../../entity/FinBookRawSource";
 
 /**
  * @Author peerless2012
@@ -24,7 +25,7 @@ export class ReaderViewModel extends AppViewModel implements SimpleRepository {
     this.args = args
   }
 
-  async loadData(type: LoadType): Promise<string> {
+  async loadData(type: LoadType): Promise<FinBookRawSource> {
     let item = await this.repository.getBook(this.args.id)
     let url = await this.repository.getBookUrl(item.id)
     let filePath = this.context.filesDir + "/" + item.id;
@@ -34,7 +35,7 @@ export class ReaderViewModel extends AppViewModel implements SimpleRepository {
       filePath = await this.download(url, filePath)
     }
     let pdf = await FileUtil.isPdf(filePath)
-    return filePath
+    return {id: item.id, name: item.name, path: filePath, pdf: pdf}
   }
 
   private async download(url: string, path: string): Promise<string> {

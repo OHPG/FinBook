@@ -20,7 +20,7 @@ export interface FinBookApi extends FinApi {
    * 查询书籍列表
    * @returns
    */
-  getBookList(): Promise<Array<FinItem>>
+  getBookList(id?: string): Promise<Array<FinItem>>
 
   /**
    * 查询书籍信息

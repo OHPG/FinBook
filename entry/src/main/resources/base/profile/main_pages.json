@@ -2,6 +2,7 @@
   "src": [
     "pages/splash/SplashPage",
     "pages/home/HomePage",
+    "pages/grid/GridPage",
     "pages/detail/DetailPage",
     "pages/read/ReaderPage",
     "pages/about/AboutPage"

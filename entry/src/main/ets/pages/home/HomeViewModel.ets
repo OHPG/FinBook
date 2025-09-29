@@ -15,7 +15,7 @@ export class HomeViewModel extends ListViewModel {
    * @param type
    * @returns
    */
-  async loadData(type: LoadType): Promise<void> {
+  async loadData(type?: LoadType): Promise<void> {
     let books = await this.repository.getBookList()
     this.dataSource.initData(books)
   }

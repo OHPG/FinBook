@@ -5,7 +5,7 @@ import { CommonConstants } from '../../common/CommonConstants'
 import { ReaderViewModel } from './ReaderViewModel'
 import { MediaArgs } from '../detail/MediaArgs'
 import { PdfView } from '../../widget/pdf/PdfView'
-import { FinItemType } from '@ohpg/fin-core'
+import { FinBookRawSource } from '../../entity/FinBookRawSource'
 
 @Entry
 @Component
@@ -16,17 +16,21 @@ struct ReaderPage {
 
   @StorageProp("currentAvoidArea") avoidArea?: window.AvoidArea = undefined
 
-
   aboutToAppear(): void {
   }
 
   @Builder
-  bookView(path: string) {
+  pdfView(path: string) {
     PdfView({
         pdfPath: path,
     })
       .width(CommonConstants.FULL_PERCENT)
       .height(CommonConstants.FULL_PERCENT)
+  }
+
+  @Builder
+  normalView(path: string) {
+    Text(path)
   }
 
   build() {
@@ -35,8 +39,12 @@ struct ReaderPage {
      ScrollRefreshView({
        refreshEnable: false,
        source: this.viewModel,
-       itemLayout: (url: string) => {
-         this.bookView(url)
+       itemLayout: (source: FinBookRawSource) => {
+         if (source.pdf) {
+           this.pdfView(source.path)
+         } else {
+           this.normalView(source.path)
+         }
        }
      })
        .layoutWeight(1)

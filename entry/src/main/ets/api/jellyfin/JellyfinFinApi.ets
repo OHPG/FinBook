@@ -119,28 +119,14 @@ export class JellyfinFinApi implements FinBookApi {
     , AccessToken: authResult.AccessToken}
   }
 
-  private filterItem(items?: Array<BaseItemDto> | null): Array<BaseItemDto> | undefined {
-    let newItems: Array<BaseItemDto> | undefined
-    items?.forEach((item) => {
-      let type = item.CollectionType
-      if (type == CollectionType.Books) {
-        if (newItems == undefined) {
-          newItems = new Array()
-        }
-        newItems.push(item)
-      }
-    }
-    )
-    return newItems
-  }
-
   private async assertCurrentBookLibrary(): Promise<BaseItemDto> {
     if (!this.bookLibrary) {
       let result = await this.jellyfin.getUserViewsApi().getUserViews({
         userId: this.activeInfo!.userInfo.userId,
         presetViews: [CollectionType.Books]
       })
-      this.bookLibrary = this.filterItem(result.Items)?.[0]
+      this.bookLibraryArray = result.Items?.filter((item) => item.CollectionType === CollectionType.Books)
+      this.bookLibrary = this.bookLibraryArray?.[0]
     }
     if (!this.bookLibrary) {
       throw new Error("No book library found.")
@@ -148,21 +134,20 @@ export class JellyfinFinApi implements FinBookApi {
     return this.bookLibrary
   }
 
-  public async getBookList(): Promise<Array<FinItem>> {
+  public async getBookList(id?: string): Promise<Array<FinItem>> {
     let library = await this.assertCurrentBookLibrary()
     let finItems = new Array<FinItem>()
     let result = await this.jellyfin.getItemsApi().getItems({
-      parentId: library.Id,
-      includeItemTypes: [BaseItemKind.Book],
-      recursive: true,
+      parentId: id ? id : library.Id,
+      includeItemTypes: [BaseItemKind.Book, BaseItemKind.Folder],
+      recursive: false,
       sortBy: [ItemSortBy.Name],
       sortOrder: [SortOrder.Ascending]
     })
-    if (result.Items) {
-      for (const item of result.Items) {
-        finItems.push(this.itemToFinItem(item))
-      }
-    }
+    let filterItems = result.Items?.filter((item) => item.Type === BaseItemKind.Book || BaseItemKind.Folder)
+    filterItems?.forEach((item) => {
+      finItems.push(this.itemToFinItem(item))
+    })
     return finItems
   }
 

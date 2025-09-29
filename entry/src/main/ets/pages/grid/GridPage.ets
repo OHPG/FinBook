@@ -1,19 +1,25 @@
 import { window } from '@kit.ArkUI'
-import { GridRefreshView } from '@ohpg/fin-framework'
+import { GridRefreshView, ToolBar } from '@ohpg/fin-framework'
 import { CommonConstants } from '../../common/CommonConstants'
-import { HomeToolBar } from '../../widget/bar/HomeToolBar'
 import { MediaItem } from '../../widget/item/MediaItem'
-import { HomeViewModel } from './HomeViewModel'
+import { MediaArgs } from '../detail/MediaArgs'
+import { GridViewModel } from './GridViewModel'
 
 @Entry
 @Component
-struct HomePage {
+struct GridPage {
 
-  private viewModel = new HomeViewModel(getContext())
+  private readonly args: MediaArgs = this.getUIContext().getRouter().getParams() as MediaArgs
+
+  private viewModel = new GridViewModel(getContext(), this.args)
 
   @StorageProp('currentBreakpoint') currentBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_MD;
 
   @StorageProp('currentAvoidArea') currentAvoidArea?: window.AvoidArea = undefined
+
+  aboutToAppear(): void {
+    this.viewModel.loadData()
+  }
 
   @Builder
   mediaListView(info: ESObject, index: number) {
@@ -23,8 +29,8 @@ struct HomePage {
   build() {
 
     Column() {
-      HomeToolBar({
-        title: $r('app.string.app_name')
+      ToolBar({
+        title: this.args.name
       })
 
       GridRefreshView({
