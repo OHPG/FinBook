@@ -3,6 +3,7 @@ import LazyDataSource from '../../common/LazyDataSource';
 import { PdfLoader } from './PdfLoader';
 import { PdfPageInfo } from './PdfPageInfo';
 
+@Reusable
 @Component
 export struct PdfView {
 

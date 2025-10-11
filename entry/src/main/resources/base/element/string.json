@@ -91,6 +91,30 @@
     {
       "name": "prefer_privacy",
       "value": "隐私政策"
+    },
+    {
+      "name": "system_font",
+      "value": "系统字体"
+    },
+    {
+      "name": "source_han_serif_font",
+      "value": "思源宋体"
+    },
+    {
+      "name": "menu_spine",
+      "value": "章节"
+    },
+    {
+      "name": "menu_font",
+      "value": "字体"
+    },
+    {
+      "name": "menu_theme",
+      "value": "主题"
+    },
+    {
+      "name": "menu_flip",
+      "value": "翻页"
     }
   ]
 }

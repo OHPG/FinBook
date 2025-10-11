@@ -6,6 +6,7 @@ import { ReaderViewModel } from './ReaderViewModel'
 import { MediaArgs } from '../detail/MediaArgs'
 import { PdfView } from '../../widget/pdf/PdfView'
 import { FinBookRawSource } from '../../entity/FinBookRawSource'
+import { XReaderView } from '../../widget/reader/XReaderView'
 
 @Entry
 @Component
@@ -30,7 +31,9 @@ struct ReaderPage {
 
   @Builder
   normalView(path: string) {
-    Text(path)
+    XReaderView({
+      bookPath: path
+    })
   }
 
   build() {
