@@ -13,6 +13,8 @@ export struct PdfView {
 
   private index: number = 0
 
+  @Consume immersiveMode: boolean
+
   @Require @Prop pdfPath: string = '';
 
   @Provide pdfLoader: PdfLoader = new PdfLoader()
@@ -56,6 +58,9 @@ export struct PdfView {
     }
     .width('100%')
     .height('100%')
+    .onClick(() => {
+      this.immersiveMode = !this.immersiveMode
+    })
   }
 
   aboutToDisappear() {

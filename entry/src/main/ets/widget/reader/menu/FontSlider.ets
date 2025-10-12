@@ -41,11 +41,14 @@ export struct FontSlider {
         .showSteps(true)
         .showTips(false)
         .trackThickness(36)
+        .width('80%')
+        .constraintSize({maxWidth: 360})
         .onChange(value => {
           this.onSliderChange?.(value)
         })
       textBuilder(new NodeParams(this.suf))
     }
+    .justifyContent(FlexAlign.Center)
     .width('100%')
   }
 }

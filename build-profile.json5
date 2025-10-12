@@ -5,18 +5,20 @@
         "name": "default",
         "signingConfig": "default",
         "compatibleSdkVersion": "5.0.4(16)",
+        "targetSdkVersion": "6.0.0(20)",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
           "strictMode": {
             "caseSensitiveCheck": true,
             "useNormalizedOHMUrl": true
           }
-        }
+        },
       },
       {
         "name": "publish",
         "signingConfig": "publish",
         "compatibleSdkVersion": "5.0.4(16)",
+        "targetSdkVersion": "6.0.0(20)",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
           "strictMode": {

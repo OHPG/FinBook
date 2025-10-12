@@ -16,6 +16,15 @@ struct ReaderPage {
   private viewModel = new ReaderViewModel(getContext(), this.args)
 
   @StorageProp("currentAvoidArea") avoidArea?: window.AvoidArea = undefined
+  /**
+   * 是否是沉浸式
+   */
+  @Provide immersiveMode: boolean = false
+
+  /**
+   * 菜单是否可见
+   */
+  @Provide menuVisible: boolean = false
 
   aboutToAppear(): void {
   }
@@ -25,8 +34,6 @@ struct ReaderPage {
     PdfView({
         pdfPath: path,
     })
-      .width(CommonConstants.FULL_PERCENT)
-      .height(CommonConstants.FULL_PERCENT)
   }
 
   @Builder
@@ -37,8 +44,7 @@ struct ReaderPage {
   }
 
   build() {
-   Column() {
-     ToolBar({title: this.args.name})
+   Stack({alignContent: Alignment.Top}) {
      ScrollRefreshView({
        refreshEnable: false,
        source: this.viewModel,
@@ -50,11 +56,31 @@ struct ReaderPage {
          }
        }
      })
-       .layoutWeight(1)
        .width(CommonConstants.FULL_PERCENT)
+       .height(CommonConstants.FULL_PERCENT)
+
+     Row() {
+       ToolBar({title: this.args.name}) {
+         SymbolGlyph($r('sys.symbol.slider_horizontal_2'))
+           .fontSize($r('sys.float.Title_L'))
+           .fontColor([$r('sys.color.font_primary')])
+           .onClick(() => {
+             this.menuVisible = true
+           })
+       }
+     }
+     .visibility(this.immersiveMode ? Visibility.Hidden : Visibility.Visible)
    }
    .width(CommonConstants.FULL_PERCENT)
    .height(CommonConstants.FULL_PERCENT)
+  }
+
+  onBackPress(): boolean | void {
+    if (this.menuVisible) {
+      this.menuVisible = false
+      return true
+    }
+    return false
   }
 
   aboutToDisappear(): void {

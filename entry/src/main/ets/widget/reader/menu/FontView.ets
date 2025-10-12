@@ -1,6 +1,7 @@
 import { FontSlider } from "./FontSlider";
 import { FontFileInfo } from "../info/FontFileInfo";
 import { bookParser, readerCore } from "@kit.ReaderKit";
+import { CommonConstants } from "../../../common/CommonConstants";
 
 @Component
 export struct FontView {
@@ -21,8 +22,9 @@ export struct FontView {
   }
 
   build() {
-    Column() {
-      Column() {
+    Stack({alignContent: Alignment.Bottom}) {
+
+      Column({space: CommonConstants.SPACE_16}) {
         GridRow({
           columns: { xs: 4, sm: 4, md: 9, lg: 12 },
           gutter: { x: 8, y: 8 },
@@ -53,14 +55,15 @@ export struct FontView {
               })
             }
           });
-        }.margin({ top: 24, left: 16, right: 16 })
+        }
 
-        Text()
-          .width('92%')
+        // 分割线
+        Divider()
+          .width('90%')
           .height(1)
-          .margin({ left: 16, top: 12, right: 16 })
           .backgroundColor($r('app.color.ic_bg_grey'))
 
+        // 字号
         FontSlider({
           step: 2,
           min: 12,
@@ -70,27 +73,29 @@ export struct FontView {
             this.bookSetting.fontSize = value
           }
         })
-          .margin({ top: 12, bottom: 12 })
 
+        // 行高
         FontSlider({
           pre: '三',
           suf: '三',
-          step: 0.2,
-          min: 1.2,
-          max: 2.5,
+          step: 0.1,
+          min: 1.0,
+          max: 2.0,
           value: Number(this.bookSetting.lineHeight),
           onSliderChange: (value) => {
             this.bookSetting.lineHeight = value
           }
         })
-          .margin({ top: 12, bottom: 12 })
       }
-      .width('60%')
+      .width('100%')
+      .backgroundColor($r('sys.color.background_primary'))
+      .borderRadius({ topRight: CommonConstants.CORNER_16, topLeft: CommonConstants.CORNER_16 })
+      .constraintSize({maxWidth: 400})
+      .padding(CommonConstants.SPACE_16)
     }
-    .alignItems(HorizontalAlign.Center)
-    .backgroundColor(Color.White)
+    .hitTestBehavior(HitTestMode.Transparent)
     .width('100%')
-    .zIndex(3)
+    .height('100%')
   }
 
 }

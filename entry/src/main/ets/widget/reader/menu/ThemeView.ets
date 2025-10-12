@@ -1,32 +1,27 @@
+import { CommonConstants } from "../../../common/CommonConstants"
 import { Colors } from "./Colors"
+import { readerCore } from "@kit.ReaderKit"
 
 @Component
 export struct ThemeView {
 
-  @Provide @Watch("onThemeChange") currentTheme: string = ""
-
   aboutToAppear(): void {
-    // TODO 恢复当前主题颜色
-    this.currentTheme = Colors.themeList[0]
   }
 
   build() {
     Scroll() {
       Row({ space: 12 }) {
-        ForEach(Colors.themeList, (item: string, index: number) => {
-          ThemeItemView({themeColor: item})
+        ForEach(Colors.themeList, (item: string) => {
+          ThemeItemView({themeColorKey: item})
         })
       }
-      .padding({ left: 12, right: 12, top: 12, bottom: 12 })
     }
-    .margin({ top: 8 })
+    .backgroundColor($r('sys.color.background_primary'))
+    .borderRadius({ topRight: CommonConstants.CORNER_16, topLeft: CommonConstants.CORNER_16 })
+    .padding(CommonConstants.SPACE_16)
     .scrollable(ScrollDirection.Horizontal)
     .scrollBar(BarState.Off)
     .edgeEffect(EdgeEffect.Spring)
-  }
-
-  private onThemeChange() {
-
   }
 
   aboutToDisappear(): void {
@@ -38,34 +33,52 @@ export struct ThemeView {
 @Component
 struct ThemeItemView {
 
-  @Consume currentTheme: string
+  @Consume bookSetting: readerCore.ReaderSetting
 
-  @Require @State themeColor: string
+  @Require @State themeColorKey: string
+
+  @State themeColorValue: string = ''
 
   aboutToAppear(): void {
-
+    this.themeColorValue = Colors.THEME_PAGE_COLOR[this.themeColorKey]
   }
 
   build() {
     Row()
       .width(80)
       .height(40)
-      .borderWidth(this.currentTheme === this.themeColor ? 1 : 2)
-      .borderColor(this.currentTheme === this.themeColor ? $r('app.color.ic_border_unselect') : this.themeColor)
-      .backgroundImage(this.getBackgroundImage(this.themeColor))
-      .backgroundColor(this.themeColor)
+      .borderWidth(this.bookSetting.themeColor === this.themeColorValue ? 1 : 2)
+      .borderColor(this.bookSetting.themeColor === this.themeColorValue ? $r('app.color.ic_border_unselect') : this.themeColorValue)
+      .backgroundImage(this.getBackgroundImage())
+      .backgroundColor(this.themeColorValue)
       .backgroundImagePosition(Alignment.BottomEnd)
       .backgroundImageSize(ImageSize.Cover)
       .borderRadius(20)
       .onClick(() => {
-        this.currentTheme = this.themeColor
+        this.bookSetting.themeColor = this.themeColorValue
+        let fontColor = '#000000'
+        let nightMode = false
+        let themeBg = ''
+        if (this.themeColorKey === 'whiteSky') {
+          themeBg = 'white_sky_first.jpg'
+        } else if (this.themeColorKey === 'darkSky') {
+          themeBg = 'white_sky_first.jpg'
+          nightMode = true
+          fontColor = '#FFFFFF'
+        } else if (this.themeColorKey === 'dark') {
+          nightMode = true
+          fontColor = '#FFFFFF'
+        }
+        this.bookSetting.fontColor = fontColor
+        this.bookSetting.themeBgImg = themeBg
+        this.bookSetting.nightMode = nightMode
       })
   }
 
-  getBackgroundImage(themeType: string): ResourceStr {
-    if (themeType === 'whiteSky') {
+  getBackgroundImage(): ResourceStr {
+    if (this.themeColorKey === 'whiteSky') {
       return $r('app.media.white_sky_icon');
-    } else if (themeType === 'darkSky') {
+    } else if (this.themeColorKey === 'darkSky') {
       return $r('app.media.dark_sky_icon');
     }
     return '';

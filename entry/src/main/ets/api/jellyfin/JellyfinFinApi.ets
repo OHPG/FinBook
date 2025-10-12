@@ -56,6 +56,7 @@ export class JellyfinFinApi implements FinBookApi {
     let finItem: FinItem = {
       id: item.Id!,
       name: item.Name!,
+      path: item.Path!,
       type: item.Type! as ESObject as FinItemType,
       originalTitle: item.OriginalTitle!,
       overview: item.Overview!,
@@ -159,10 +160,11 @@ export class JellyfinFinApi implements FinBookApi {
     return this.itemToFinItem(item)
   }
 
-  getBookUrl(id: string): Promise<string> {
-    return this.jellyfin.getLibraryApi().getFile({
+  public async getBookUrl(id: string): Promise<string> {
+    let url = await this.jellyfin.getLibraryApi().getFile({
       itemId: id,
     })
+    return url
   }
 
   public searchMedia(keyword: string): Promise<Array<FinItem>> {

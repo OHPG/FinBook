@@ -23,6 +23,8 @@ export class CommonConstants {
   static readonly SPACE_8: number = 8;
   static readonly SPACE_12: number = 12;
   static readonly SPACE_16: number = 16;
+
+  static readonly CORNER_16: number = 16;
   // MaxLines
   static readonly MAX_LINE_TWO: number = 2;
 

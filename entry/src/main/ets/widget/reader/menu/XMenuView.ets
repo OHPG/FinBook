@@ -3,6 +3,7 @@ import { CataView } from "./CataView"
 import { FlipView } from "./FlipView"
 import { FontView } from "./FontView"
 import { ThemeView } from "./ThemeView"
+import { window } from "@kit.ArkUI"
 
 /**
  * @Author peerless2012
@@ -13,6 +14,10 @@ import { ThemeView } from "./ThemeView"
  */
 @Component
 export struct XMenuView {
+
+  @StorageProp("currentAvoidArea") avoidArea?: window.AvoidArea = undefined
+
+  @Consume menuVisible: boolean
 
   private tabsController: TabsController = new TabsController();
 
@@ -40,37 +45,46 @@ export struct XMenuView {
   }
 
   build() {
+    Stack({alignContent: Alignment.Bottom}) {
+      Row()
+      .backgroundColor($r('sys.color.background_primary'))
+        .width(CommonConstants.FULL_PERCENT)
+        .height(50 + this.getUIContext().px2vp(this.avoidArea?.bottomRect.height))
 
-    Tabs({ barPosition: BarPosition.End, controller: this.tabsController}) {
-      TabContent() {
-        CataView()
+      Tabs({ barPosition: BarPosition.End, controller: this.tabsController}) {
+        TabContent() {
+          CataView()
+        }
+        .tabBar(this.TabBuilder($r('app.string.menu_spine'), 0, $r('sys.symbol.list_bullet')))
+        TabContent() {
+          FontView()
+        }
+        .tabBar(this.TabBuilder($r('app.string.menu_font'), 1, $r('sys.symbol.textformat_size_square')))
+        TabContent() {
+          ThemeView()
+        }
+        .tabBar(this.TabBuilder($r('app.string.menu_theme'), 2, $r('sys.symbol.sun_min')))
+        TabContent() {
+          FlipView()
+        }
+        .tabBar(this.TabBuilder($r('app.string.menu_flip'), 3, $r('sys.symbol.book_open_fill')))
       }
-      .tabBar(this.TabBuilder($r('app.string.menu_spine'), 0, $r('sys.symbol.list_bullet')))
-      TabContent() {
-        FontView()
-      }
-      .tabBar(this.TabBuilder($r('app.string.menu_font'), 0, $r('sys.symbol.textformat_size_square')))
-      TabContent() {
-        ThemeView()
-      }
-      .tabBar(this.TabBuilder($r('app.string.menu_theme'), 0, $r('sys.symbol.sun_min')))
-      TabContent() {
-        FlipView()
-      }
-      .tabBar(this.TabBuilder($r('app.string.menu_flip'), 0, $r('sys.symbol.book_open_fill')))
+      .vertical(false)
+      .barWidth(CommonConstants.FULL_PERCENT)
+      .barHeight(50)
+      .margin({bottom: this.getUIContext().px2vp(this.avoidArea?.bottomRect.height)})
+      .scrollable(false)
+      .animationDuration(0)
+      .width(CommonConstants.FULL_PERCENT)
+      .height('auto')
+      .onChange((index: number) => {
+        this.currentIndex = index;
+      })
     }
-    .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
-    .vertical(false)
-    .barWidth(CommonConstants.FULL_PERCENT)
-    .barHeight(50)
-    .scrollable(false)
-    .animationDuration(0)
-    .backgroundColor($r('sys.color.background_primary'))
+    .onClick(() => { this.menuVisible = false })
+    .backgroundColor($r('sys.color.comp_background_secondary'))
     .width(CommonConstants.FULL_PERCENT)
     .height(CommonConstants.FULL_PERCENT)
-    .onChange((index: number) => {
-      this.currentIndex = index;
-    })
   }
 
 }

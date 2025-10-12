@@ -33,7 +33,7 @@ export struct FlipView {
   }
 
   build() {
-    Column() {
+    Stack({alignContent: Alignment.Bottom}) {
       Row() {
         Row() {
           Text('翻页方式')
@@ -62,15 +62,18 @@ export struct FlipView {
             this.flipMenu = true
           })
         }
-        .layoutWeight(1)
-        .justifyContent(FlexAlign.SpaceBetween)
+        .height(60)
+        .width(CommonConstants.FULL_PERCENT)
+        .constraintSize({maxWidth: 360})
+        .justifyContent(FlexAlign.SpaceAround)
       }
-      .width('60%')
-      .margin({ top: 24, left: 16, right: 16 })
+      .justifyContent(FlexAlign.Center)
+      .backgroundColor($r('sys.color.background_primary'))
+      .borderRadius({ topRight: CommonConstants.CORNER_16, topLeft: CommonConstants.CORNER_16 })
+      .width(CommonConstants.FULL_PERCENT)
+      .onClick(() => {})
     }
-    .alignItems(HorizontalAlign.Center)
-    .backgroundColor(Color.White)
     .width(CommonConstants.FULL_PERCENT)
-    .hitTestBehavior(HitTestMode.Transparent)
+    .height(CommonConstants.FULL_PERCENT)
   }
 }

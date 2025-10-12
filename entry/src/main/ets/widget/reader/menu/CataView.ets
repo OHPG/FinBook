@@ -1,12 +1,14 @@
-import { bookParser, readerCore } from '@kit.ReaderKit';
 import { image } from '@kit.ImageKit';
+import { bookParser, readerCore } from '@kit.ReaderKit';
+import LazyDataSource from '../../../common/LazyDataSource';
+import { CommonConstants } from '../../../common/CommonConstants';
 
 @Component
 export struct CataView {
 
   @Consume bookHandler: bookParser.BookParserHandler
 
-  @Consume bookSpine: bookParser.SpineItem
+  @Consume bookSpine?: bookParser.SpineItem
 
   @State bookInfo?: bookParser.BookInfo = undefined
 
@@ -14,16 +16,19 @@ export struct CataView {
 
   @State bookCataList?: Array<bookParser.CatalogItem> = undefined
 
-  @State cataIndex: number = 0
+  @Provide cataIndex: number = 0
+
+  private cataDataSource: LazyDataSource<bookParser.CatalogItem> = new LazyDataSource();
 
   aboutToAppear(): void {
     // info
     this.bookInfo = this.bookHandler.getBookInfo()
     // cata
     this.bookCataList = this.bookHandler.getCatalogList();
+    this.cataDataSource.pushArrayData(this.bookCataList)
     // cata index
     let cata = this.bookCataList.findIndex(item => this.getResourceItemByCatalog(item)?.index ===
-      this.bookSpine.index)
+      this.bookSpine?.index)
     if (cata) {
       this.cataIndex = cata
     }
@@ -56,127 +61,94 @@ export struct CataView {
 
   build() {
     Column() {
-      Row() {
-        Stack() {
-          SymbolGlyph($r('sys.symbol.xmark'))
-            .fontColor([$r('app.color.ohos_id_color_primary_light')])
-            .width(18)
-            .fontSize(18)
-            .fontWeight(600)
-            .renderingStrategy(SymbolRenderingStrategy.SINGLE)
-            .effectStrategy(SymbolEffectStrategy.NONE)
-        }
-        .borderRadius('50%')
-        .backgroundColor("#0d777777")
-        .align(Alignment.Center)
-        .width(40)
-        .height(40)
-        .margin({ top: 8, left: 16, right: 16 })
-        .onClick(() => {
-          // this.closeModal();
-        })
-      }
-      .width('100%')
-      .height(56)
-      .alignItems(VerticalAlign.Center)
-      .justifyContent(FlexAlign.End)
-
-      Row() {
+      Row({space: CommonConstants.SPACE_12}) {
         Stack({ alignContent: Alignment.Top }) {
           Image(this.bookCover)
             .draggable(false)
-            .width(42)
-            .aspectRatio(3 / 4)
+            .width('100%')
+            .height('100%')
             .borderRadius(2)
-            .zIndex(1)
             .alt($r('app.media.default_cover'))
             .backgroundColor($r('sys.color.ohos_id_color_background'))
 
           Image($r('app.media.default_spines'))
             .draggable(false)
-            .aspectRatio(3 / 4)
-            .width(42)
+            .width('100%')
+            .height('100%')
             .borderRadius(2)
-            .zIndex(2)
-            .position({ x: 0, y: 0 })
 
           Image($r('app.media.cover_shadow'))
             .draggable(false)
-            .width(42)
+            .width('100%')
+            .height('100%')
             .opacity(0.7)
             .aspectRatio(3)
-            .position({ x: 0, y: 42 / 3 / 4 - 42 / 9 })
-            .zIndex(0)
+            .position({ x: 0, y: 90 / 3 / 4 - 90 / 9 })
         }
-        .width(42)
+        .width(90)
+        .height(120)
         .shadow({ radius: 18, color: "#4D000000" })
         .borderRadius(2)
-        .aspectRatio(3 / 4)
         .visibility(this.bookInfo ? Visibility.Visible : Visibility.None)
 
-        Text(this.bookInfo?.bookTitle)
-          .fontSize($r('sys.float.ohos_id_text_size_body1'))
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .maxLines(1)
-          .margin({ right: 12, left: 12 })
-          .fontWeight(FontWeight.Bold)
-          .flexShrink(1)
-          .fontColor("#E6000000")
-          .height(40)
-          .visibility(this.bookInfo?.bookTitle ? Visibility.Visible : Visibility.None)
-      }
-      .padding({
-        left: 16,
-        right: 16
-      })
-      .width('60%')
-      .margin({ bottom: 20 })
-      .alignSelf(ItemAlign.Center)
+        Column() {
+          Text(this.bookInfo?.bookTitle)
+            .fontSize($r('sys.float.ohos_id_text_size_body1'))
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .maxLines(1)
+            .margin({ right: 12, left: 12 })
+            .fontWeight(FontWeight.Bold)
+            .flexShrink(1)
+            .fontColor("#E6000000")
+            .height(40)
 
-      Column() {
-        Row() {
-          Text(`共${this.bookCataList!.length}章`)
+          Text(`共${this.bookCataList?.length}章`)
             .fontSize(16)
             .fontColor(Color.Black)
             .fontWeight(FontWeight.Bold)
             .padding({ top: 8, bottom: 8 })
         }
-        .width('100%')
-
-        Divider().color('#ffc4c4c4')
+        .width('auto')
+        .height(120)
       }
-      .width('60%')
-      .justifyContent(FlexAlign.Start)
+      .width('100%')
+      .padding(CommonConstants.SPACE_16)
+      .alignSelf(ItemAlign.Center)
 
+      // 章节列表
       List({ initialIndex: this.cataIndex }) {
-        ForEach(this.bookCataList, (item: bookParser.CatalogItem, index: number) => {
+        LazyForEach(this.cataDataSource, (item: bookParser.CatalogItem) => {
           ListItem() {
-
+            CataItemView({cataItem: item})
           }
         })
       }
-      .scrollBar(BarState.Off)
-      .width('60%')
-      .height('100%')
+      .divider({color: "#ffc4c4c4", strokeWidth: 1, startMargin: CommonConstants.SPACE_16, endMargin: CommonConstants.SPACE_16})
+      .scrollBar(BarState.Auto)
+      .width('100%')
+      .height('auto')
+      .layoutWeight(1)
     }
-    .borderRadius({ topRight: 32, topLeft: 32 })
-    .backgroundColor(Color.White)
+    .backgroundColor($r('sys.color.background_primary'))
+    .borderRadius({ topRight: CommonConstants.CORNER_16, topLeft: CommonConstants.CORNER_16 })
     .width('100%')
+    .height('80%')
   }
-
 }
 
-@Component
 @Reusable
+@Component
 struct CataItemView {
 
   @Consume bookHandler: bookParser.BookParserHandler
+
+  @Consume menuVisible: boolean
 
   @StorageLink('bookCtrl') bookCtrl?: readerCore.ReaderComponentController = undefined
 
   @State cataItem?: bookParser.CatalogItem = undefined
 
-  @Link cataIndex: number
+  @Consume cataIndex: number
 
   @State cataHighLight: boolean = true
 
@@ -189,37 +161,27 @@ struct CataItemView {
   }
 
   build() {
-    Column() {
-      Row() {
-        Row() {
-          Text(' · ')
-            .fontSize(14)
-            .fontColor(this.cataHighLight ? $r('app.color.black_90_opacity') : $r('app.color.black_60_opacity'))
-          Text(this.cataItem?.catalogName)
-            .fontSize(14)
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .padding({ top: 8, bottom: 8 })
-            .maxLines(2)
-            .layoutWeight(1)
-            .fontColor(this.cataHighLight ? $r('app.color.black_90_opacity') : $r('app.color.black_60_opacity'))
-            .fontWeight(this.cataHighLight ? 900 : 200)
-        }
-      }
-      .width('100%')
-      .height(48)
-      .justifyContent(FlexAlign.Center)
-      .alignItems(VerticalAlign.Center)
+    Row() {
+      Text(' · ')
+        .fontSize(14)
+        .fontColor(this.cataHighLight ? $r('app.color.black_90_opacity') : $r('app.color.black_60_opacity'))
 
-      Divider()
-        .color('#ffc4c4c4')
+      Text(this.cataItem?.catalogName)
+        .fontSize(14)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .padding({ top: 8, bottom: 8 })
+        .maxLines(2)
+        .layoutWeight(1)
+        .fontColor(this.cataHighLight ? $r('app.color.black_90_opacity') : $r('app.color.black_60_opacity'))
+        .fontWeight(this.cataHighLight ? 900 : 200)
     }
+    .width('100%')
+    .height(48)
     .padding({
-      left: this.cataItem?.catalogLevel ? this.cataItem.catalogLevel * 26 : 16,
-      right: 16,
-      top: 6,
-      bottom: 6
+      left: this.cataItem?.catalogLevel ? this.cataItem.catalogLevel * CommonConstants.SPACE_16 : CommonConstants.SPACE_16,
+      right: CommonConstants.SPACE_16,
     })
-    .onClick(async () => {
+    .onClick(() => {
       this.jumpToCatalogItem();
     })
   }
@@ -229,6 +191,7 @@ struct CataItemView {
     let spineList = this.bookHandler.getSpineList()
     let spine = spineList.find((item) => item.href === this.cataItem?.href)
     this.bookCtrl?.startPlay(spine!.index, domPos)
+    this.menuVisible = false
   }
 
 }
