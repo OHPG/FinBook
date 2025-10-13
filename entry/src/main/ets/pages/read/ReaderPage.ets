@@ -16,6 +16,9 @@ struct ReaderPage {
   private viewModel = new ReaderViewModel(getContext(), this.args)
 
   @StorageProp("currentAvoidArea") avoidArea?: window.AvoidArea = undefined
+
+  @Provide bookTitle: string = this.args.name
+
   /**
    * 是否是沉浸式
    */
@@ -26,7 +29,13 @@ struct ReaderPage {
    */
   @Provide menuVisible: boolean = false
 
+  /**
+   * 阅读进度
+   */
+  @Provide @Watch('onProgressChange') readProgress: number = 10
+
   aboutToAppear(): void {
+    this.viewModel.startRead()
   }
 
   @Builder
@@ -49,7 +58,7 @@ struct ReaderPage {
        refreshEnable: false,
        source: this.viewModel,
        itemLayout: (source: FinBookRawSource) => {
-         if (source.pdf) {
+         if (this.judgementType(source)) {
            this.pdfView(source.path)
          } else {
            this.normalView(source.path)
@@ -75,6 +84,16 @@ struct ReaderPage {
    .height(CommonConstants.FULL_PERCENT)
   }
 
+  private judgementType(source: FinBookRawSource): boolean {
+    this.readProgress = source.progress
+    this.bookTitle = source.name
+    return source.pdf ? true : false
+  }
+
+  private onProgressChange() {
+    this.viewModel.updateProgress(this.readProgress)
+  }
+
   onBackPress(): boolean | void {
     if (this.menuVisible) {
       this.menuVisible = false
@@ -84,6 +103,7 @@ struct ReaderPage {
   }
 
   aboutToDisappear(): void {
+    this.viewModel.stopRead(this.readProgress)
   }
 
 }

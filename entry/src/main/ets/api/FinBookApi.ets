@@ -43,4 +43,28 @@ export interface FinBookApi extends FinApi {
    */
   searchMedia(keyword: string): Promise<Array<FinItem>>
 
+  /**
+   * 开始阅读
+   * @param id
+   * @returns
+   */
+  onPlaybackStart(id: string): Promise<void>
+
+  /**
+   * 更新进度
+   * @param id
+   * @param position
+   * @param playing
+   * @returns
+   */
+  onPlaybackProgress(id: string, position: number, playing: boolean): Promise<void>
+
+  /**
+   * 停止阅读
+   * @param id
+   * @param position
+   * @returns
+   */
+  onPlaybackStopped(id: string, position: number): Promise<void>
+
 }

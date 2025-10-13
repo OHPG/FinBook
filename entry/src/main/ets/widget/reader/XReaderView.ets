@@ -21,6 +21,8 @@ export struct XReaderView {
 
   @Consume menuVisible: boolean
 
+  @Consume readProgress: number
+
   private bookCtrl: readerCore.ReaderComponentController = new readerCore.ReaderComponentController()
 
   private bookCtrlPrepared: boolean = false
@@ -47,10 +49,15 @@ export struct XReaderView {
     viewPortHeight: 0, // 视口高度，需要根据设备实际情况获取
   }
 
+  private screenDensityCallBack?: Callback<number> = undefined;
+
   aboutToAppear(): void {
     this.restoreConfig()
+    this.registerScreenDensityChange()
     AppStorage.setOrCreate('bookCtrl', this.bookCtrl)
     this.bookCtrl.on('pageShow', (info) => {
+      console.log("xxx: pageShow " + JSON.stringify(info))
+      this.readProgress = info.resourceIndex
       this.bookState = info.state
       if (info.state === readerCore.PageState.PAGE_ON_SHOW) {
         if (this.bookSpine?.index !== info.resourceIndex) {
@@ -61,7 +68,7 @@ export struct XReaderView {
     })
     this.parseBook()
       .then(() => {
-        this.bookCtrl.startPlay(0, "")
+        this.bookCtrl.startPlay(this.readProgress, "")
       })
       .catch((error: Error) => {
         console.error("xxx: " + JSON.stringify(error))
@@ -90,6 +97,20 @@ export struct XReaderView {
     } catch (e) {
       // ignore
     }
+  }
+
+  /**
+   * 注册缩放文本缩放因子变化监听
+   */
+  registerScreenDensityChange() {
+    this.screenDensityCallBack = (data: number) => {
+      let displaySync = display.getDefaultDisplaySync();
+      let scaledDensity = displaySync.scaledDensity;
+      if (scaledDensity !== this.bookSetting.scaledDensity) {
+        this.bookSetting.scaledDensity = scaledDensity
+      }
+    }
+    display.on('change', this.screenDensityCallBack);
   }
 
   private async parseBook(): Promise<void> {
@@ -148,6 +169,7 @@ export struct XReaderView {
   }
 
   aboutToDisappear(): void {
+    display.off('change', this.screenDensityCallBack);
     this.bookCtrl.off('pageShow')
     this.bookCtrl.off('resourceRequest')
     this.bookCtrl.releaseBook()

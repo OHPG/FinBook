@@ -64,6 +64,19 @@ export class JellyfinFinApi implements FinBookApi {
       image: {
         primary: this.buildImage(item, ImageType.Primary),
         backdrop: this.buildImage(item, ImageType.Backdrop)
+      },
+      data: {
+        rating: item.UserData?.Rating!,
+        playPercentage: item.UserData?.PlayedPercentage!,
+        unplayedItemCount: item.UserData?.UnplayedItemCount!,
+        playedPositionTicks: item.UserData?.PlaybackPositionTicks
+          ? item.UserData?.PlaybackPositionTicks / 10000
+          : undefined,
+        playCount: item.UserData?.PlayCount!,
+        isFavorite: item.UserData?.IsFavorite,
+        likes: item.UserData?.Likes!,
+        lastPlayDate: item.UserData?.LastPlayedDate!,
+        played: item.UserData?.Played
       }
     }
 
@@ -204,11 +217,11 @@ export class JellyfinFinApi implements FinBookApi {
   }
 
   async onPlaybackProgress(id: string, position: number, playing: boolean): Promise<void> {
-    await this.jellyfin.getPlayStateApi().onPlaybackProgress({itemId: id, positionTicks: position, isPaused: !playing})
+    await this.jellyfin.getPlayStateApi().onPlaybackProgress({itemId: id, positionTicks: position * 10000, isPaused: !playing})
   }
 
   async onPlaybackStopped(id: string, position: number): Promise<void> {
-    await this.jellyfin.getPlayStateApi().onPlaybackStopped({itemId: id, positionTicks: position})
+    await this.jellyfin.getPlayStateApi().onPlaybackStopped({itemId: id, positionTicks: position * 10000})
   }
 
 }

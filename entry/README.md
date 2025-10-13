@@ -4,3 +4,4 @@
 * [PDF Kit](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/pdf-introduction)
 * [Reader Kit](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/reader-introduction)
 * [Source Han Serif](https://github.com/adobe-fonts/source-han-serif)
+* [Google fonts](https://fonts.google.com/)

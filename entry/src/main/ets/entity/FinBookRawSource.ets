@@ -9,6 +9,8 @@ export interface FinBookRawSource {
 
   id: string
 
+  progress: number
+
   name: string
 
   path: string

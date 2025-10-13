@@ -36,4 +36,16 @@ export class Repository extends FinRepository {
     return this.requireApi().getBookUrl(id)
   }
 
+  public startRead(id: string): Promise<void> {
+    return this.requireApi().onPlaybackStart(id)
+  }
+
+  public updateProgress(id: string, ticks: number): Promise<void> {
+    return this.requireApi().onPlaybackProgress(id, ticks, true)
+  }
+
+  public stopRead(id: string, ticks: number): Promise<void> {
+    return this.requireApi().onPlaybackStopped(id, ticks)
+  }
+
 }

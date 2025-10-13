@@ -11,9 +11,11 @@ export struct PdfView {
 
   private dataSource: LazyDataSource<PdfPageInfo> = new LazyDataSource<PdfPageInfo>();
 
-  private index: number = 0
+  private controller = new SwiperController()
 
   @Consume immersiveMode: boolean
+
+  @Consume readProgress: number
 
   @Require @Prop pdfPath: string = '';
 
@@ -42,18 +44,19 @@ export struct PdfView {
 
   build() {
     Stack() {
-      Swiper() {
+      Swiper(this.controller) {
         LazyForEach(this.dataSource, (info: PdfPageInfo) => {
           PdfPage({info: info})
         }, (item: PdfPageInfo, index: number) => item.index.toString())
       }
+      .index(this.readProgress)
       .displayCount(this.currentBreakpoint >= WidthBreakpoint.WIDTH_LG ? 2 : 1, true)
       .indicator(false)
       .width('100%')
       .height('100%')
       .loop(false)
       .onChange((index) => {
-        this.index = index;
+        this.readProgress = index;
       })
     }
     .width('100%')

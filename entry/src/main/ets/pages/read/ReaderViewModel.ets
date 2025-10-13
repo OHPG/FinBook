@@ -3,9 +3,9 @@ import { SimpleRepository } from "@ohpg/fin-framework";
 import { AppViewModel } from "../../lifecycle/AppViewModel";
 import { MediaArgs } from "../detail/MediaArgs";
 import { request } from "@kit.BasicServicesKit";
-import fs from '@ohos.file.fs';
 import { FileUtil } from "../../util/FileUtil";
 import { FinBookRawSource } from "../../entity/FinBookRawSource";
+import fs from '@ohos.file.fs';
 
 /**
  * @Author peerless2012
@@ -42,7 +42,13 @@ export class ReaderViewModel extends AppViewModel implements SimpleRepository {
       filePath = await this.download(url, filePath)
     }
     let pdf = await FileUtil.isPdf(filePath)
-    return {id: item.id, name: item.name, path: filePath, pdf: pdf}
+    
+    let progress = 0
+    if (item.data?.playedPositionTicks) {
+      progress = item.data.playedPositionTicks
+    }
+    
+    return {id: item.id, name: item.name, progress: progress, path: filePath, pdf: pdf}
   }
 
   private async download(url: string, path: string): Promise<string> {
@@ -85,5 +91,17 @@ export class ReaderViewModel extends AppViewModel implements SimpleRepository {
     this.downloadTask.start()
     return promise
   }
-  
+
+  public startRead(): Promise<void> {
+    return this.repository.startRead(this.args.id)
+  }
+
+  public updateProgress(progress: number): Promise<void> {
+    return this.repository.updateProgress(this.args.id, progress)
+  }
+
+  public stopRead(progress: number): Promise<void> {
+    return this.repository.stopRead(this.args.id, progress)
+  }
+
 }

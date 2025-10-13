@@ -6,6 +6,8 @@ import { CommonConstants } from '../../../common/CommonConstants';
 @Component
 export struct CataView {
 
+  @Consume bookTitle: string
+
   @Consume bookHandler: bookParser.BookParserHandler
 
   @Consume @Watch('onSpineChange') bookSpine?: bookParser.SpineItem
@@ -99,22 +101,21 @@ export struct CataView {
         .visibility(this.bookInfo ? Visibility.Visible : Visibility.None)
 
         Column() {
-          Text(this.bookInfo?.bookTitle)
-            .fontSize($r('sys.float.ohos_id_text_size_body1'))
+          Text(this.bookTitle)
+            .fontSize($r('sys.float.ohos_id_text_size_sub_title1'))
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .maxLines(1)
             .margin({ right: 12, left: 12 })
             .fontWeight(FontWeight.Bold)
             .flexShrink(1)
-            .fontColor("#E6000000")
             .height(40)
 
           Text(`共${this.bookCataList?.length}章`)
-            .fontSize(16)
-            .fontColor(Color.Black)
+            .fontSize($r('sys.float.ohos_id_text_size_body1'))
             .fontWeight(FontWeight.Bold)
             .padding({ top: 8, bottom: 8 })
         }
+        .justifyContent(FlexAlign.SpaceAround)
         .width('auto')
         .height(120)
       }
