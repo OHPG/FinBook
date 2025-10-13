@@ -8,7 +8,7 @@ export struct CataView {
 
   @Consume bookHandler: bookParser.BookParserHandler
 
-  @Consume bookSpine?: bookParser.SpineItem
+  @Consume @Watch('onSpineChange') bookSpine?: bookParser.SpineItem
 
   @State bookInfo?: bookParser.BookInfo = undefined
 
@@ -20,22 +20,29 @@ export struct CataView {
 
   private cataDataSource: LazyDataSource<bookParser.CatalogItem> = new LazyDataSource();
 
+  private cataScroller = new Scroller()
+
   aboutToAppear(): void {
     // info
     this.bookInfo = this.bookHandler.getBookInfo()
     // cata
     this.bookCataList = this.bookHandler.getCatalogList();
     this.cataDataSource.pushArrayData(this.bookCataList)
-    // cata index
-    let cata = this.bookCataList.findIndex(item => this.getResourceItemByCatalog(item)?.index ===
-      this.bookSpine?.index)
-    if (cata) {
-      this.cataIndex = cata
-    }
+    // cover
     let buffer = this.bookHandler.getResourceContent(-1, this.bookInfo.bookCoverImage)
     let imageSource: image.ImageSource = image.createImageSource(buffer);
     this.bookCover = imageSource.createPixelMapSync();
     imageSource.release();
+    this.onSpineChange()
+  }
+
+  private onSpineChange() {
+    // cata index
+    let cata = this.bookCataList?.findIndex(item => this.getResourceItemByCatalog(item)?.index === this.bookSpine?.index)
+    if (cata && cata >= 0) {
+      this.cataIndex = cata
+      this.cataScroller.scrollToIndex(cata, false, ScrollAlign.CENTER)
+    }
   }
 
   /**
@@ -116,10 +123,10 @@ export struct CataView {
       .alignSelf(ItemAlign.Center)
 
       // 章节列表
-      List({ initialIndex: this.cataIndex }) {
-        LazyForEach(this.cataDataSource, (item: bookParser.CatalogItem) => {
+      List({ initialIndex: this.cataIndex, scroller: this.cataScroller }) {
+        LazyForEach(this.cataDataSource, (item: bookParser.CatalogItem, index: number) => {
           ListItem() {
-            CataItemView({cataItem: item})
+            CataItemView({cataItem: item, itemIndex: index})
           }
         })
       }
@@ -140,17 +147,17 @@ export struct CataView {
 @Component
 struct CataItemView {
 
+  @StorageLink('bookCtrl') bookCtrl?: readerCore.ReaderComponentController = undefined
+
   @Consume bookHandler: bookParser.BookParserHandler
 
   @Consume menuVisible: boolean
 
-  @StorageLink('bookCtrl') bookCtrl?: readerCore.ReaderComponentController = undefined
+  @Consume cataIndex: number
 
   @State cataItem?: bookParser.CatalogItem = undefined
 
-  @Consume cataIndex: number
-
-  @State cataHighLight: boolean = true
+  @State itemIndex: number = 0
 
   aboutToAppear(): void {
 
@@ -158,13 +165,14 @@ struct CataItemView {
 
   aboutToReuse(params: Record<string, ESObject>): void {
     this.cataItem = params["cataItem"]
+    this.itemIndex = params["itemIndex"]
   }
 
   build() {
     Row() {
       Text(' · ')
         .fontSize(14)
-        .fontColor(this.cataHighLight ? $r('app.color.black_90_opacity') : $r('app.color.black_60_opacity'))
+        .fontColor(this.itemIndex > this.cataIndex ? $r('app.color.black_90_opacity') : $r('app.color.black_60_opacity'))
 
       Text(this.cataItem?.catalogName)
         .fontSize(14)
@@ -172,8 +180,8 @@ struct CataItemView {
         .padding({ top: 8, bottom: 8 })
         .maxLines(2)
         .layoutWeight(1)
-        .fontColor(this.cataHighLight ? $r('app.color.black_90_opacity') : $r('app.color.black_60_opacity'))
-        .fontWeight(this.cataHighLight ? 900 : 200)
+        .fontColor(this.itemIndex > this.cataIndex ? $r('app.color.black_90_opacity') : $r('app.color.black_60_opacity'))
+        .fontWeight(this.itemIndex > this.cataIndex ? 900 : 200)
     }
     .width('100%')
     .height(48)

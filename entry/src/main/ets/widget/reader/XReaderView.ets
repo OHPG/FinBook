@@ -2,12 +2,9 @@ import { bookParser } from '@kit.ReaderKit';
 import { readerCore } from "@kit.ReaderKit";
 import { ReadPageComponent } from "@kit.ReaderKit";
 import { CommonConstants } from "../../common/CommonConstants";
-import { AsyncCallback } from "@kit.BasicServicesKit";
 import { display } from '@kit.ArkUI';
 import { common } from '@kit.AbilityKit';
 import { XMenuView } from './menu/XMenuView';
-import { XUtil } from './util/XUtil';
-import { Fonts } from './entity/Fonts';
 import { AppPrefer } from '../../prefer/AppPrefer';
 
 @Reusable
@@ -50,14 +47,9 @@ export struct XReaderView {
     viewPortHeight: 0, // 视口高度，需要根据设备实际情况获取
   }
 
-  private callback: AsyncCallback<readerCore.ReaderComponentController> = (error, controller) => {
-    console.log("xxx: error = " + JSON.stringify(error))
-    // sh
-  }
-
   aboutToAppear(): void {
-    AppStorage.setOrCreate('bookCtrl', this.bookCtrl)
     this.restoreConfig()
+    AppStorage.setOrCreate('bookCtrl', this.bookCtrl)
     this.bookCtrl.on('pageShow', (info) => {
       this.bookState = info.state
       if (info.state === readerCore.PageState.PAGE_ON_SHOW) {
@@ -66,24 +58,11 @@ export struct XReaderView {
           this.bookSpine = spineList?.find((spine) => spine.index === info.resourceIndex)
         }
       }
-      console.log("xxx: onPageShow " + JSON.stringify(info))
     })
-    this.bookCtrl.on('resourceRequest', (data: string): ArrayBuffer => {
-      console.log("xxx: onResource " + data)
-      if (data.length <= 0) return new ArrayBuffer(0);
-      let buffer: ArrayBuffer | undefined = undefined
-      // if (XUtil.isFont(data)) {
-      //   data = Fonts.FONT_PATH[data]
-      // }
-      buffer = XUtil.loadFileFromAssets(this.getUIContext().getHostContext()!, data)
-      if (!buffer) {
-        buffer = XUtil.loadFileFromPath(data)
-      }
-      return buffer
-    })
-    this.parseBook().then(() => {
-
-    })
+    this.parseBook()
+      .then(() => {
+        this.bookCtrl.startPlay(0, "")
+      })
       .catch((error: Error) => {
         console.error("xxx: " + JSON.stringify(error))
       })
@@ -113,14 +92,13 @@ export struct XReaderView {
     }
   }
 
-  private async parseBook() {
+  private async parseBook(): Promise<void> {
     await this.bookCtrl.init(this.getUIContext().getHostContext()! as common.UIAbilityContext)
     this.bookCtrlPrepared = true
     this.onSettingChange()
     this.bookHandler = await bookParser.getDefaultHandler(this.bookPath)
     this.bookCtrl.registerBookParser(this.bookHandler)
-    this.bookHandler.getCatalogList()
-    this.bookCtrl.startPlay(0, "")
+
   }
 
   build() {
@@ -133,14 +111,13 @@ export struct XReaderView {
           this.bookSetting.viewPortHeight = this.getUIContext().vp2px(newValue.height! as number)
         })
         .onClick(() => {
-          // 这里的逻辑有点问题
           this.immersiveMode = !this.immersiveMode
         })
 
       // loading
 
       // menu
-      if (this.bookState === readerCore.PageState.PAGE_ON_SHOW) {
+      if (this.bookHandler) {
         XMenuView()
           .width(CommonConstants.FULL_PERCENT)
           .height(CommonConstants.FULL_PERCENT)
@@ -164,10 +141,9 @@ export struct XReaderView {
   private saveSetting() {
     try {
       let config = JSON.stringify(this.bookSetting)
-      console.log("xxx: onSettingChange " + config)
       this.appPrefer.setBookConfig(config)
     } catch (e) {
-      //
+      // ignore
     }
   }
 

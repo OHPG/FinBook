@@ -10,6 +10,14 @@ export class XUtil {
     return find ? true : false;
   }
 
+  // public static loadFont(context: Context, font: string): ArrayBuffer {
+  //   let index = font.lastIndexOf('.')
+  //   // if (index > 0) {
+  //   //
+  //   // }
+  //   let fontName = font
+  // }
+
   public static loadFileFromAssets(context: Context, path: string): ArrayBuffer | undefined {
     try {
       let value: Uint8Array = context.resourceManager.getRawFileContentSync(path);
