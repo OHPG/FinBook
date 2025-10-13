@@ -7,10 +7,14 @@ import { display } from '@kit.ArkUI';
 import { common } from '@kit.AbilityKit';
 import { XMenuView } from './menu/XMenuView';
 import { XUtil } from './util/XUtil';
+import { Fonts } from './entity/Fonts';
+import { AppPrefer } from '../../prefer/AppPrefer';
 
 @Reusable
 @Component
 export struct XReaderView {
+
+  private appPrefer: AppPrefer = AppStorage.get(AppPrefer.PREFER)!
 
   @Require @Prop bookPath: string = '';
 
@@ -31,7 +35,7 @@ export struct XReaderView {
   @State bookState: readerCore.PageState = readerCore.PageState.PAGE_WAITING
 
   @Provide @Watch('onSettingChange') bookSetting: readerCore.ReaderSetting = {
-    fontName: '系统字体',
+    fontName: 'system',
     fontPath: '',
     fontSize: 12,
     fontColor: '#000000',
@@ -53,6 +57,7 @@ export struct XReaderView {
 
   aboutToAppear(): void {
     AppStorage.setOrCreate('bookCtrl', this.bookCtrl)
+    this.restoreConfig()
     this.bookCtrl.on('pageShow', (info) => {
       this.bookState = info.state
       if (info.state === readerCore.PageState.PAGE_ON_SHOW) {
@@ -67,10 +72,9 @@ export struct XReaderView {
       console.log("xxx: onResource " + data)
       if (data.length <= 0) return new ArrayBuffer(0);
       let buffer: ArrayBuffer | undefined = undefined
-      if (XUtil.isFont(data)) {
-        // TODO 选中的字体
-        data = ''
-      }
+      // if (XUtil.isFont(data)) {
+      //   data = Fonts.FONT_PATH[data]
+      // }
       buffer = XUtil.loadFileFromAssets(this.getUIContext().getHostContext()!, data)
       if (!buffer) {
         buffer = XUtil.loadFileFromPath(data)
@@ -83,6 +87,30 @@ export struct XReaderView {
       .catch((error: Error) => {
         console.error("xxx: " + JSON.stringify(error))
       })
+  }
+
+  /**
+   * 恢复之前的配置
+   */
+  private restoreConfig() {
+    try {
+      let config = this.appPrefer.getBookConfig()
+      if (config && config.length > 0) {
+        let setting: readerCore.ReaderSetting = JSON.parse(config)
+        this.bookSetting.fontName = setting.fontName
+        this.bookSetting.fontPath = setting.fontPath
+        this.bookSetting.fontSize = setting.fontSize
+        this.bookSetting.fontColor = setting.fontColor
+        this.bookSetting.fontWeight = setting.fontWeight
+        this.bookSetting.lineHeight = setting.lineHeight
+        this.bookSetting.nightMode = setting.nightMode
+        this.bookSetting.themeColor = setting.themeColor
+        this.bookSetting.themeBgImg = setting.themeBgImg
+        this.bookSetting.flipMode = setting.flipMode
+      }
+    } catch (e) {
+      // ignore
+    }
   }
 
   private async parseBook() {
@@ -126,7 +154,21 @@ export struct XReaderView {
   private onSettingChange() {
     if (!this.bookCtrlPrepared) return
     if (this.bookSetting.viewPortWidth <= 0 || this.bookSetting.viewPortHeight <= 0) return
+    this.saveSetting()
     this.bookCtrl.setPageConfig(this.bookSetting)
+  }
+
+  /**
+    * 保存更改的配置
+   */
+  private saveSetting() {
+    try {
+      let config = JSON.stringify(this.bookSetting)
+      console.log("xxx: onSettingChange " + config)
+      this.appPrefer.setBookConfig(config)
+    } catch (e) {
+      //
+    }
   }
 
   aboutToDisappear(): void {
@@ -134,6 +176,7 @@ export struct XReaderView {
     this.bookCtrl.off('resourceRequest')
     this.bookCtrl.releaseBook()
     AppStorage.delete('bookCtrl')
+    this.saveSetting()
   }
 
 }

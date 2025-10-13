@@ -13,6 +13,8 @@ export class AppPrefer {
 
   private static readonly KEY_PRIVACY_GRANT = "privacy_grant"
 
+  private static readonly KEY_BOOK_X_CONFIG = "book_x_config"
+
   private readonly preference: preferences.Preferences
 
   constructor(context: Context) {
@@ -28,6 +30,18 @@ export class AppPrefer {
 
   public setPrivacyGrant(): void {
     this.preference.putSync(AppPrefer.KEY_PRIVACY_GRANT, true)
+    this.preference.flush()
+  }
+
+  public getBookConfig(): string | undefined {
+    if (this.preference.hasSync(AppPrefer.KEY_BOOK_X_CONFIG)) {
+      return this.preference.getSync(AppPrefer.KEY_BOOK_X_CONFIG, '') as string
+    }
+    return undefined
+  }
+
+  public setBookConfig(config: string): void {
+    this.preference.putSync(AppPrefer.KEY_BOOK_X_CONFIG, config)
     this.preference.flush()
   }
 

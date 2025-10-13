@@ -115,6 +115,18 @@
     {
       "name": "menu_flip",
       "value": "翻页"
+    },
+    {
+      "name": "menu_flip_title",
+      "value": "翻页方式"
+    },
+    {
+      "name": "menu_flip_normal",
+      "value": "仿真模式"
+    },
+    {
+      "name": "menu_flip_slid",
+      "value": "横划模式"
     }
   ]
 }

@@ -16,14 +16,14 @@ export struct FlipView {
   @Builder
   bindFlipModelMenu() {
     Menu() {
-      MenuItem({ content: '仿真模式' })
+      MenuItem({ content: $r('app.string.menu_flip_normal')})
         .selectIcon(true)
         .selected(this.bookSetting.flipMode === FlipMode.PAPER)
         .onClick(() => {
           this.bookSetting.flipMode = FlipMode.PAPER
         })
 
-      MenuItem({ content: '横滑模式' })
+      MenuItem({ content: $r('app.string.menu_flip_slid') })
         .selectIcon(true)
         .selected(this.bookSetting.flipMode === FlipMode.SLID)
         .onClick(() => {
@@ -36,13 +36,15 @@ export struct FlipView {
     Stack({alignContent: Alignment.Bottom}) {
       Row() {
         Row() {
-          Text('翻页方式')
+          Text($r('app.string.menu_flip_title'))
             .fontSize(16)
             .fontColor(Color.Black)
             .margin({ left: 16 })
 
           Row() {
-            Text(this.bookSetting.flipMode === FlipMode.PAPER ? '仿真模式' : '横滑翻页')
+            Text(this.bookSetting.flipMode === FlipMode.PAPER
+              ? $r('app.string.menu_flip_normal')
+              : $r('app.string.menu_flip_slid'))
               .fontSize(16)
               .fontColor(Color.Black)
               .margin({ left: 16 })
@@ -64,7 +66,7 @@ export struct FlipView {
         }
         .height(60)
         .width(CommonConstants.FULL_PERCENT)
-        .constraintSize({maxWidth: 360})
+        .constraintSize({maxWidth: 400})
         .justifyContent(FlexAlign.SpaceAround)
       }
       .justifyContent(FlexAlign.Center)

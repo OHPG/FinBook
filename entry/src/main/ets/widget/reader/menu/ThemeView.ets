@@ -1,5 +1,5 @@
 import { CommonConstants } from "../../../common/CommonConstants"
-import { Colors } from "./Colors"
+import { Colors } from "../entity/Colors"
 import { readerCore } from "@kit.ReaderKit"
 
 @Component
@@ -11,7 +11,7 @@ export struct ThemeView {
   build() {
     Scroll() {
       Row({ space: 12 }) {
-        ForEach(Colors.themeList, (item: string) => {
+        ForEach(Colors.THEMES, (item: string) => {
           ThemeItemView({themeColorKey: item})
         })
       }
@@ -40,7 +40,7 @@ struct ThemeItemView {
   @State themeColorValue: string = ''
 
   aboutToAppear(): void {
-    this.themeColorValue = Colors.THEME_PAGE_COLOR[this.themeColorKey]
+    this.themeColorValue = Colors.THEME_COLOR[this.themeColorKey]
   }
 
   build() {
@@ -62,7 +62,7 @@ struct ThemeItemView {
         if (this.themeColorKey === 'whiteSky') {
           themeBg = 'white_sky_first.jpg'
         } else if (this.themeColorKey === 'darkSky') {
-          themeBg = 'white_sky_first.jpg'
+          themeBg = 'dark_sky_first.jpg'
           nightMode = true
           fontColor = '#FFFFFF'
         } else if (this.themeColorKey === 'dark') {
