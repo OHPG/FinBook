@@ -200,7 +200,8 @@ struct CataItemView {
     let domPos = this.bookHandler.getDomPosByCatalogHref(this.cataItem?.href)
     let spineList = this.bookHandler.getSpineList()
     let spine = spineList.find((item) => item.href === this.cataItem?.href)
-    this.bookCtrl?.startPlay(spine!.index, domPos)
+    if (!spine) return
+    this.bookCtrl?.startPlay(spine.index, domPos)
     this.menuVisible = false
   }
 

@@ -1,4 +1,4 @@
-import { FinItem, FinItemType, FinPerson, FinPersonType } from "@ohpg/fin-core"
+import { BreakpointSystem, FinItem, FinItemType, FinPerson, FinPersonType } from "@ohpg/fin-core"
 import { CommonConstants } from "../../common/CommonConstants"
 import { DetailViewModel } from "./DetailViewModel"
 import { MediaArgs } from "./MediaArgs"
@@ -120,6 +120,10 @@ export struct DetailOperate {
 @Component
 export struct DetailHeader {
 
+  @StorageProp(BreakpointSystem.CURRENT_WIDTH_BREAKPOINT) currentWidthBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_SM
+
+  @StorageProp(BreakpointSystem.CURRENT_HEIGHT_BREAKPOINT) currentHeightBreakpoint: HeightBreakpoint = HeightBreakpoint.HEIGHT_SM
+
   @Prop item: FinItem
 
   @State collecting: boolean = false
@@ -140,7 +144,7 @@ export struct DetailHeader {
         .objectFit(ImageFit.Cover)
         .autoResize(true)
         .width(CommonConstants.FULL_PERCENT)
-        .aspectRatio(1.5)
+        .aspectRatio(this.currentWidthBreakpoint <= WidthBreakpoint.WIDTH_SM ? 1.5 : 3)
 
       Column({space: CommonConstants.SPACE_12}) {
 

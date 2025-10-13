@@ -127,6 +127,18 @@
     {
       "name": "menu_flip_slid",
       "value": "横划模式"
+    },
+    {
+      "name": "prefer_about_qq_group",
+      "value": "需求/反馈QQ群："
+    },
+    {
+      "name": "prefer_about_qq_group_value",
+      "value": "1053123111"
+    },
+    {
+      "name": "prefer_about_qq_group_copied",
+      "value": "QQ群号已拷贝到剪贴板"
     }
   ]
 }

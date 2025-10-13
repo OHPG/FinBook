@@ -3,6 +3,7 @@ import { WebTool } from '@ohpg/fin-core'
 import { Repository } from '../../data/Repository'
 import { CommonConstants } from '../../common/CommonConstants'
 import { FinRouter, ToolBar } from '@ohpg/fin-framework'
+import { pasteboard } from '@kit.BasicServicesKit'
 
 @Entry
 @Component
@@ -77,12 +78,36 @@ struct AboutPage {
 
       Blank()
 
-      Text("ICP备案")
-        .fontColor($r('sys.color.ohos_id_color_component_activated'))
-        .margin(CommonConstants.SPACE_16)
-        .onClick(() => {
-          WebTool.openBrowser(getContext(), "https://beian.miit.gov.cn")
-        })
+      Row({space: CommonConstants.SPACE_4}) {
+        Text($r('app.string.prefer_about_qq_group'))
+          .fontSize(16)
+          .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+
+        Text($r('app.string.prefer_about_qq_group_value'))
+          .fontSize(16)
+          .fontColor($r('sys.color.ohos_id_color_component_activated'))
+          .onClick(() => {
+            let text = getContext().resourceManager
+              .getStringSync($r('app.string.prefer_about_qq_group_value'))
+            const pasteboardData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, text);
+            const systemPasteboard = pasteboard.getSystemPasteboard();
+            systemPasteboard.setData(pasteboardData);
+            this.getUIContext().getPromptAction().showToast({message: $r('app.string.prefer_about_qq_group_copied')})
+          })
+      }
+
+      Row({space: CommonConstants.SPACE_4}) {
+        Text("ICP备案：")
+          .fontSize(16)
+          .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+
+        Text("豫ICP备2025110731号-6A")
+          .fontColor($r('sys.color.ohos_id_color_component_activated'))
+          .onClick(() => {
+            WebTool.openBrowser(getContext(), "https://beian.miit.gov.cn")
+          })
+      }
+      .margin(CommonConstants.SPACE_16)
     }
     .padding({
       bottom: px2vp(this.currentAvoidArea?.bottomRect.height)
