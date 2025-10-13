@@ -25,6 +25,11 @@ struct ReaderPage {
   @Provide immersiveMode: boolean = false
 
   /**
+   * 菜单是否可用
+   */
+  @State menuEnable: boolean = false
+
+  /**
    * 菜单是否可见
    */
   @Provide menuVisible: boolean = false
@@ -32,7 +37,7 @@ struct ReaderPage {
   /**
    * 阅读进度
    */
-  @Provide @Watch('onProgressChange') readProgress: number = 10
+  @Provide @Watch('onProgressChange') readProgress: number = 0
 
   aboutToAppear(): void {
     this.viewModel.startRead()
@@ -73,11 +78,13 @@ struct ReaderPage {
          SymbolGlyph($r('sys.symbol.slider_horizontal_2'))
            .fontSize($r('sys.float.Title_L'))
            .fontColor([$r('sys.color.font_primary')])
+           .visibility(this.menuEnable ? Visibility.Visible : Visibility.Hidden)
            .onClick(() => {
              this.menuVisible = true
            })
        }
      }
+     .backgroundColor($r('sys.color.background_primary'))
      .visibility(this.immersiveMode ? Visibility.Hidden : Visibility.Visible)
    }
    .width(CommonConstants.FULL_PERCENT)
@@ -87,6 +94,7 @@ struct ReaderPage {
   private judgementType(source: FinBookRawSource): boolean {
     this.readProgress = source.progress
     this.bookTitle = source.name
+    this.menuEnable = source.pdf ? false: true
     return source.pdf ? true : false
   }
 

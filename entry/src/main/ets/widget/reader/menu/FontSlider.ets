@@ -9,10 +9,10 @@ class NodeParams {
 @Builder
 function textBuilder(params: NodeParams) {
   Text(params.param)
-    .fontSize($r('sys.float.Caption_L'))
     .clip(true)
     .textAlign(TextAlign.Center)
-    .fontColor(Color.Black)
+    .fontSize($r('sys.float.Caption_L'))
+    .fontColor($r('sys.color.ohos_id_color_text_primary'))
 }
 
 @Component

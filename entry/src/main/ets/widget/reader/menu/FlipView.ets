@@ -33,49 +33,43 @@ export struct FlipView {
   }
 
   build() {
-    Stack({alignContent: Alignment.Bottom}) {
+    Row() {
       Row() {
-        Row() {
-          Text($r('app.string.menu_flip_title'))
-            .fontSize(16)
-            .fontColor(Color.Black)
-            .margin({ left: 16 })
+        Text($r('app.string.menu_flip_title'))
+          .fontSize(16)
+          .margin({ left: 16 })
 
-          Row() {
-            Text(this.bookSetting.flipMode === FlipMode.PAPER
-              ? $r('app.string.menu_flip_normal')
-              : $r('app.string.menu_flip_slid'))
-              .fontSize(16)
-              .fontColor(Color.Black)
-              .margin({ left: 16 })
-            SymbolGlyph($r('sys.symbol.hand_point_up_tap_fill'))
-              .fontSize(18)
-              .fontWeight(600)
-              .renderingStrategy(SymbolRenderingStrategy.SINGLE)
-              .effectStrategy(SymbolEffectStrategy.NONE)
-          }
-          .clickEffect({ level: ClickEffectLevel.MIDDLE })
-          .bindContextMenu(this.flipMenu, this.bindFlipModelMenu, {
-            aboutToDisappear: () => {
-              this.flipMenu = false
-            }
-          })
-          .onClick(() => {
-            this.flipMenu = true
-          })
+        Row() {
+          Text(this.bookSetting.flipMode === FlipMode.PAPER
+            ? $r('app.string.menu_flip_normal')
+            : $r('app.string.menu_flip_slid'))
+            .fontSize(16)
+            .margin({ left: 16 })
+          SymbolGlyph($r('sys.symbol.hand_point_up_tap_fill'))
+            .fontSize(18)
+            .fontWeight(600)
+            .renderingStrategy(SymbolRenderingStrategy.SINGLE)
+            .effectStrategy(SymbolEffectStrategy.NONE)
         }
-        .height(60)
-        .width(CommonConstants.FULL_PERCENT)
-        .constraintSize({maxWidth: 400})
-        .justifyContent(FlexAlign.SpaceAround)
+        .clickEffect({ level: ClickEffectLevel.MIDDLE })
+        .bindContextMenu(this.flipMenu, this.bindFlipModelMenu, {
+          aboutToDisappear: () => {
+            this.flipMenu = false
+          }
+        })
+        .onClick(() => {
+          this.flipMenu = true
+        })
       }
-      .justifyContent(FlexAlign.Center)
-      .backgroundColor($r('sys.color.background_primary'))
-      .borderRadius({ topRight: CommonConstants.CORNER_16, topLeft: CommonConstants.CORNER_16 })
+      .height(60)
       .width(CommonConstants.FULL_PERCENT)
-      .onClick(() => {})
+      .constraintSize({maxWidth: 400})
+      .justifyContent(FlexAlign.SpaceAround)
     }
+    .justifyContent(FlexAlign.Center)
+    .backgroundColor($r('sys.color.background_primary'))
+    .borderRadius({ topRight: CommonConstants.CORNER_16, topLeft: CommonConstants.CORNER_16 })
     .width(CommonConstants.FULL_PERCENT)
-    .height(CommonConstants.FULL_PERCENT)
+    .onClick(() => {})
   }
 }

@@ -43,7 +43,7 @@ struct GridPage {
           }
           attr.rowsGap = CommonConstants.SPACE_12
           attr.columnsGap = CommonConstants.SPACE_12
-          attr.columnsTemplate = ('1fr 1fr')
+          attr.columnsTemplate = ('repeat(auto-fit, 140)')
           attr.width = CommonConstants.FULL_PERCENT
           attr.height = CommonConstants.FULL_PERCENT
         },

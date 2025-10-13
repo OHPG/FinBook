@@ -131,7 +131,7 @@ export struct CataView {
           }
         })
       }
-      .divider({color: "#ffc4c4c4", strokeWidth: 1, startMargin: CommonConstants.SPACE_16, endMargin: CommonConstants.SPACE_16})
+      .divider({color: $r('sys.color.ohos_id_divider_color'), strokeWidth: 1, startMargin: CommonConstants.SPACE_16, endMargin: CommonConstants.SPACE_16})
       .scrollBar(BarState.Auto)
       .width('100%')
       .height('auto')
@@ -140,7 +140,8 @@ export struct CataView {
     .backgroundColor($r('sys.color.background_primary'))
     .borderRadius({ topRight: CommonConstants.CORNER_16, topLeft: CommonConstants.CORNER_16 })
     .width('100%')
-    .height('80%')
+    .height('75%')
+    .onClick(() => {})
   }
 }
 
@@ -173,7 +174,7 @@ struct CataItemView {
     Row() {
       Text(' · ')
         .fontSize(14)
-        .fontColor(this.itemIndex > this.cataIndex ? $r('app.color.black_90_opacity') : $r('app.color.black_60_opacity'))
+        .fontColor(this.itemIndex > this.cataIndex ? $r('sys.color.ohos_id_color_text_primary') : $r('sys.color.ohos_id_color_text_secondary'))
 
       Text(this.cataItem?.catalogName)
         .fontSize(14)
@@ -181,7 +182,7 @@ struct CataItemView {
         .padding({ top: 8, bottom: 8 })
         .maxLines(2)
         .layoutWeight(1)
-        .fontColor(this.itemIndex > this.cataIndex ? $r('app.color.black_90_opacity') : $r('app.color.black_60_opacity'))
+        .fontColor(this.itemIndex > this.cataIndex ? $r('sys.color.ohos_id_color_text_primary') : $r('sys.color.ohos_id_color_text_secondary'))
         .fontWeight(this.itemIndex > this.cataIndex ? 900 : 200)
     }
     .width('100%')

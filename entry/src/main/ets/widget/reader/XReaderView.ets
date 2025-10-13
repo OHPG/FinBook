@@ -36,10 +36,10 @@ export struct XReaderView {
   @Provide @Watch('onSettingChange') bookSetting: readerCore.ReaderSetting = {
     fontName: 'system',
     fontPath: '',
-    fontSize: 12,
+    fontSize: 16,
     fontColor: '#000000',
     fontWeight: 400,
-    lineHeight: 1,
+    lineHeight: 1.4,
     nightMode: false,
     themeColor: 'rgba(248, 249, 250, 1)',
     themeBgImg: '',
@@ -56,7 +56,6 @@ export struct XReaderView {
     this.registerScreenDensityChange()
     AppStorage.setOrCreate('bookCtrl', this.bookCtrl)
     this.bookCtrl.on('pageShow', (info) => {
-      console.log("xxx: pageShow " + JSON.stringify(info))
       this.readProgress = info.resourceIndex
       this.bookState = info.state
       if (info.state === readerCore.PageState.PAGE_ON_SHOW) {

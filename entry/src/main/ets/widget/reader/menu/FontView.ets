@@ -14,66 +14,61 @@ export struct FontView {
   }
 
   build() {
-    Stack({alignContent: Alignment.Bottom}) {
-
-      // 字体
-      Column({space: CommonConstants.SPACE_16}) {
-        GridRow({
-          columns: { xs: 4, sm: 4, md: 9, lg: 12 },
-          gutter: { x: 8, y: 8 },
-          breakpoints: { value: ['0vp', '520vp', '840vp'] },
-          direction: GridRowDirection.Row
-        }) {
-          ForEach(Fonts.FONTS, (font: string) => {
-            GridCol({
-              span: { xs: 1, sm: 2, md: 3, lg: 4 },
-              offset: 0,
-              order: 0
-            }) {
-              FontItemView({font: font})
-            }
-          });
-        }
-
-        // 分割线
-        Divider()
-          .width('90%')
-          .height(1)
-          .backgroundColor($r('app.color.ic_bg_grey'))
-
-        // 字号
-        FontSlider({
-          step: 2,
-          min: 12,
-          max: 32,
-          value: Number(this.bookSetting.fontSize),
-          onSliderChange: (value) => {
-            this.bookSetting.fontSize = value
+    // 字体
+    Column({space: CommonConstants.SPACE_16}) {
+      GridRow({
+        columns: { xs: 4, sm: 4, md: 9, lg: 12 },
+        gutter: { x: 8, y: 8 },
+        breakpoints: { value: ['0vp', '520vp', '840vp'] },
+        direction: GridRowDirection.Row
+      }) {
+        ForEach(Fonts.FONTS, (font: string) => {
+          GridCol({
+            span: { xs: 1, sm: 2, md: 3, lg: 4 },
+            offset: 0,
+            order: 0
+          }) {
+            FontItemView({font: font})
           }
-        })
-
-        // 行高
-        FontSlider({
-          pre: '三',
-          suf: '三',
-          step: 0.1,
-          min: 1.0,
-          max: 2.0,
-          value: Number(this.bookSetting.lineHeight),
-          onSliderChange: (value) => {
-            this.bookSetting.lineHeight = value
-          }
-        })
+        });
       }
-      .width('100%')
-      .backgroundColor($r('sys.color.background_primary'))
-      .borderRadius({ topRight: CommonConstants.CORNER_16, topLeft: CommonConstants.CORNER_16 })
-      .constraintSize({maxWidth: 400})
-      .padding(CommonConstants.SPACE_16)
+      .alignItems(ItemAlign.Center)
+
+      // 分割线
+      Divider()
+        .width('90%')
+        .height(1)
+        .backgroundColor($r('sys.color.ohos_id_divider_color'))
+
+      // 字号
+      FontSlider({
+        step: 2,
+        min: 12,
+        max: 32,
+        value: Number(this.bookSetting.fontSize),
+        onSliderChange: (value) => {
+          this.bookSetting.fontSize = value
+        }
+      })
+
+      // 行高
+      FontSlider({
+        pre: '三',
+        suf: '三',
+        step: 0.1,
+        min: 1.0,
+        max: 2.0,
+        value: Number(this.bookSetting.lineHeight),
+        onSliderChange: (value) => {
+          this.bookSetting.lineHeight = value
+        }
+      })
     }
-    .hitTestBehavior(HitTestMode.Transparent)
     .width('100%')
-    .height('100%')
+    .backgroundColor($r('sys.color.background_primary'))
+    .borderRadius({ topRight: CommonConstants.CORNER_16, topLeft: CommonConstants.CORNER_16 })
+    .padding(CommonConstants.SPACE_16)
+    .onClick(() => {})
   }
 
 }

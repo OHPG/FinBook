@@ -22,6 +22,8 @@ export struct ThemeView {
     .scrollable(ScrollDirection.Horizontal)
     .scrollBar(BarState.Off)
     .edgeEffect(EdgeEffect.Spring)
+    .width(CommonConstants.FULL_PERCENT)
+    .onClick(() => {})
   }
 
   aboutToDisappear(): void {

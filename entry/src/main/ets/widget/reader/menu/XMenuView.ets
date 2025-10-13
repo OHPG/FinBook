@@ -49,7 +49,7 @@ export struct XMenuView {
       Row()
       .backgroundColor($r('sys.color.background_primary'))
         .width(CommonConstants.FULL_PERCENT)
-        .height(50 + this.getUIContext().px2vp(this.avoidArea?.bottomRect.height))
+        .height(50 + this.getUIContext().px2vp(this.avoidArea?.bottomRect.height) + 2)
 
       Tabs({ barPosition: BarPosition.End, controller: this.tabsController}) {
         TabContent() {
