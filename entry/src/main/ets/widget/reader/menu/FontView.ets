@@ -14,25 +14,23 @@ export struct FontView {
   }
 
   build() {
-    // 字体
     Column({space: CommonConstants.SPACE_16}) {
+
+      // 字体
       GridRow({
-        columns: { xs: 4, sm: 4, md: 9, lg: 12 },
-        gutter: { x: 8, y: 8 },
-        breakpoints: { value: ['0vp', '520vp', '840vp'] },
+        columns: Fonts.FONTS.length,
+        gutter: CommonConstants.SPACE_16,
         direction: GridRowDirection.Row
       }) {
         ForEach(Fonts.FONTS, (font: string) => {
-          GridCol({
-            span: { xs: 1, sm: 2, md: 3, lg: 4 },
-            offset: 0,
-            order: 0
-          }) {
+          GridCol({ span: 1 }) {
             FontItemView({font: font})
           }
         });
       }
       .alignItems(ItemAlign.Center)
+      .width('100%')
+      .constraintSize({maxWidth: 400})
 
       // 分割线
       Divider()

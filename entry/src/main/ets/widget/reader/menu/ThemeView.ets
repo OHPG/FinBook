@@ -49,8 +49,9 @@ struct ThemeItemView {
     Row()
       .width(80)
       .height(40)
-      .borderWidth(this.bookSetting.themeColor === this.themeColorValue ? 1 : 2)
-      .borderColor(this.bookSetting.themeColor === this.themeColorValue ? $r('app.color.ic_border_unselect') : this.themeColorValue)
+      .borderWidth(this.bookSetting.themeColor === this.themeColorValue ? 2 : 1)
+      .borderColor(this.bookSetting.themeColor === this.themeColorValue
+        ? $r('app.color.ic_border_unselect') : Colors.THEME_BORDER_COLOR[this.themeColorKey])
       .backgroundImage(this.getBackgroundImage())
       .backgroundColor(this.themeColorValue)
       .backgroundImagePosition(Alignment.BottomEnd)
