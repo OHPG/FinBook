@@ -61,9 +61,27 @@ export struct PdfView {
     }
     .width('100%')
     .height('100%')
-    .onClick(() => {
-      this.immersiveMode = !this.immersiveMode
-    })
+    .gesture(TapGesture({ count: 1 })
+      .onAction((event) => {
+        if (this.dataSource.totalCount() <= 0) return
+        let width = event.target.area.width as number
+        let x = event.fingerList[0].localX as number
+        if (x < width / 3) {
+          if (this.readProgress <= 0) {
+            this.getUIContext().getPromptAction().showToast({message: $r('app.string.read_not_previous')})
+          } else {
+            this.controller.showPrevious()
+          }
+        } else if (x > width * 2 / 3){
+          if (this.readProgress >= this.dataSource.totalCount() -1) {
+            this.getUIContext().getPromptAction().showToast({message: $r('app.string.read_not_next')})
+          } else {
+            this.controller.showNext()
+          }
+        } else {
+          this.immersiveMode = !this.immersiveMode
+        }
+      }))
   }
 
   aboutToDisappear() {
@@ -77,6 +95,8 @@ export struct PdfView {
 struct PdfPage {
 
   @Consume pdfLoader: PdfLoader
+
+  @Consume immersiveMode: boolean
 
   @Require @State info?: PdfPageInfo = undefined
 
@@ -106,6 +126,8 @@ struct PdfPage {
 
       // index
       Text((this.info!.index + 1) + "/" + this.info!.count)
+        .fontColor(Color.Gray)
+        .visibility(this.immersiveMode ? Visibility.Hidden : Visibility.Visible)
         .margin(CommonConstants.SPACE_16)
     }
     .width(CommonConstants.FULL_PERCENT)

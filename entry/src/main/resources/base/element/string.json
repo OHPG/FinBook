@@ -139,6 +139,14 @@
     {
       "name": "prefer_about_qq_group_copied",
       "value": "QQ群号已拷贝到剪贴板"
+    },
+    {
+      "name": "read_not_previous",
+      "value": "没有上一页了"
+    },
+    {
+      "name": "read_not_next",
+      "value": "没有下一页了"
     }
   ]
 }
