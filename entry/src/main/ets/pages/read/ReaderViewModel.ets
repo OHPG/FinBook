@@ -47,6 +47,9 @@ export class ReaderViewModel extends AppViewModel implements SimpleRepository {
     if (item.data?.playedPositionTicks) {
       progress = item.data.playedPositionTicks
     }
+    if (progress < 0) {
+      progress = 0
+    }
     
     return {id: item.id, name: item.name, progress: progress, path: filePath, pdf: pdf}
   }
