@@ -96,7 +96,7 @@ struct FontItemView {
       .textAlign(TextAlign.Center)
       .fontColor(this.fontSelected ? Color.Red : Color.Black)
       .backgroundColor(this.fontSelected ? $r('app.color.ic_bg_font_selected') : $r('app.color.ic_bg_grey'))
-      .borderColor(this.fontSelected ? $r('app.color.ic_border_select_white') : $r('app.color.color_transparent'))
+      .borderColor(this.fontSelected ? $r('app.color.ic_border_font_selected') : $r('app.color.color_transparent'))
       .width('100%')
       .onClick(() => {
         this.bookSetting.fontName = this.font
