@@ -107,17 +107,19 @@ export struct CataView {
             .maxLines(1)
             .margin({ right: 12, left: 12 })
             .fontWeight(FontWeight.Bold)
+            .width('100%')
             .flexShrink(1)
             .height(40)
 
           Text(`共${this.bookCataList?.length}章`)
             .fontSize($r('sys.float.ohos_id_text_size_body1'))
-            .fontWeight(FontWeight.Bold)
-            .padding({ top: 8, bottom: 8 })
+            .fontWeight(FontWeight.Normal)
+            .width('100%')
         }
         .justifyContent(FlexAlign.SpaceAround)
         .width('auto')
         .height(120)
+        .layoutWeight(1)
       }
       .width('100%')
       .padding(CommonConstants.SPACE_16)
