@@ -16,6 +16,8 @@ struct ReaderPage {
 
   private viewModel = new ReaderViewModel(getContext(), this.args)
 
+  private immersiveModeTimer?: number = undefined
+
   @StorageProp("currentAvoidArea") avoidArea?: window.AvoidArea = undefined
 
   @Provide bookTitle: string = this.args.name
@@ -96,7 +98,22 @@ struct ReaderPage {
     this.readProgress = source.progress
     this.bookTitle = source.name
     this.menuEnable = source.pdf ? false: true
+    this.addImmersiveModeTimer()
     return source.pdf ? true : false
+  }
+
+  private clearImmersiveModeTimer() {
+    if (this.immersiveModeTimer === undefined) return
+    clearTimeout(this.immersiveModeTimer)
+    this.immersiveModeTimer = undefined
+  }
+
+  private addImmersiveModeTimer() {
+    if (this.immersiveModeTimer !== undefined) return
+    this.immersiveModeTimer = setTimeout(() => {
+      this.immersiveMode = true
+      this.immersiveModeTimer = undefined
+    }, 3000)
   }
 
   private onProgressChange() {
@@ -107,9 +124,11 @@ struct ReaderPage {
     try {
       let window = (this.getUIContext().getHostContext() as common.UIAbilityContext).windowStage.getMainWindowSync()
       if (this.immersiveMode) {
+        this.clearImmersiveModeTimer()
         await window.setWindowSystemBarEnable([])
       } else {
         await window.setWindowSystemBarEnable(['status', 'navigation'])
+        this.addImmersiveModeTimer()
       }
     } catch (e) {
 
