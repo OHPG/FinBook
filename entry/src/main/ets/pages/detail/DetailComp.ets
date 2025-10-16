@@ -139,10 +139,25 @@ export struct DetailHeader {
 
   build() {
     Column({space: CommonConstants.SPACE_12}) {
-      Image(this.item.image?.primary)
-        .alt($r('app.media.alt'))
-        .objectFit(ImageFit.Cover)
-        .autoResize(true)
+      Stack() {
+        Image(this.item.image?.primary)
+          .blur(15)
+          .alt($r('app.media.alt'))
+          .objectFit(ImageFit.Cover)
+          .width(CommonConstants.FULL_PERCENT)
+          .height(CommonConstants.FULL_PERCENT)
+
+        Row()
+          .backgroundColor(0x64000000)
+          .width(CommonConstants.FULL_PERCENT)
+          .height(CommonConstants.FULL_PERCENT)
+
+        Image(this.item.image?.primary)
+          .alt($r('app.media.alt'))
+          .objectFit(ImageFit.Cover)
+          .aspectRatio(0.67)
+          .height(CommonConstants.FULL_PERCENT)
+      }
         .width(CommonConstants.FULL_PERCENT)
         .aspectRatio(this.currentWidthBreakpoint <= WidthBreakpoint.WIDTH_SM ? 1.5 : 3)
 
@@ -252,7 +267,7 @@ struct PersonItem {
   }
 
   build() {
-    Column() {
+    Column({space: CommonConstants.SPACE_8}) {
       Image(this.item?.image?.primary)
         .alt($r('app.media.alt'))
         .borderRadius($r('app.float.lg_border_radius'))
@@ -271,7 +286,7 @@ struct PersonItem {
     }
     .alignItems(HorizontalAlign.Start)
     .width(120)
-    .height(220)
+    .height(240)
   }
 
 }
