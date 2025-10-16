@@ -13,8 +13,6 @@ struct GridPage {
 
   private viewModel = new GridViewModel(getContext(), this.args)
 
-  @StorageProp('currentBreakpoint') currentBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_MD;
-
   @StorageProp('currentAvoidArea') currentAvoidArea?: window.AvoidArea = undefined
 
   aboutToAppear(): void {

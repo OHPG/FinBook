@@ -11,8 +11,6 @@ struct HomePage {
 
   private viewModel = new HomeViewModel(getContext())
 
-  @StorageProp('currentBreakpoint') currentBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_MD;
-
   @StorageProp('currentAvoidArea') currentAvoidArea?: window.AvoidArea = undefined
 
   @Builder

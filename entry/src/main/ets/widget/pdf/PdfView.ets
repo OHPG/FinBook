@@ -7,7 +7,7 @@ import { PdfPageInfo } from './PdfPageInfo';
 @Component
 export struct PdfView {
 
-  @StorageProp('currentBreakpoint') currentBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_MD;
+  @StorageProp('currentWidthBreakpoint') currentBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_MD;
 
   private dataSource: LazyDataSource<PdfPageInfo> = new LazyDataSource<PdfPageInfo>();
 
