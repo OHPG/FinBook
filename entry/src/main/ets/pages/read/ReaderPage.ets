@@ -7,6 +7,7 @@ import { MediaArgs } from '../detail/MediaArgs'
 import { PdfView } from '../../widget/pdf/PdfView'
 import { FinBookRawSource } from '../../entity/FinBookRawSource'
 import { XReaderView } from '../../widget/reader/XReaderView'
+import { common } from '@kit.AbilityKit'
 
 @Entry
 @Component
@@ -22,7 +23,7 @@ struct ReaderPage {
   /**
    * 是否是沉浸式
    */
-  @Provide immersiveMode: boolean = false
+  @Provide @Watch("onImmersiveModeChange") immersiveMode: boolean = false
 
   /**
    * 菜单是否可用
@@ -102,6 +103,19 @@ struct ReaderPage {
     this.viewModel.updateProgress(this.readProgress)
   }
 
+  private async onImmersiveModeChange() {
+    try {
+      let window = (this.getUIContext().getHostContext() as common.UIAbilityContext).windowStage.getMainWindowSync()
+      if (this.immersiveMode) {
+        await window.setWindowSystemBarEnable([])
+      } else {
+        await window.setWindowSystemBarEnable(['status', 'navigation'])
+      }
+    } catch (e) {
+
+    }
+  }
+
   onBackPress(): boolean | void {
     if (this.menuVisible) {
       this.menuVisible = false
@@ -111,6 +125,7 @@ struct ReaderPage {
   }
 
   aboutToDisappear(): void {
+    this.immersiveMode = false
     this.viewModel.stopRead(this.readProgress)
   }
 
