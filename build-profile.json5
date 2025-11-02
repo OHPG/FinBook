@@ -65,6 +65,10 @@
     {
       "name": "jellyfin",
       "srcPath": "../FinSdk/jellyfin"
+    },
+    {
+      "name": "komga",
+      "srcPath": "../FinSdk/komga"
     }
   ]
 }

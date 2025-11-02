@@ -1,3 +1,4 @@
+import { ImageKnifeComponent } from '@ohos/imageknife'
 import { FinItem, FinItemType } from '@ohpg/fin-core'
 import { CommonConstants } from '@ohpg/fin-framework'
 import { MediaArgs } from '../../pages/detail/MediaArgs'

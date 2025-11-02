@@ -125,6 +125,14 @@ export class JellyfinFinApi implements FinBookApi {
     return {Id: info.Id, ServerName: info.ServerName, Version: info.Version, StartupWizardCompleted: info.StartupWizardCompleted}
   }
 
+  public async getSystemInfo(url?: string): Promise<FinPublicSystemInfo> {
+    if (url) {
+      this.jellyfin.selectServer({address: url})
+    }
+    let info = await this.jellyfin.getSystemApi().getSystemInfo()
+    return {Id: info.Id, ServerName: info.ServerName, Version: info.Version, StartupWizardCompleted: info.StartupWizardCompleted}
+  }
+
   public async authenticateUserByName(name: string, psw?: string | undefined): Promise<FinAuthResult> {
     let authResult = await this.jellyfin.getUserApi().authenticateUserByName({Username: name, Pw: psw})
     return { ServerId: authResult.ServerId

@@ -35,7 +35,7 @@ struct ReaderPage {
   /**
    * 菜单是否可见
    */
-  @Provide menuVisible: boolean = false
+  @Provide @Watch("onMenuChanged") menuVisible: boolean = false
 
   /**
    * 阅读进度
@@ -116,6 +116,14 @@ struct ReaderPage {
     }, 3000)
   }
 
+  private onMenuChanged() {
+    if (this.menuVisible) {
+      this.clearImmersiveModeTimer()
+    } else {
+      this.addImmersiveModeTimer()
+    }
+  }
+
   private onProgressChange() {
     this.viewModel.updateProgress(this.readProgress)
   }
@@ -128,7 +136,11 @@ struct ReaderPage {
         await window.setWindowSystemBarEnable([])
       } else {
         await window.setWindowSystemBarEnable(['status', 'navigation'])
-        this.addImmersiveModeTimer()
+        if (!this.menuVisible) {
+          this.addImmersiveModeTimer()
+        } else {
+          // 监听
+        }
       }
     } catch (e) {
 

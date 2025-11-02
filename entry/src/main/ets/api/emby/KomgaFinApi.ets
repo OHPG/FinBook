@@ -1,0 +1,204 @@
+import { ActuatorInfo, Auth, AuthType } from "@ohpg/komga";
+import { BookDto, Komga, LibraryDto } from "@ohpg/komga";
+import { FinBookApi } from "../FinBookApi";
+import { ActiveInfo, ServerType } from "@ohpg/fin-core";
+import { FinItemType } from "@ohpg/fin-core";
+import { FinPublicSystemInfo } from "@ohpg/fin-core";
+import { FinItem, FinAuthResult } from "@ohpg/fin-core";
+import { ClientInfo, DeviceInfo } from "@ohpg/network";
+import uri from "@ohos.uri";
+
+/**
+ * @Author peerless2012
+ * @Email peerless2012@126.com
+ * @DateTime 2025/11/2 12:41
+ * @Version V1.0
+ * @Description
+ */
+export class KomgaFinApi implements FinBookApi {
+
+  private readonly context: Context
+
+  private activeInfo?: ActiveInfo
+
+  /**
+   * Komga api
+   */
+  private komga: Komga
+
+  private komgaTmp: Komga
+
+  private bookLibraryArray?: Array<LibraryDto>
+
+  private bookLibrary?: LibraryDto
+
+  constructor(context: Context, clientInfo: ClientInfo, deviceInfo: DeviceInfo) {
+    this.context = context
+    this.komga = new Komga(clientInfo, deviceInfo)
+    this.komgaTmp = new Komga(clientInfo, deviceInfo)
+  }
+
+  private generateAuth(name?: string, psw?: string): string | undefined {
+    if (!name || !psw) {
+      throw new Error("Name or psw is null.")
+    }
+    let auth = new Auth(AuthType.Basic, name, psw)
+    return auth.auth
+  }
+
+  getApiType(): ServerType {
+    return ServerType.KOMGA
+  }
+
+  getAuth(): string {
+    return this.komga.apiClient.getAuthorization()
+  }
+
+  updateAddress(address: string): void {
+    this.komga.selectServer({address: address})
+  }
+
+  updateActiveInfo(activeInfo: ActiveInfo): void {
+    this.activeInfo = activeInfo
+    this.komga.selectServer({address: activeInfo.addressInfo.address})
+    this.komga.selectUser({id: activeInfo.userInfo.userId, token: activeInfo.userInfo.accessToken})
+  }
+
+  public async getPublicSystemInfo(url: string, name?: string, psw?: string): Promise<FinPublicSystemInfo> {
+    let auth = this.generateAuth(name, psw)
+    this.komgaTmp.selectServer({address: url})
+    this.komgaTmp.selectUser({token: auth})
+    let info = await this.komgaTmp.getSystemApi().getActuatorInfo()
+    let serverId = info.os.name + "-" + info.os.arch
+    return {Id: serverId, ServerName: info.build.name, Version: info.build.version, StartupWizardCompleted: true}
+  }
+
+  public async getSystemInfo(url?: string): Promise<FinPublicSystemInfo> {
+    let info: ActuatorInfo
+    if (url) {
+      this.komgaTmp.selectServer({address: url})
+      this.komgaTmp.selectUser({id: this.activeInfo!.userInfo.userId, token: this.activeInfo!.userInfo.accessToken})
+      info = await this.komgaTmp.getSystemApi().getActuatorInfo()
+    } else {
+      info = await this.komga.getSystemApi().getActuatorInfo()
+    }
+    let serverId = info.os.name + "-" + info.os.arch
+    return {Id: serverId, ServerName: info.build.name, Version: info.build.version}
+  }
+
+  public async authenticateUserByName(name: string, psw?: string): Promise<FinAuthResult> {
+    let auth = this.generateAuth(name, psw)
+    this.komga.selectUser({token: auth})
+    let serverInfo = await this.getSystemInfo()
+    let authResult = await this.komga.getUserApi().getCurrentUser()
+    return { ServerId: serverInfo.Id
+    , UserName: authResult.email
+    , UserId: authResult.id
+    , AccessToken: auth}
+  }
+
+  private async assertCurrentBookLibrary(): Promise<LibraryDto> {
+    if (!this.bookLibrary) {
+      let result = await this.komga.getLibraryApi().getLibraries()
+      this.bookLibraryArray = result
+      this.bookLibrary = this.bookLibraryArray?.[0]
+    }
+    if (!this.bookLibrary) {
+      throw new Error("No book library found.")
+    }
+    return this.bookLibrary
+  }
+
+  private buildImage(dto: BookDto): string {
+    let imageUri = new uri.URI(this.activeInfo!.addressInfo.address)
+    imageUri = imageUri.addEncodedSegment(`/api/v1/books/${dto.id!}/thumbnail`)
+    return imageUri.toString()
+  }
+
+  private itemToFinItem(book: BookDto): FinItem {
+    let item: FinItem = {
+      id: book.id,
+      name: book.name,
+      type: FinItemType.Book,
+      originalTitle: book.name,
+      overview: book.metadata?.summary,
+      path: book.url,
+      person: [],
+      image: {
+        primary: this.buildImage(book)
+      }
+    }
+    book.metadata.authors?.forEach((author) => {
+      item.person?.push({
+        id: "",
+        name: author.name,
+        role: author.role
+      })
+    })
+    return item
+  }
+
+  public async getBookList(id?: string): Promise<Array<FinItem>> {
+    await this.assertCurrentBookLibrary()
+    let finItems = new Array<FinItem>()
+    let result = await this.komga.getItemsApi().getBooks(this.bookLibrary?.id!)
+    result.content?.forEach((item) => {
+      finItems.push(this.itemToFinItem(item))
+    })
+    return finItems
+  }
+
+  public async getBook(id: string): Promise<FinItem> {
+    let item = await  this.komga.getItemsApi().getBook(id)
+    return this.itemToFinItem(item)
+  }
+
+  public async getBookUrl(id: string): Promise<string> {
+    let url = await this.komga.getItemsApi().getFile(id)
+    return url
+  }
+
+  public searchMedia(keyword: string): Promise<Array<FinItem>> {
+    return Promise.resolve([])
+  }
+
+  async markFavoriteItem(id: string): Promise<void> {
+    // await this.komga.getUserLibraryApi().markFavoriteItem({
+    //   itemId: id,
+    //   userId: this.activeInfo!.userInfo.userId
+    // })
+  }
+
+  async unmarkFavoriteItem(id: string): Promise<void> {
+    // await this.komga.getUserLibraryApi().unmarkFavoriteItem({
+    //   itemId: id,
+    //   userId: this.activeInfo!.userInfo.userId
+    // })
+  }
+
+  async markPlayedItem(id: string): Promise<void> {
+    // await this.komga.getPlayStateApi().markPlayedItem({
+    //   itemId: id,
+    //   userId: this.activeInfo!.userInfo.userId
+    // })
+  }
+
+  async markUnplayedItem(id: string): Promise<void> {
+    // await this.komga.getPlayStateApi().markUnplayedItem({
+    //   itemId: id,
+    //   userId: this.activeInfo!.userInfo.userId
+    // })
+  }
+
+  async onPlaybackStart(id: string): Promise<void> {
+    // await this.komga.getPlayStateApi().onPlaybackStart({itemId: id})
+  }
+
+  async onPlaybackProgress(id: string, position: number, playing: boolean): Promise<void> {
+    // await this.komga.getPlayStateApi().onPlaybackProgress({itemId: id, positionTicks: position * 10000, isPaused: !playing})
+  }
+
+  async onPlaybackStopped(id: string, position: number): Promise<void> {
+    // await this.komga.getPlayStateApi().onPlaybackStopped({itemId: id, positionTicks: position * 10000})
+  }
+}

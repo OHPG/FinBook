@@ -8,6 +8,8 @@
   "dependencies": {
     // https://ohpm.openharmony.cn/#/cn/detail/@abner%2Frefresh
     "@abner/refresh": "1.4.3",
+    "@ohos/imageknife": "3.2.7",
+    "@ohpg/komga": 'file:../../FinSdk/komga',
     "@ohpg/network": 'file:../../FinSdk/network',
     "@ohpg/jellyfin": 'file:../../FinSdk/jellyfin',
     "@ohpg/fin-core": 'file:../../FinFramework/lib_core',
