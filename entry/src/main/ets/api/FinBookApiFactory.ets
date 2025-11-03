@@ -1,6 +1,6 @@
 import { JellyfinFinApi } from "./jellyfin/JellyfinFinApi";
 import { ApiFactory, CoreApi, ServerType } from "@ohpg/fin-core";
-import { KomgaFinApi } from "./emby/KomgaFinApi";
+import { KomgaFinApi } from "./komga/KomgaFinApi";
 
 /**
  * @Author peerless2012
