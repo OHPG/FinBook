@@ -4,6 +4,7 @@ import { DetailViewModel } from "./DetailViewModel"
 import { MediaArgs } from "./MediaArgs"
 import LazyDataSource from "../../common/LazyDataSource"
 import { AppRouter } from "../../router/AppRouter"
+import { CoverImage } from "../../widget/image/CoverImage"
 
 @Component
 export struct DetailOperate {
@@ -140,10 +141,7 @@ export struct DetailHeader {
   build() {
     Column({space: CommonConstants.SPACE_12}) {
       Stack() {
-        Image(this.item.image?.primary)
-          .blur(15)
-          .alt($r('app.media.alt'))
-          .objectFit(ImageFit.Cover)
+        CoverImage({ image: this.item?.image, imageBlur: 15 })
           .width(CommonConstants.FULL_PERCENT)
           .height(CommonConstants.FULL_PERCENT)
 
@@ -152,9 +150,7 @@ export struct DetailHeader {
           .width(CommonConstants.FULL_PERCENT)
           .height(CommonConstants.FULL_PERCENT)
 
-        Image(this.item.image?.primary)
-          .alt($r('app.media.alt'))
-          .objectFit(ImageFit.Cover)
+        CoverImage({ image: this.item?.image })
           .aspectRatio(0.67)
           .height(CommonConstants.FULL_PERCENT)
       }

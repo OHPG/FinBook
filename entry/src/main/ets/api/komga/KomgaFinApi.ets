@@ -1,7 +1,7 @@
 import { ActuatorInfo, Auth, AuthType } from "@ohpg/komga";
 import { BookDto, Komga, LibraryDto } from "@ohpg/komga";
 import { FinBookApi } from "../FinBookApi";
-import { ActiveInfo, ServerType } from "@ohpg/fin-core";
+import { ActiveInfo, FinPersonType, ServerType } from "@ohpg/fin-core";
 import { FinItemType } from "@ohpg/fin-core";
 import { FinPublicSystemInfo } from "@ohpg/fin-core";
 import { FinItem, FinAuthResult } from "@ohpg/fin-core";
@@ -25,6 +25,8 @@ export class KomgaFinApi implements FinBookApi {
    * Komga api
    */
   private komga: Komga
+
+  private komgaHeader?: Record<string, string>
 
   private komgaTmp: Komga
 
@@ -62,6 +64,9 @@ export class KomgaFinApi implements FinBookApi {
     this.activeInfo = activeInfo
     this.komga.selectServer({address: activeInfo.addressInfo.address})
     this.komga.selectUser({id: activeInfo.userInfo.userId, token: activeInfo.userInfo.accessToken})
+    this.komgaHeader = {
+      "Authorization": this.komga.apiClient.getAuthorization()
+    }
   }
 
   public async getPublicSystemInfo(url: string, name?: string, psw?: string): Promise<FinPublicSystemInfo> {
@@ -111,7 +116,7 @@ export class KomgaFinApi implements FinBookApi {
 
   private buildImage(dto: BookDto): string {
     let imageUri = new uri.URI(this.activeInfo!.addressInfo.address)
-    imageUri = imageUri.addEncodedSegment(`/api/v1/books/${dto.id!}/thumbnail`)
+    imageUri = imageUri.addEncodedSegment(`api/v1/books/${dto.id!}/thumbnail`)
     return imageUri.toString()
   }
 
@@ -125,20 +130,24 @@ export class KomgaFinApi implements FinBookApi {
       path: book.url,
       person: [],
       image: {
-        primary: this.buildImage(book)
-      },
-      data: {
-        playedPositionTicks: book.readProgress.page,
-        played: book.readProgress.completed
+        primary: this.buildImage(book),
+        header: this.komgaHeader
       }
     }
     book.metadata.authors?.forEach((author) => {
       item.person?.push({
         id: "",
         name: author.name,
-        role: author.role
+        role: author.role,
+        type: FinPersonType.Author
       })
     })
+    if (book.readProgress) {
+      item.data = {
+        playedPositionTicks: book.readProgress.page,
+        played: book.readProgress.completed
+      }
+    }
     return item
   }
 
@@ -185,11 +194,16 @@ export class KomgaFinApi implements FinBookApi {
   }
 
   async onPlaybackProgress(id: string, position: number, playing: boolean): Promise<void> {
-    await this.komga.getItemsApi().markBookReadProgress(id, position)
+    await this.komga.getItemsApi().markBookProgression(id, position)
   }
 
   async onPlaybackStopped(id: string, position: number): Promise<void> {
     // ignore
+  }
+
+  public async release(): Promise<void> {
+    this.komga.apiClient.release()
+    this.komgaTmp.apiClient.release()
   }
 
 }

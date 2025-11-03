@@ -232,4 +232,8 @@ export class JellyfinFinApi implements FinBookApi {
     await this.jellyfin.getPlayStateApi().onPlaybackStopped({itemId: id, positionTicks: position * 10000})
   }
 
+  public async release(): Promise<void> {
+    this.jellyfin.apiClient.release()
+  }
+
 }

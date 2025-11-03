@@ -1,8 +1,8 @@
-import { ImageKnifeComponent } from '@ohos/imageknife'
 import { FinItem, FinItemType } from '@ohpg/fin-core'
 import { CommonConstants } from '@ohpg/fin-framework'
 import { MediaArgs } from '../../pages/detail/MediaArgs'
 import { AppRouter } from '../../router/AppRouter'
+import { CoverImage } from '../image/CoverImage'
 
 @Reusable
 @Component
@@ -15,11 +15,8 @@ export struct MediaItem {
   }
   build() {
     Column({space: CommonConstants.SPACE_8}) {
-      Image(this.item?.image?.primary)
-        .alt($r('app.media.alt'))
-        .objectFit(ImageFit.Cover)
-        .autoResize(true)
-        .borderRadius(CommonConstants.SPACE_16)
+
+      CoverImage({ image: this.item?.image, imageBorderRadius: CommonConstants.SPACE_16 })
         .width('100%')
         .aspectRatio(0.67)
 
