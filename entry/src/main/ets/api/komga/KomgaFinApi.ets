@@ -126,6 +126,10 @@ export class KomgaFinApi implements FinBookApi {
       person: [],
       image: {
         primary: this.buildImage(book)
+      },
+      data: {
+        playedPositionTicks: book.readProgress.page,
+        played: book.readProgress.completed
       }
     }
     book.metadata.authors?.forEach((author) => {
@@ -163,42 +167,29 @@ export class KomgaFinApi implements FinBookApi {
   }
 
   async markFavoriteItem(id: string): Promise<void> {
-    // await this.komga.getUserLibraryApi().markFavoriteItem({
-    //   itemId: id,
-    //   userId: this.activeInfo!.userInfo.userId
-    // })
   }
 
   async unmarkFavoriteItem(id: string): Promise<void> {
-    // await this.komga.getUserLibraryApi().unmarkFavoriteItem({
-    //   itemId: id,
-    //   userId: this.activeInfo!.userInfo.userId
-    // })
   }
 
   async markPlayedItem(id: string): Promise<void> {
-    // await this.komga.getPlayStateApi().markPlayedItem({
-    //   itemId: id,
-    //   userId: this.activeInfo!.userInfo.userId
-    // })
+    await this.komga.getItemsApi().markBookRead(id)
   }
 
   async markUnplayedItem(id: string): Promise<void> {
-    // await this.komga.getPlayStateApi().markUnplayedItem({
-    //   itemId: id,
-    //   userId: this.activeInfo!.userInfo.userId
-    // })
+    await this.komga.getItemsApi().markBookUnread(id)
   }
 
   async onPlaybackStart(id: string): Promise<void> {
-    // await this.komga.getPlayStateApi().onPlaybackStart({itemId: id})
+    // ignore
   }
 
   async onPlaybackProgress(id: string, position: number, playing: boolean): Promise<void> {
-    // await this.komga.getPlayStateApi().onPlaybackProgress({itemId: id, positionTicks: position * 10000, isPaused: !playing})
+    await this.komga.getItemsApi().markBookReadProgress(id, position)
   }
 
   async onPlaybackStopped(id: string, position: number): Promise<void> {
-    // await this.komga.getPlayStateApi().onPlaybackStopped({itemId: id, positionTicks: position * 10000})
+    // ignore
   }
+
 }
