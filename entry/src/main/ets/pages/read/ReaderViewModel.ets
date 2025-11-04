@@ -26,6 +26,7 @@ export class ReaderViewModel extends AppViewModel implements SimpleRepository {
   }
 
   async loadData(type: LoadType): Promise<FinBookRawSource> {
+    let activeInfo = this.repository.getActiveInfo()!
     let item = await this.repository.getBook(this.args.id)
     let url = await this.repository.getBookUrl(item.id)
     let suffix: string = ''
@@ -35,7 +36,7 @@ export class ReaderViewModel extends AppViewModel implements SimpleRepository {
         suffix = item.path.substring(index)
       }
     }
-    let filePath = this.context.filesDir + "/" + item.id + suffix;
+    let filePath = this.context.filesDir + "/" + activeInfo.serverInfo.serverId + "/" + item.id + suffix;
     let exists = await fs.access(filePath, fs.AccessModeType.EXIST)
     if (!exists) {
       // download

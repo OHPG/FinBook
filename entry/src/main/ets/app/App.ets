@@ -1,4 +1,5 @@
 import { AbilityConstant, AbilityStage, Configuration, ConfigurationConstant } from "@kit.AbilityKit";
+import { ImageKnife } from "@ohos/imageknife";
 import { AppPrefer } from "../prefer/AppPrefer";
 import { pdfCache } from "../widget/pdf/PdfCache";
 
@@ -15,6 +16,7 @@ export class App extends AbilityStage {
     // https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/arkts-light-dark-color-adaptation-V5#section1421172621111
     this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     AppStorage.setOrCreate(AppPrefer.PREFER, new AppPrefer(this.context.getApplicationContext()))
+    ImageKnife.getInstance().initFileCache(this.context, 1024, 128 * 1024 * 1024)
   }
 
   onMemoryLevel(level: AbilityConstant.MemoryLevel): void {
