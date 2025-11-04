@@ -20,11 +20,11 @@ export class HomeViewModel extends ListViewModel {
     let normalItems = await this.repository.getLibraryList()
     if (normalItems) {
       for (let item of normalItems) {
-        let items = await this.repository.getBookList(item.id)
-        if (items && items.length > 0) {
+        let page = await this.repository.getBookList(item.id)
+        if (page && page.items && page.items.length > 0) {
           categoryArray.push({
             category: item,
-            items: items
+            items: page.items
           })
         }
       }

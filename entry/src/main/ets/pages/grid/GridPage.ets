@@ -15,17 +15,12 @@ struct GridPage {
 
   @StorageProp('currentAvoidArea') currentAvoidArea?: window.AvoidArea = undefined
 
-  aboutToAppear(): void {
-    this.viewModel.loadData()
-  }
-
   @Builder
   mediaListView(info: ESObject, index: number) {
     MediaItem({item: info})
   }
 
   build() {
-
     Column() {
       ToolBar({
         title: this.args.name

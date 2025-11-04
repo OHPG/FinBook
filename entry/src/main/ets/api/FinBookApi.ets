@@ -1,4 +1,4 @@
-import { FinItem } from "@ohpg/fin-core";
+import { FinItem, FinPage } from "@ohpg/fin-core";
 import { FinApi } from "@ohpg/fin-framework";
 
 /**
@@ -26,7 +26,7 @@ export interface FinBookApi extends FinApi {
    * 查询书籍列表
    * @returns
    */
-  getBookList(id: string): Promise<Array<FinItem>>
+  getBookList(id: string, page?: number): Promise<FinPage>
 
   /**
    * 查询书籍信息

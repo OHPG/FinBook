@@ -1,7 +1,7 @@
 import { ActuatorInfo, Auth, AuthType } from "@ohpg/komga";
 import { BookDto, Komga, LibraryDto } from "@ohpg/komga";
 import { FinBookApi } from "../FinBookApi";
-import { ActiveInfo, FinPersonType, ServerType } from "@ohpg/fin-core";
+import { ActiveInfo, FinPage, FinPersonType, ServerType } from "@ohpg/fin-core";
 import { FinItemType } from "@ohpg/fin-core";
 import { FinPublicSystemInfo } from "@ohpg/fin-core";
 import { FinItem, FinAuthResult } from "@ohpg/fin-core";
@@ -154,13 +154,15 @@ export class KomgaFinApi implements FinBookApi {
     return finLibraryArray
   }
 
-  public async getBookList(id: string): Promise<Array<FinItem>> {
+  public async getBookList(id: string, page?: number): Promise<FinPage> {
     let finItems = new Array<FinItem>()
-    let result = await this.komga.getItemsApi().getBooks(id)
+    let result = await this.komga.getItemsApi().getBooks(id, page)
     result.content?.forEach((item) => {
       finItems.push(this.bookToFinItem(item))
     })
-    return finItems
+    let cur: number = result.pageable ? result.pageable.pageNumber : 0
+    let more: boolean = cur < result.totalPages - 1
+    return {items: finItems, cur: cur, more: more }
   }
 
   public async getBook(id: string): Promise<FinItem> {

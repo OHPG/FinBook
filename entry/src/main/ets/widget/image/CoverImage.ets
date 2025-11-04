@@ -1,4 +1,4 @@
-import { HeaderOptions, ImageKnifeComponent } from "@ohos/imageknife"
+import { BlurTransformation, HeaderOptions, ImageKnifeComponent } from "@ohos/imageknife"
 import { FinImage } from "@ohpg/fin-core"
 
 @Reusable
@@ -44,6 +44,7 @@ export struct CoverImage {
         headerOption: this.imageHeaderOptions,
         placeholderSrc: $r("app.media.alt"),
         errorholderSrc: $r("app.media.alt"),
+        transformation: this.imageBlur > 0 ? new BlurTransformation(this.imageBlur) : undefined,
         objectFit: ImageFit.Cover,
         border: {
           radius: this.imageBorderRadius

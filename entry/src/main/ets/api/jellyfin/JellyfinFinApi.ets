@@ -1,4 +1,5 @@
 import { ActiveInfo, FinAuthResult, FinItem, FinItemType,
+  FinPage,
   FinPerson,
   FinPersonType,
   FinPublicSystemInfo, ServerType } from "@ohpg/fin-core";
@@ -148,7 +149,7 @@ export class JellyfinFinApi implements FinBookApi {
     return finLibraryArray
   }
 
-  public async getBookList(id?: string): Promise<Array<FinItem>> {
+  public async getBookList(id: string, page?: number): Promise<FinPage> {
     let finItems = new Array<FinItem>()
     let result = await this.jellyfin.getItemsApi().getItems({
       parentId: id,
@@ -161,7 +162,8 @@ export class JellyfinFinApi implements FinBookApi {
     filterItems?.forEach((item) => {
       finItems.push(this.itemToFinItem(item))
     })
-    return finItems
+    // 暂不处理分页
+    return {items: finItems, cur: 0, more: false}
   }
 
   public async getBook(id: string): Promise<FinItem> {

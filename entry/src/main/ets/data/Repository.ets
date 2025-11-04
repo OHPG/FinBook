@@ -1,5 +1,5 @@
 import { FinBookApi } from "../api/FinBookApi";
-import { FinItem } from "@ohpg/fin-core";
+import { FinItem, FinPage } from "@ohpg/fin-core";
 import { FinRepository } from "@ohpg/fin-framework";
 import { FinBookApiFactory } from "../api/FinBookApiFactory";
 
@@ -28,8 +28,8 @@ export class Repository extends FinRepository {
     return this.requireApi().getLibraryList()
   }
 
-  public getBookList(id: string): Promise<Array<FinItem>> {
-    return this.requireApi().getBookList(id)
+  public getBookList(id: string, page?: number): Promise<FinPage> {
+    return this.requireApi().getBookList(id, page)
   }
 
   public getBook(id: string): Promise<FinItem> {
