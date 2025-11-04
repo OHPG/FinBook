@@ -114,7 +114,7 @@ export class JellyfinFinApi implements FinBookApi {
     this.jellyfin.selectUser({id: activeInfo.userInfo.userId, token: activeInfo.userInfo.accessToken})
   }
 
-  public async getPublicSystemInfo(url: string): Promise<FinPublicSystemInfo> {
+  public async getPublicSystemInfo(url: string, name?: string): Promise<FinPublicSystemInfo> {
     this.jellyfin.selectServer({address: url})
     let info = await this.jellyfin.getSystemApi().getPublicSystemInfo()
     return {Id: info.Id, ServerName: info.ServerName, Version: info.Version, StartupWizardCompleted: info.StartupWizardCompleted}

@@ -1,4 +1,4 @@
-import { ActuatorInfo, Auth, AuthType } from "@ohpg/komga";
+import { ActuatorInfo, Auth, AuthType, UserDto } from "@ohpg/komga";
 import { BookDto, Komga, LibraryDto } from "@ohpg/komga";
 import { FinBookApi } from "../FinBookApi";
 import { ActiveInfo, FinPage, FinPersonType, MD5, ServerType } from "@ohpg/fin-core";
@@ -77,46 +77,34 @@ export class KomgaFinApi implements FinBookApi {
     }
   }
 
-  public async getPublicSystemInfo(url: string, name?: string, psw?: string): Promise<FinPublicSystemInfo> {
-    let auth = this.generateAuth(name, psw)
-    this.komgaTmp.selectServer({address: url})
-    this.komgaTmp.selectUser({token: auth})
-    let info = await this.komgaTmp.getSystemApi().getActuatorInfo()
-    let id = this.generateServerId(info)
-    return {Id: id, ServerName: info.build.name, Version: info.build.version, StartupWizardCompleted: true}
+  public async getPublicSystemInfo(url: string, name?: string): Promise<FinPublicSystemInfo> {
+    if (!name || name.length <= 0) {
+      throw new Error("Server name is empty.")
+    }
+    return {Id: MD5.digestSync(name), ServerName: name, StartupWizardCompleted: true}
   }
 
   public async getSystemInfo(url?: string): Promise<FinPublicSystemInfo> {
-    let info: ActuatorInfo
+    // 非管理员，无权限获取系统信息
+    // 用获取用户信息来代替获取系统信息
     if (url) {
       this.komgaTmp.selectServer({address: url})
       this.komgaTmp.selectUser({id: this.activeInfo!.userInfo.userId, token: this.activeInfo!.userInfo.accessToken})
-      info = await this.komgaTmp.getSystemApi().getActuatorInfo()
-    } else {
-      info = await this.komga.getSystemApi().getActuatorInfo()
+      await this.komgaTmp.getUserApi().getCurrentUser()
     }
-    let serverId = this.generateServerId(info)
-    return {Id: serverId, ServerName: info.build.name, Version: info.build.version}
+    return {Id: this.activeInfo!.serverInfo.serverId, ServerName: this.activeInfo!.serverInfo.serverName}
   }
 
   public async authenticateUserByName(name: string, psw?: string): Promise<FinAuthResult> {
-    try {
-      let auth = this.generateAuth(name, psw)
-      this.komga.selectUser({token: auth})
-      let serverInfo = await this.getSystemInfo()
-      let authResult = await this.komga.getUserApi().getCurrentUser()
-      return { ServerId: serverInfo.Id
-      , UserName: authResult.email
-      , UserId: authResult.id
-      , AccessToken: auth}
-    } catch (e) {
-      throw e as Error
-    } finally {
-      // 还原当前用户token
-      if (this.activeInfo) {
-        this.komga.selectUser({id: this.activeInfo.userInfo.userId, token: this.activeInfo.userInfo.accessToken})
-      }
-    }
+    let auth = this.generateAuth(name, psw)
+    this.komgaTmp.selectServer({address: this.activeInfo!.addressInfo.address})
+    this.komgaTmp.selectUser({token: auth})
+    let serverInfo = await this.getSystemInfo()
+    let authResult = await this.komga.getUserApi().getCurrentUser()
+    return { ServerId: serverInfo.Id
+    , UserName: authResult.email
+    , UserId: authResult.id
+    , AccessToken: auth}
   }
 
   private buildBookImage(dto: BookDto): string {
