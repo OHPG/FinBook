@@ -31,10 +31,6 @@ export class JellyfinFinApi implements FinBookApi {
    */
   private jellyfin: Jellyfin
 
-  private bookLibraryArray?: Array<BaseItemDto>
-
-  private bookLibrary?: BaseItemDto
-
   constructor(context: Context, clientInfo: ClientInfo, deviceInfo: DeviceInfo) {
     this.context = context
     this.jellyfin = new Jellyfin(clientInfo, deviceInfo)
@@ -109,12 +105,10 @@ export class JellyfinFinApi implements FinBookApi {
 
   updateAddress(address: string): void {
     this.jellyfin.selectServer({address: address})
-    this.bookLibrary = undefined
   }
 
   updateActiveInfo(activeInfo: ActiveInfo): void {
     this.activeInfo = activeInfo
-    this.bookLibrary = undefined
     this.jellyfin.selectServer({address: activeInfo.addressInfo.address})
     this.jellyfin.selectUser({id: activeInfo.userInfo.userId, token: activeInfo.userInfo.accessToken})
   }
@@ -141,26 +135,23 @@ export class JellyfinFinApi implements FinBookApi {
     , AccessToken: authResult.AccessToken}
   }
 
-  private async assertCurrentBookLibrary(): Promise<BaseItemDto> {
-    if (!this.bookLibrary) {
-      let result = await this.jellyfin.getUserViewsApi().getUserViews({
-        userId: this.activeInfo!.userInfo.userId,
-        presetViews: [CollectionType.Books]
-      })
-      this.bookLibraryArray = result.Items?.filter((item) => item.CollectionType === CollectionType.Books)
-      this.bookLibrary = this.bookLibraryArray?.[0]
-    }
-    if (!this.bookLibrary) {
-      throw new Error("No book library found.")
-    }
-    return this.bookLibrary
+  public async getLibraryList(): Promise<Array<FinItem>> {
+    let result = await this.jellyfin.getUserViewsApi().getUserViews({
+      userId: this.activeInfo!.userInfo.userId,
+      presetViews: [CollectionType.Books]
+    })
+    let libraryArray = result.Items?.filter((item) => item.CollectionType === CollectionType.Books)
+    let finLibraryArray = new Array<FinItem>()
+    libraryArray?.forEach((item) => {
+      finLibraryArray.push(this.itemToFinItem(item))
+    })
+    return finLibraryArray
   }
 
   public async getBookList(id?: string): Promise<Array<FinItem>> {
-    let library = await this.assertCurrentBookLibrary()
     let finItems = new Array<FinItem>()
     let result = await this.jellyfin.getItemsApi().getItems({
-      parentId: id ? id : library.Id,
+      parentId: id,
       includeItemTypes: [BaseItemKind.Book, BaseItemKind.Folder],
       recursive: false,
       sortBy: [ItemSortBy.Name],

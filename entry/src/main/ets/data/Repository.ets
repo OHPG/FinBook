@@ -24,7 +24,11 @@ export class Repository extends FinRepository {
     return this.requireApi().getAuth()
   }
 
-  public getBookList(id?: string): Promise<Array<FinItem>> {
+  public getLibraryList():Promise<Array<FinItem>> {
+    return this.requireApi().getLibraryList()
+  }
+
+  public getBookList(id: string): Promise<Array<FinItem>> {
     return this.requireApi().getBookList(id)
   }
 

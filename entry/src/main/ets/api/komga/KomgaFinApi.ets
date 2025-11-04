@@ -30,10 +30,6 @@ export class KomgaFinApi implements FinBookApi {
 
   private komgaTmp: Komga
 
-  private bookLibraryArray?: Array<LibraryDto>
-
-  private bookLibrary?: LibraryDto
-
   constructor(context: Context, clientInfo: ClientInfo, deviceInfo: DeviceInfo) {
     this.context = context
     this.komga = new Komga(clientInfo, deviceInfo)
@@ -102,25 +98,23 @@ export class KomgaFinApi implements FinBookApi {
     , AccessToken: auth}
   }
 
-  private async assertCurrentBookLibrary(): Promise<LibraryDto> {
-    if (!this.bookLibrary) {
-      let result = await this.komga.getLibraryApi().getLibraries()
-      this.bookLibraryArray = result
-      this.bookLibrary = this.bookLibraryArray?.[0]
-    }
-    if (!this.bookLibrary) {
-      throw new Error("No book library found.")
-    }
-    return this.bookLibrary
-  }
-
-  private buildImage(dto: BookDto): string {
+  private buildBookImage(dto: BookDto): string {
     let imageUri = new uri.URI(this.activeInfo!.addressInfo.address)
     imageUri = imageUri.addEncodedSegment(`api/v1/books/${dto.id!}/thumbnail`)
     return imageUri.toString()
   }
 
-  private itemToFinItem(book: BookDto): FinItem {
+  private libraryToFinItem(library: LibraryDto): FinItem {
+    let item: FinItem = {
+      id: library.id,
+      name: library.name,
+      type: FinItemType.Folder,
+      path: library.root
+    }
+    return item
+  }
+
+  private bookToFinItem(book: BookDto): FinItem {
     let item: FinItem = {
       id: book.id,
       name: book.name,
@@ -130,7 +124,7 @@ export class KomgaFinApi implements FinBookApi {
       path: book.url,
       person: [],
       image: {
-        primary: this.buildImage(book),
+        primary: this.buildBookImage(book),
         header: this.komgaHeader
       }
     }
@@ -151,19 +145,27 @@ export class KomgaFinApi implements FinBookApi {
     return item
   }
 
-  public async getBookList(id?: string): Promise<Array<FinItem>> {
-    await this.assertCurrentBookLibrary()
+  public async getLibraryList(): Promise<Array<FinItem>> {
+    let result = await this.komga.getLibraryApi().getLibraries()
+    let finLibraryArray = new Array<FinItem>()
+    result?.forEach((item) => {
+      finLibraryArray.push(this.libraryToFinItem(item))
+    })
+    return finLibraryArray
+  }
+
+  public async getBookList(id: string): Promise<Array<FinItem>> {
     let finItems = new Array<FinItem>()
-    let result = await this.komga.getItemsApi().getBooks(this.bookLibrary?.id!)
+    let result = await this.komga.getItemsApi().getBooks(id)
     result.content?.forEach((item) => {
-      finItems.push(this.itemToFinItem(item))
+      finItems.push(this.bookToFinItem(item))
     })
     return finItems
   }
 
   public async getBook(id: string): Promise<FinItem> {
     let item = await  this.komga.getItemsApi().getBook(id)
-    return this.itemToFinItem(item)
+    return this.bookToFinItem(item)
   }
 
   public async getBookUrl(id: string): Promise<string> {

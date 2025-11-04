@@ -17,10 +17,16 @@ export interface FinBookApi extends FinApi {
   getAuth(): string
 
   /**
+   * 查询媒体库列表
+   * @returns
+   */
+  getLibraryList(): Promise<Array<FinItem>>
+
+  /**
    * 查询书籍列表
    * @returns
    */
-  getBookList(id?: string): Promise<Array<FinItem>>
+  getBookList(id: string): Promise<Array<FinItem>>
 
   /**
    * 查询书籍信息

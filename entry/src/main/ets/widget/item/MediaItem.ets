@@ -10,6 +10,8 @@ export struct MediaItem {
 
   @Require @State item?: FinItem = undefined
 
+  @State itemWidth: string | number = CommonConstants.FULL_PERCENT
+
   aboutToReuse(params: Record<string, object>): void {
     this.item = params['item'] as FinItem
   }
@@ -24,6 +26,7 @@ export struct MediaItem {
         .width('100%')
         .maxLines(1)
     }
+    .width(this.itemWidth)
     .onClick(() => {
       let args: MediaArgs = {
         id: this.item?.id!,

@@ -1,4 +1,5 @@
 import { LoadType } from "@ohpg/fin-core";
+import { CategoryInfo } from "../../entity/CategoryInfo";
 import { ListViewModel } from "../../lifecycle/ListViewModel";
 
 /**
@@ -11,13 +12,24 @@ import { ListViewModel } from "../../lifecycle/ListViewModel";
 export class HomeViewModel extends ListViewModel {
 
   /**
-   * TODO 分页
    * @param type
    * @returns
    */
   async loadData(type?: LoadType): Promise<void> {
-    let books = await this.repository.getBookList()
-    this.dataSource.initData(books)
+    let categoryArray = new Array<CategoryInfo>()
+    let normalItems = await this.repository.getLibraryList()
+    if (normalItems) {
+      for (let item of normalItems) {
+        let items = await this.repository.getBookList(item.id)
+        if (items && items.length > 0) {
+          categoryArray.push({
+            category: item,
+            items: items
+          })
+        }
+      }
+    }
+    this.dataSource.initData(categoryArray)
   }
 
 }

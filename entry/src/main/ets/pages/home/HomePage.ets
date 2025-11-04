@@ -1,8 +1,8 @@
 import { window } from '@kit.ArkUI'
-import { GridRefreshView } from '@ohpg/fin-framework'
+import { ListRefreshView } from '@ohpg/fin-framework'
 import { CommonConstants } from '../../common/CommonConstants'
 import { HomeToolBar } from '../../widget/bar/HomeToolBar'
-import { MediaItem } from '../../widget/item/MediaItem'
+import { MediaGroup } from '../../widget/item/MediaGroup'
 import { HomeViewModel } from './HomeViewModel'
 
 @Entry
@@ -11,11 +11,11 @@ struct HomePage {
 
   private viewModel = new HomeViewModel(getContext())
 
-  @StorageProp('currentAvoidArea') currentAvoidArea?: window.AvoidArea = undefined
+  @StorageProp('currentAvoidArea') avoidArea?: window.AvoidArea = undefined
 
   @Builder
-  mediaListView(info: ESObject, index: number) {
-    MediaItem({item: info})
+  mediaCategory(info: ESObject, index: number) {
+    MediaGroup({item: info})
   }
 
   build() {
@@ -25,26 +25,22 @@ struct HomePage {
         title: $r('app.string.app_name')
       })
 
-      GridRefreshView({
+      ListRefreshView({
         source: this.viewModel,
-        gridAttribute: (attr) => {
-          attr.padding = {
-            left: CommonConstants.SPACE_16,
-            right: CommonConstants.SPACE_16,
-            bottom: px2vp(this.currentAvoidArea?.bottomRect.height)
+        itemLayout: this.mediaCategory,
+        listAttribute: (attr) => {
+          attr.divider = {
+            color: Color.Transparent,
+            strokeWidth: CommonConstants.SPACE_12
           }
-          attr.rowsGap = CommonConstants.SPACE_12
-          attr.columnsGap = CommonConstants.SPACE_12
-          attr.columnsTemplate = ('repeat(auto-fit, 140)')
           attr.width = CommonConstants.FULL_PERCENT
           attr.height = CommonConstants.FULL_PERCENT
+          attr.contentEndOffset = px2vp(this.avoidArea?.bottomRect.height)
         },
-        itemLayout: this.mediaListView
       })
         .width(CommonConstants.FULL_PERCENT)
         .layoutWeight(1)
     }
-
   }
 
 }
