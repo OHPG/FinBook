@@ -56,14 +56,17 @@ export struct XReaderView {
     this.registerScreenDensityChange()
     AppStorage.setOrCreate('bookCtrl', this.bookCtrl)
     this.bookCtrl.on('pageShow', (info) => {
-      this.readProgress = info.resourceIndex
-      this.bookState = info.state
       if (info.state === readerCore.PageState.PAGE_ON_SHOW) {
         if (this.bookSpine?.index !== info.resourceIndex) {
           let spineList = this.bookHandler?.getSpineList()
           this.bookSpine = spineList?.find((spine) => spine.index === info.resourceIndex)
+          // if (this.bookSpine) {
+          //   AppStorage.setOrCreate("boo_href", this.bookSpine.href)
+          // }
         }
       }
+      this.readProgress = info.resourceIndex
+      this.bookState = info.state
     })
     this.parseBook()
       .then(() => {

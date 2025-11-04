@@ -30,6 +30,8 @@ export class KomgaFinApi implements FinBookApi {
 
   private komgaTmp: Komga
 
+  private readingBook?: BookDto
+
   constructor(context: Context, clientInfo: ClientInfo, deviceInfo: DeviceInfo) {
     this.context = context
     this.komga = new Komga(clientInfo, deviceInfo)
@@ -98,14 +100,23 @@ export class KomgaFinApi implements FinBookApi {
   }
 
   public async authenticateUserByName(name: string, psw?: string): Promise<FinAuthResult> {
-    let auth = this.generateAuth(name, psw)
-    this.komga.selectUser({token: auth})
-    let serverInfo = await this.getSystemInfo()
-    let authResult = await this.komga.getUserApi().getCurrentUser()
-    return { ServerId: serverInfo.Id
-    , UserName: authResult.email
-    , UserId: authResult.id
-    , AccessToken: auth}
+    try {
+      let auth = this.generateAuth(name, psw)
+      this.komga.selectUser({token: auth})
+      let serverInfo = await this.getSystemInfo()
+      let authResult = await this.komga.getUserApi().getCurrentUser()
+      return { ServerId: serverInfo.Id
+      , UserName: authResult.email
+      , UserId: authResult.id
+      , AccessToken: auth}
+    } catch (e) {
+      throw e as Error
+    } finally {
+      // 还原当前用户token
+      if (this.activeInfo) {
+        this.komga.selectUser({id: this.activeInfo.userInfo.userId, token: this.activeInfo.userInfo.accessToken})
+      }
+    }
   }
 
   private buildBookImage(dto: BookDto): string {
@@ -146,11 +157,15 @@ export class KomgaFinApi implements FinBookApi {
         type: FinPersonType.Author
       })
     })
-    if (book.readProgress) {
-      item.data = {
-        playedPositionTicks: book.readProgress.page,
-        played: book.readProgress.completed
+    if (book?.media?.mediaProfile === "PDF") {
+      if (book.readProgress) {
+        item.data = {
+          playedPositionTicks: book.readProgress.page,
+          played: book.readProgress.completed
+        }
       }
+    } else {
+      // Epub not support
     }
     return item
   }
@@ -185,7 +200,7 @@ export class KomgaFinApi implements FinBookApi {
   }
 
   public async getBook(id: string): Promise<FinItem> {
-    let item = await  this.komga.getItemsApi().getBook(id)
+    let item = await this.komga.getItemsApi().getBook(id)
     return this.bookToFinItem(item)
   }
 
@@ -213,15 +228,27 @@ export class KomgaFinApi implements FinBookApi {
   }
 
   async onPlaybackStart(id: string): Promise<void> {
-    // ignore
+    this.readingBook = await this.komga.getItemsApi().getBook(id)
   }
 
   async onPlaybackProgress(id: string, position: number, playing: boolean): Promise<void> {
-    await this.komga.getItemsApi().markBookProgression(id, position)
+    let mediaProfile = this.readingBook?.media?.mediaProfile
+    if (mediaProfile === "PDF") {
+      await this.komga.getItemsApi().markBookReadProgress(id, position)
+    } else if (mediaProfile === "EPUB") {
+      // let href = AppStorage.get<string>("boo_href")
+      // if (href) {
+      //   await this.komga.getItemsApi().markBookProgression(id, href, position)
+      // } else {
+      //   // ignore
+      // }
+    } else {
+      // not support.
+    }
   }
 
   async onPlaybackStopped(id: string, position: number): Promise<void> {
-    // ignore
+    this.readingBook = undefined
   }
 
   public async release(): Promise<void> {
