@@ -1,7 +1,7 @@
 import { ActuatorInfo, Auth, AuthType } from "@ohpg/komga";
 import { BookDto, Komga, LibraryDto } from "@ohpg/komga";
 import { FinBookApi } from "../FinBookApi";
-import { ActiveInfo, FinPage, FinPersonType, ServerType } from "@ohpg/fin-core";
+import { ActiveInfo, FinPage, FinPersonType, MD5, ServerType } from "@ohpg/fin-core";
 import { FinItemType } from "@ohpg/fin-core";
 import { FinPublicSystemInfo } from "@ohpg/fin-core";
 import { FinItem, FinAuthResult } from "@ohpg/fin-core";
@@ -44,6 +44,16 @@ export class KomgaFinApi implements FinBookApi {
     return auth.auth
   }
 
+  /**
+   * 通过服务器信息生成server id
+   * @param info
+   * @returns
+   */
+  private generateServerId(info: ActuatorInfo): string {
+    let serverId = info.os.name + "-" + info.os.arch
+    return MD5.digestSync(serverId)
+  }
+
   getApiType(): ServerType {
     return ServerType.KOMGA
   }
@@ -70,8 +80,8 @@ export class KomgaFinApi implements FinBookApi {
     this.komgaTmp.selectServer({address: url})
     this.komgaTmp.selectUser({token: auth})
     let info = await this.komgaTmp.getSystemApi().getActuatorInfo()
-    let serverId = info.os.name + "-" + info.os.arch
-    return {Id: serverId, ServerName: info.build.name, Version: info.build.version, StartupWizardCompleted: true}
+    let id = this.generateServerId(info)
+    return {Id: id, ServerName: info.build.name, Version: info.build.version, StartupWizardCompleted: true}
   }
 
   public async getSystemInfo(url?: string): Promise<FinPublicSystemInfo> {
@@ -83,7 +93,7 @@ export class KomgaFinApi implements FinBookApi {
     } else {
       info = await this.komga.getSystemApi().getActuatorInfo()
     }
-    let serverId = info.os.name + "-" + info.os.arch
+    let serverId = this.generateServerId(info)
     return {Id: serverId, ServerName: info.build.name, Version: info.build.version}
   }
 
