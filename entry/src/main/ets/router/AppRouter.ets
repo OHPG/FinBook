@@ -1,4 +1,5 @@
 import { MediaArgs } from "../pages/detail/MediaArgs";
+import { SearchArgs } from "../pages/search/SearchArgs";
 
 /**
  * @Author peerless2012
@@ -21,8 +22,16 @@ export class AppRouter {
     context.getRouter().pushUrl({url: 'pages/detail/DetailPage', params: args})
   }
 
+  public static goToSearch(context: UIContext, args: SearchArgs) {
+    context.getRouter().pushUrl({url: 'pages/search/SearchPage', params: args})
+  }
+
   public static goToReader(context: UIContext, args: MediaArgs) {
     context.getRouter().pushUrl({url: "pages/read/ReaderPage", params: args})
+  }
+
+  public static goToAbout(context: UIContext) {
+    context.getRouter().pushUrl({url: "pages/about/AboutPage"})
   }
 
 }

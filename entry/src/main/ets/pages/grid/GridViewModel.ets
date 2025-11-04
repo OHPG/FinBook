@@ -29,7 +29,6 @@ export class GridViewModel extends ListViewModel {
    * @returns
    */
   async loadData(type?: LoadType): Promise<void> {
-    let index = 0
     if (type !== "More") {
       this.lastPage = undefined
     }
@@ -41,7 +40,6 @@ export class GridViewModel extends ListViewModel {
       this.dataSource.initData(page.items)
     }
     this.lastPage = page
-    console.log("xxx: cur =" + page.cur + ", more = " + page.more)
   }
 
 }

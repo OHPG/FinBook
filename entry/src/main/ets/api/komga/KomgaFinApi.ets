@@ -164,6 +164,15 @@ export class KomgaFinApi implements FinBookApi {
     return finLibraryArray
   }
 
+  public async search(keyword: string): Promise<FinPage> {
+    let finItems = new Array<FinItem>()
+    let result = await this.komga.getItemsApi().search(keyword)
+    result.content?.forEach((item) => {
+      finItems.push(this.bookToFinItem(item))
+    })
+    return {items: finItems, cur: 0, more: false }
+  }
+
   public async getBookList(id: string, page?: number): Promise<FinPage> {
     let finItems = new Array<FinItem>()
     let result = await this.komga.getItemsApi().getBooks(id, page)

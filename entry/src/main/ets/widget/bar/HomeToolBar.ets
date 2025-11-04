@@ -1,5 +1,7 @@
+import { window } from "@kit.ArkUI"
 import { CommonConstants } from "../../common/CommonConstants"
-import { router, window } from "@kit.ArkUI"
+import { SearchArgs } from "../../pages/search/SearchArgs"
+import { AppRouter } from "../../router/AppRouter"
 
 @Component
 export struct HomeToolBar {
@@ -23,24 +25,27 @@ export struct HomeToolBar {
           .fontFamily(CommonConstants.HARMONY_HEITI_BOLD_FONT_FAMILY)
           .margin({ right: $r('app.float.sm_padding_margin') })
 
-        // Search({ placeholder: $r('app.string.search') })
-        //   .focusable(false)
-        //   .fontColor($r('sys.color.ohos_id_color_text_primary'))
-        //   .textFont({ size: $r('app.float.large_text_size') })
-        //   .width($r('app.float.search_width'))
-        //   .height($r('app.float.search_height'))
-        //   .onClick(() => {
-        //     this.getUIContext().getRouter().pushUrl({
-        //       url: "pages/search/SearchPage"
-        //     })
-        //   })
+        Row({space: CommonConstants.SPACE_8}) {
+          Search({ placeholder: $r('app.string.search_title') })
+            .fontColor($r('sys.color.ohos_id_color_text_primary'))
+            .textFont({ size: $r('app.float.large_text_size') })
+            .width($r('app.float.search_width'))
+            .height($r('app.float.search_height'))
+            .onSubmit((word: string) => {
+              this.getUIContext().getFocusController().clearFocus()
+              let searchArgs: SearchArgs = {
+                word: word
+              }
+              AppRouter.goToSearch(this.getUIContext(), searchArgs)
+            })
 
-        SymbolGlyph($r('sys.symbol.more'))
-          .fontSize($r('app.float.header_font_size'))
-          .fontColor([$r('sys.color.ohos_id_color_text_primary')])
-          .onClick(() => {
-            router.pushUrl({url: "pages/about/AboutPage"})
-          })
+          SymbolGlyph($r('sys.symbol.gearshape_fill'))
+            .fontSize($r('app.float.header_font_size'))
+            .fontColor([$r('sys.color.ohos_id_color_text_primary')])
+            .onClick(() => {
+              AppRouter.goToAbout(this.getUIContext())
+            })
+        }
       }
       .padding({
         left: $r('app.float.xxl_padding_margin'),
