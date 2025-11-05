@@ -197,8 +197,8 @@ export class KomgaFinApi implements FinBookApi {
 
   public async getBook(id: string): Promise<FinItem> {
     let item = await this.komga.getItemsApi().getBook(id)
-    let progress = await this.komga.getItemsApi().getBookProgression(id)
-    console.log("xxx: id = " + id + ", progress = " + JSON.stringify(progress))
+    // let progress = await this.komga.getItemsApi().getBookProgression(id)
+    // console.log("xxx: id = " + id + ", progress = " + JSON.stringify(progress))
     return this.bookToFinItem(item)
   }
 
@@ -235,18 +235,18 @@ export class KomgaFinApi implements FinBookApi {
       if (mediaProfile === "PDF") {
         await this.komga.getItemsApi().markBookReadProgress(id, position)
       } else if (mediaProfile === "EPUB") {
-        let href = AppStorage.get<string>("boo_href")
-        if (href) {
-          await this.komga.getItemsApi().markBookProgression(id, href, position)
-          console.log("xxx: id = " + id + ", set page = " + position + ", href = " + href)
-        } else {
-          // ignore
-        }
+        // let href = AppStorage.get<string>("boo_href")
+        // if (href) {
+        //   await this.komga.getItemsApi().markBookProgression(id, href, position)
+        //   console.log("xxx: id = " + id + ", set page = " + position + ", href = " + href)
+        // } else {
+        //   // ignore
+        // }
       } else {
         // not support.
       }
     } catch (e) {
-      console.error("xxx: id = " + id + ", set page = " + position + ", error = " + JSON.stringify(e))
+      // console.error("xxx: id = " + id + ", set page = " + position + ", error = " + JSON.stringify(e))
     }
   }
 

@@ -31,4 +31,11 @@ export class FileUtil {
     }
   }
 
+  public static async mkdir(dir: string): Promise<void> {
+    let exist = await fs.access(dir, fs.AccessModeType.EXIST)
+    if (!exist) {
+      await fs.mkdir(dir)
+    }
+  }
+
 }

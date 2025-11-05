@@ -2,9 +2,9 @@ import { LoadType } from "@ohpg/fin-core";
 import { SimpleRepository } from "@ohpg/fin-framework";
 import { AppViewModel } from "../../lifecycle/AppViewModel";
 import { MediaArgs } from "../detail/MediaArgs";
-import { request } from "@kit.BasicServicesKit";
 import { FileUtil } from "../../util/FileUtil";
 import { FinBookRawSource } from "../../entity/FinBookRawSource";
+import { AppDownload } from "../../down/AppDownload";
 import fs from '@ohos.file.fs';
 
 /**
@@ -18,11 +18,12 @@ export class ReaderViewModel extends AppViewModel implements SimpleRepository {
 
   private readonly args: MediaArgs
 
-  private downloadTask?: request.agent.Task
+  private readonly down: AppDownload
 
   constructor(context: Context, args: MediaArgs) {
     super(context)
     this.args = args
+    this.down = new AppDownload(context)
   }
 
   async loadData(type: LoadType): Promise<FinBookRawSource> {
@@ -36,11 +37,12 @@ export class ReaderViewModel extends AppViewModel implements SimpleRepository {
         suffix = item.path.substring(index)
       }
     }
-    let filePath = this.context.filesDir + "/" + activeInfo.serverInfo.serverId + "/" + item.id + suffix;
+    let dirPath = this.context.filesDir + "/" + activeInfo.serverInfo.serverId
+    await FileUtil.mkdir(dirPath)
+    let filePath = dirPath + "/" + item.id + suffix;
     let exists = await fs.access(filePath, fs.AccessModeType.EXIST)
     if (!exists) {
-      // download
-      filePath = await this.download(url, filePath)
+      filePath = await this.down.download(url, filePath, this.repository.getAuth())
     }
     let pdf = await FileUtil.isPdf(filePath)
     
@@ -53,47 +55,6 @@ export class ReaderViewModel extends AppViewModel implements SimpleRepository {
     }
     
     return {id: item.id, name: item.name, progress: progress, path: filePath, pdf: pdf}
-  }
-
-  private async download(url: string, path: string): Promise<string> {
-    if (this.downloadTask) {
-      await this.downloadTask.stop()
-    }
-    let tmpPath = path + ".tmp"
-    let tmpExists = await fs.access(tmpPath, fs.AccessModeType.EXIST)
-    if (tmpExists) {
-      console.log("FinBook download clear tmp.")
-      await fs.unlink(tmpPath)
-    }
-    this.downloadTask = await request.agent.create(this.context, {
-      action: request.agent.Action.DOWNLOAD,
-      url: url,
-      mode: request.agent.Mode.FOREGROUND,
-      headers: {
-        "Accept": "*/*",
-        "Accept-Encoding": "gzip, deflate",
-        "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Authorization": this.repository.getAuth()
-      },
-      overwrite: true,
-      saveas: tmpPath
-    })
-    let promise = new Promise<string>((resolve, reject) => {
-      this.downloadTask?.on('response', (response) => {
-        console.log("FinBook download response: " + JSON.stringify(response))
-      })
-      this.downloadTask!.on('completed', () => {
-        console.log("FinBook download complete.")
-        fs.renameSync(tmpPath, path)
-        resolve(path)
-      })
-      this.downloadTask!.on('failed', (progress) => {
-        console.log("FinBook download error: " + JSON.stringify(progress))
-        reject(new Error("Download fail " + progress.state))
-      })
-    })
-    this.downloadTask.start()
-    return promise
   }
 
   public startRead(): Promise<void> {
