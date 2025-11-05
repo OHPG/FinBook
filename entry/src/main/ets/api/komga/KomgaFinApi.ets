@@ -81,6 +81,7 @@ export class KomgaFinApi implements FinBookApi {
     if (!name || name.length <= 0) {
       throw new Error("Server name is empty.")
     }
+    this.komgaTmp.selectServer({address: url})
     return {Id: MD5.digestSync(name), ServerName: name, StartupWizardCompleted: true}
   }
 
@@ -89,20 +90,27 @@ export class KomgaFinApi implements FinBookApi {
     // 用获取用户信息来代替获取系统信息
     if (url) {
       this.komgaTmp.selectServer({address: url})
-      this.komgaTmp.selectUser({id: this.activeInfo!.userInfo.userId, token: this.activeInfo!.userInfo.accessToken})
-      await this.komgaTmp.getUserApi().getCurrentUser()
+    } else {
+      this.komgaTmp.selectServer({address: this.activeInfo!.addressInfo.address})
     }
+    this.komgaTmp.selectUser({id: this.activeInfo!.userInfo.userId, token: this.activeInfo!.userInfo.accessToken})
+    await this.komgaTmp.getUserApi().getCurrentUser()
     return {Id: this.activeInfo!.serverInfo.serverId, ServerName: this.activeInfo!.serverInfo.serverName}
   }
 
-  public async authenticateUserByName(name: string, psw?: string): Promise<FinAuthResult> {
+  public async auth(name: string, psw?: string, url?: string): Promise<FinAuthResult> {
+    if (!psw || psw.length <= 0) {
+      throw new Error("Password can't be empty.")
+    }
+    if (url) {
+      this.komgaTmp.selectServer({address: url})
+    } else {
+      this.komgaTmp.selectServer({address: this.activeInfo!.addressInfo.address})
+    }
     let auth = this.generateAuth(name, psw)
-    this.komgaTmp.selectServer({address: this.activeInfo!.addressInfo.address})
     this.komgaTmp.selectUser({token: auth})
-    let serverInfo = await this.getSystemInfo()
-    let authResult = await this.komga.getUserApi().getCurrentUser()
-    return { ServerId: serverInfo.Id
-    , UserName: authResult.email
+    let authResult = await this.komgaTmp.getUserApi().getCurrentUser()
+    return { UserName: authResult.email
     , UserId: authResult.id
     , AccessToken: auth}
   }
@@ -189,6 +197,8 @@ export class KomgaFinApi implements FinBookApi {
 
   public async getBook(id: string): Promise<FinItem> {
     let item = await this.komga.getItemsApi().getBook(id)
+    let progress = await this.komga.getItemsApi().getBookProgression(id)
+    console.log("xxx: id = " + id + ", progress = " + JSON.stringify(progress))
     return this.bookToFinItem(item)
   }
 
@@ -220,18 +230,23 @@ export class KomgaFinApi implements FinBookApi {
   }
 
   async onPlaybackProgress(id: string, position: number, playing: boolean): Promise<void> {
-    let mediaProfile = this.readingBook?.media?.mediaProfile
-    if (mediaProfile === "PDF") {
-      await this.komga.getItemsApi().markBookReadProgress(id, position)
-    } else if (mediaProfile === "EPUB") {
-      // let href = AppStorage.get<string>("boo_href")
-      // if (href) {
-      //   await this.komga.getItemsApi().markBookProgression(id, href, position)
-      // } else {
-      //   // ignore
-      // }
-    } else {
-      // not support.
+    try {
+      let mediaProfile = this.readingBook?.media?.mediaProfile
+      if (mediaProfile === "PDF") {
+        await this.komga.getItemsApi().markBookReadProgress(id, position)
+      } else if (mediaProfile === "EPUB") {
+        let href = AppStorage.get<string>("boo_href")
+        if (href) {
+          await this.komga.getItemsApi().markBookProgression(id, href, position)
+          console.log("xxx: id = " + id + ", set page = " + position + ", href = " + href)
+        } else {
+          // ignore
+        }
+      } else {
+        // not support.
+      }
+    } catch (e) {
+      console.error("xxx: id = " + id + ", set page = " + position + ", error = " + JSON.stringify(e))
     }
   }
 

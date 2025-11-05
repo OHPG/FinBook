@@ -32,9 +32,12 @@ export class JellyfinFinApi implements FinBookApi {
    */
   private jellyfin: Jellyfin
 
+  private jellyfinTmp: Jellyfin
+
   constructor(context: Context, clientInfo: ClientInfo, deviceInfo: DeviceInfo) {
     this.context = context
     this.jellyfin = new Jellyfin(clientInfo, deviceInfo)
+    this.jellyfinTmp = new Jellyfin(clientInfo, deviceInfo)
   }
 
   private buildImage(dto: BaseItemDto, type: ImageType): string {
@@ -115,23 +118,30 @@ export class JellyfinFinApi implements FinBookApi {
   }
 
   public async getPublicSystemInfo(url: string, name?: string): Promise<FinPublicSystemInfo> {
-    this.jellyfin.selectServer({address: url})
-    let info = await this.jellyfin.getSystemApi().getPublicSystemInfo()
+    this.jellyfinTmp.selectServer({address: url})
+    let info = await this.jellyfinTmp.getSystemApi().getPublicSystemInfo()
     return {Id: info.Id, ServerName: info.ServerName, Version: info.Version, StartupWizardCompleted: info.StartupWizardCompleted}
   }
 
   public async getSystemInfo(url?: string): Promise<FinPublicSystemInfo> {
     if (url) {
-      this.jellyfin.selectServer({address: url})
+      this.jellyfinTmp.selectServer({address: url})
+    } else {
+      this.jellyfinTmp.selectServer({address: this.activeInfo!.addressInfo.address})
     }
-    let info = await this.jellyfin.getSystemApi().getSystemInfo()
+    this.jellyfinTmp.selectUser({id: this.activeInfo!.userInfo.userId, token: this.activeInfo!.userInfo.accessToken})
+    let info = await this.jellyfinTmp.getSystemApi().getSystemInfo()
     return {Id: info.Id, ServerName: info.ServerName, Version: info.Version, StartupWizardCompleted: info.StartupWizardCompleted}
   }
 
-  public async authenticateUserByName(name: string, psw?: string | undefined): Promise<FinAuthResult> {
-    let authResult = await this.jellyfin.getUserApi().authenticateUserByName({Username: name, Pw: psw})
-    return { ServerId: authResult.ServerId
-    , UserName: authResult.User?.Name
+  public async auth(name: string, psw?: string | undefined, url?: string): Promise<FinAuthResult> {
+    if (url) {
+      this.jellyfinTmp.selectServer({address: url})
+    } else {
+      this.jellyfinTmp.selectServer({address: this.activeInfo!.addressInfo.address})
+    }
+    let authResult = await this.jellyfinTmp.getUserApi().authenticateUserByName({Username: name, Pw: psw})
+    return { UserName: authResult.User?.Name
     , UserId: authResult.User?.Id
     , AccessToken: authResult.AccessToken}
   }
