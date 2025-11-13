@@ -1,4 +1,4 @@
-import { ImageLruCache } from "@ohpg/fin-core";
+import { RefLruCache } from "@ohpg/fin-core";
 import { AbilityConstant } from "@kit.AbilityKit";
 
 /**
@@ -8,7 +8,7 @@ import { AbilityConstant } from "@kit.AbilityKit";
  * @Version V1.0
  * @Description: 
  */
-export class PdfCache extends ImageLruCache<number> {
+export class PdfCache extends RefLruCache<number, PixelMap> {
 
   constructor() {
     super(128 * 1024 * 1024)

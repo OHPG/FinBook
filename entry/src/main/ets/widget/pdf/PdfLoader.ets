@@ -1,6 +1,7 @@
 import { pdfService } from "@kit.PDFKit";
-import { pdfCache } from "./PdfCache";
 import { deviceInfo } from "@kit.BasicServicesKit";
+import { pdfCache } from "./PdfCache";
+import { CacheRef, ImageRef } from "@ohpg/fin-core";
 
 /**
  * @Author peerless2012
@@ -25,9 +26,9 @@ export class PdfLoader {
     return this.document.getPageCount()
   }
 
-  public getPage(index: number): PixelMap {
-    let pixel = pdfCache.get(index)
-    if (!pixel) {
+  public getPage(index: number): CacheRef<PixelMap> {
+    let pixelRef = pdfCache.get(index)
+    if (!pixelRef) {
       let page = this.document.getPage(index);
       let pdfMatrix: pdfService.PdfMatrix = new pdfService.PdfMatrix();
       let width = page.getWidth()
@@ -46,6 +47,7 @@ export class PdfLoader {
       pdfMatrix.width = width;
       pdfMatrix.height = height;
       pdfMatrix.rotate = 0;
+      let pixel: PixelMap
       if (deviceInfo.sdkApiVersion >= 18) {
         let options: pdfService.PixelOptions = new pdfService.PixelOptions();
         options.isGray = false;
@@ -55,9 +57,10 @@ export class PdfLoader {
       } else {
         pixel = page.getAreaPixelMap(pdfMatrix, width, height, false, true)
       }
-      pdfCache.put(index, pixel)
+      pixelRef = new ImageRef(pixel)
+      pdfCache.put(index, pixelRef)
     }
-    return pixel
+    return pixelRef
   }
 
   public release() {

@@ -1,7 +1,8 @@
-import { CommonConstants } from '../../common/CommonConstants';
-import LazyDataSource from '../../common/LazyDataSource';
 import { PdfLoader } from './PdfLoader';
 import { PdfPageInfo } from './PdfPageInfo';
+import LazyDataSource from '../../common/LazyDataSource';
+import { CommonConstants } from '../../common/CommonConstants';
+import { CacheRef } from '@ohpg/fin-core';
 
 @Reusable
 @Component
@@ -102,18 +103,21 @@ struct PdfPage {
 
   @State pixel?: PixelMap = undefined
 
+  private pixelRef?: CacheRef<PixelMap>
+
   aboutToAppear(): void {
-    this.updateImage()
+    this.acquireImage()
   }
 
   aboutToReuse(params: Record<string, ESObject>): void {
     this.info = params['info']
-    this.updateImage()
+    this.acquireImage()
   }
 
-  private updateImage() {
+  private acquireImage() {
     let index = this.info!.index
-    this.pixel = this.pdfLoader.getPage(index)
+    this.pixelRef = this.pdfLoader.getPage(index)
+    this.pixel = this.pixelRef.acquire()
   }
 
   build() {
@@ -134,11 +138,17 @@ struct PdfPage {
     .height(CommonConstants.FULL_PERCENT)
   }
 
+  private releaseImage() {
+    this.pixelRef?.release()
+    this.pixelRef = undefined
+  }
+
   aboutToRecycle(): void {
+    this.releaseImage()
   }
 
   aboutToDisappear(): void {
-
+    this.releaseImage()
   }
 
 }
