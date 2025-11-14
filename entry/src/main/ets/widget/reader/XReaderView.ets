@@ -60,9 +60,9 @@ export struct XReaderView {
         if (this.bookSpine?.index !== info.resourceIndex) {
           let spineList = this.bookHandler?.getSpineList()
           this.bookSpine = spineList?.find((spine) => spine.index === info.resourceIndex)
-          // if (this.bookSpine) {
-          //   AppStorage.setOrCreate("boo_href", this.bookSpine.href)
-          // }
+          if (this.bookSpine) {
+            AppStorage.setOrCreate("boo_href", this.bookSpine.href)
+          }
         }
       }
       this.readProgress = info.resourceIndex
@@ -176,6 +176,7 @@ export struct XReaderView {
     this.bookCtrl.off('resourceRequest')
     this.bookCtrl.releaseBook()
     AppStorage.delete('bookCtrl')
+    AppStorage.delete("boo_href")
     this.saveSetting()
   }
 

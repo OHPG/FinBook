@@ -1,4 +1,4 @@
-import { ActuatorInfo, Auth, AuthType, UserDto } from "@ohpg/komga";
+import { ActuatorInfo, Auth, AuthType, ProgressDto, UserDto } from "@ohpg/komga";
 import { BookDto, Komga, LibraryDto } from "@ohpg/komga";
 import { FinBookApi } from "../FinBookApi";
 import { ActiveInfo, FinPage, FinPersonType, MD5, ServerType } from "@ohpg/fin-core";
@@ -6,6 +6,7 @@ import { FinItemType } from "@ohpg/fin-core";
 import { FinPublicSystemInfo } from "@ohpg/fin-core";
 import { FinItem, FinAuthResult } from "@ohpg/fin-core";
 import { ClientInfo, DeviceInfo } from "@ohpg/network";
+import BuildProfile from "BuildProfile";
 import uri from "@ohos.uri";
 
 /**
@@ -131,7 +132,7 @@ export class KomgaFinApi implements FinBookApi {
     return item
   }
 
-  private bookToFinItem(book: BookDto): FinItem {
+  private bookToFinItem(book: BookDto, progress?: ProgressDto): FinItem {
     let item: FinItem = {
       id: book.id,
       name: book.name,
@@ -153,15 +154,22 @@ export class KomgaFinApi implements FinBookApi {
         type: FinPersonType.Author
       })
     })
-    if (book?.media?.mediaProfile === "PDF") {
+    let mediaType = book?.media?.mediaProfile
+    if (mediaType === "PDF") {
       if (book.readProgress) {
         item.data = {
           playedPositionTicks: book.readProgress.page,
           played: book.readProgress.completed
         }
       }
+    } else if (mediaType === "EPUB") {
+      if (progress) {
+        item.data = {
+          playedPositionTicks: progress.locator.locations.position,
+        }
+      }
     } else {
-      // Epub not support
+      // ignore
     }
     return item
   }
@@ -197,9 +205,14 @@ export class KomgaFinApi implements FinBookApi {
 
   public async getBook(id: string): Promise<FinItem> {
     let item = await this.komga.getItemsApi().getBook(id)
-    // let progress = await this.komga.getItemsApi().getBookProgression(id)
-    // console.log("xxx: id = " + id + ", progress = " + JSON.stringify(progress))
-    return this.bookToFinItem(item)
+    let progress: ProgressDto | undefined
+    if (item.media.mediaProfile === "EPUB") {
+      progress = await this.komga.getItemsApi().getBookProgression(id)
+      if (BuildProfile.DEBUG) {
+        console.info("KomgaFinApi: get progress id = " + id + ", progress = " + JSON.stringify(progress))
+      }
+    }
+    return this.bookToFinItem(item, progress)
   }
 
   public async getBookUrl(id: string): Promise<string> {
@@ -230,23 +243,27 @@ export class KomgaFinApi implements FinBookApi {
   }
 
   async onPlaybackProgress(id: string, position: number, playing: boolean): Promise<void> {
+    let href = AppStorage.get<string>("boo_href")
     try {
+      if (BuildProfile.DEBUG) {
+        console.info("KomgaFinApi: update progress id = " + id + ", position = " + position + ", playing = " + playing)
+      }
       let mediaProfile = this.readingBook?.media?.mediaProfile
       if (mediaProfile === "PDF") {
         await this.komga.getItemsApi().markBookReadProgress(id, position)
       } else if (mediaProfile === "EPUB") {
-        // let href = AppStorage.get<string>("boo_href")
-        // if (href) {
-        //   await this.komga.getItemsApi().markBookProgression(id, href, position)
-        //   console.log("xxx: id = " + id + ", set page = " + position + ", href = " + href)
-        // } else {
-        //   // ignore
-        // }
+        if (href) {
+          await this.komga.getItemsApi().markBookProgression(id, href, position)
+        } else {
+          if (BuildProfile.DEBUG) {
+            console.warn("KomgaFinApi: update progress ignore " + id + " because of no href.")
+          }
+        }
       } else {
         // not support.
       }
     } catch (e) {
-      // console.error("xxx: id = " + id + ", set page = " + position + ", error = " + JSON.stringify(e))
+      console.error("KomgaFinApi: update " + id + " progress error " + JSON.stringify(e))
     }
   }
 
