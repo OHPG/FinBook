@@ -1,5 +1,5 @@
 import { FinBookApi } from "../api/FinBookApi";
-import { FinItem, FinPage } from "@ohpg/fin-core";
+import { FinItem, FinPage, ServerType } from "@ohpg/fin-core";
 import { FinRepository } from "@ohpg/fin-framework";
 import { FinBookApiFactory } from "../api/FinBookApiFactory";
 
@@ -14,6 +14,10 @@ export class Repository extends FinRepository {
 
   constructor(context: Context) {
     super(context, new FinBookApiFactory(context))
+  }
+
+  public getSupportServer(): ServerType {
+    return ServerType.KOMGA
   }
 
   protected requireApi(): FinBookApi {

@@ -22,8 +22,8 @@ export struct DetailOperate {
   @State finished?: boolean = false
 
   aboutToAppear(): void {
-    this.finished = this.item?.played
-    this.collected = this.item?.favorite
+    this.finished = this.item?.data?.played
+    this.collected = this.item?.data?.isFavorite
   }
 
   build() {
