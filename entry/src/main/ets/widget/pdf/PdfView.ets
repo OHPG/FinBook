@@ -62,7 +62,7 @@ export struct PdfView {
     }
     .width('100%')
     .height('100%')
-    .gesture(TapGesture({ count: 1 })
+    .gesture(TapGesture({ count: 2 })
       .onAction((event) => {
         if (this.dataSource.totalCount() <= 0) return
         let width = event.target.area.width as number
@@ -103,6 +103,8 @@ struct PdfPage {
 
   @State pixel?: PixelMap = undefined
 
+  @State pixelFit:ImageFit = ImageFit.Contain
+
   private pixelRef?: CacheRef<PixelMap>
 
   aboutToAppear(): void {
@@ -124,7 +126,7 @@ struct PdfPage {
     Stack({alignContent: Alignment.Bottom}) {
       // pdf
       Image(this.pixel)
-        .objectFit(ImageFit.Contain)
+        .objectFit(this.pixelFit)
         .width(CommonConstants.FULL_PERCENT)
         .height(CommonConstants.FULL_PERCENT)
 
@@ -134,6 +136,17 @@ struct PdfPage {
         .visibility(this.immersiveMode ? Visibility.Hidden : Visibility.Visible)
         .margin(CommonConstants.SPACE_16)
     }
+    .gesture(TapGesture({count: 2})
+      .onAction((event) => {
+        if (this.pixelFit === ImageFit.Contain) {
+          this.pixelFit = ImageFit.Cover
+        } else if (this.pixelFit === ImageFit.Cover) {
+          this.pixelFit = ImageFit.Contain
+        } else {
+          // ignore
+        }
+      })
+    )
     .width(CommonConstants.FULL_PERCENT)
     .height(CommonConstants.FULL_PERCENT)
   }
@@ -144,10 +157,12 @@ struct PdfPage {
   }
 
   aboutToRecycle(): void {
+    this.pixelFit = ImageFit.Contain
     this.releaseImage()
   }
 
   aboutToDisappear(): void {
+    this.pixelFit = ImageFit.Contain
     this.releaseImage()
   }
 
