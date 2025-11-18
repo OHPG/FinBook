@@ -68,7 +68,7 @@ export struct StaticReaderView {
     }
     .width('100%')
     .height('100%')
-    .gesture(TapGesture({ count: 2 })
+    .gesture(TapGesture({ count: 1 })
       .onAction((event) => {
         if (this.dataSource.totalCount() <= 0) return
         let width = event.target.area.width as number

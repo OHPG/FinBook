@@ -99,7 +99,7 @@ struct ReaderPage {
   private judgementType(source: FinBookRawSource): boolean {
     this.readProgress = source.progress
     this.bookTitle = source.name
-    this.menuEnable = source.type === BookType.ARCHIVE
+    this.menuEnable = source.type === BookType.OTHER
     this.addImmersiveModeTimer()
     return source.type !== BookType.OTHER ? true : false
   }
