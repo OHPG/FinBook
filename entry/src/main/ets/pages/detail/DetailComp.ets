@@ -4,7 +4,7 @@ import { DetailViewModel } from "./DetailViewModel"
 import { MediaArgs } from "./MediaArgs"
 import LazyDataSource from "../../common/LazyDataSource"
 import { AppRouter } from "../../router/AppRouter"
-import { CoverImage } from "../../widget/image/CoverImage"
+import { CoverImage } from "../../widget/cover/CoverImage"
 
 @Component
 export struct DetailOperate {

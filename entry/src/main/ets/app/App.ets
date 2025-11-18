@@ -1,7 +1,7 @@
 import { AbilityConstant, AbilityStage, Configuration, ConfigurationConstant } from "@kit.AbilityKit";
 import { ImageKnife } from "@ohos/imageknife";
 import { AppPrefer } from "../prefer/AppPrefer";
-import { pdfCache } from "../widget/pdf/PdfCache";
+import { imageCache } from "../reader/static/ImageCache";
 
 /**
  * @Author peerless2012
@@ -20,7 +20,7 @@ export class App extends AbilityStage {
   }
 
   onMemoryLevel(level: AbilityConstant.MemoryLevel): void {
-    pdfCache.onMemoryLevel(level)
+    imageCache.onMemoryLevel(level)
   }
 
   onConfigurationUpdate(newConfig: Configuration): void {

@@ -9,7 +9,7 @@ import { AppPrefer } from '../../prefer/AppPrefer';
 
 @Reusable
 @Component
-export struct XReaderView {
+export struct DynamicReaderView {
 
   private appPrefer: AppPrefer = AppStorage.get(AppPrefer.PREFER)!
 

@@ -1,4 +1,4 @@
-export interface PdfPageInfo {
+export interface ImagePageInfo {
 
   index: number
 

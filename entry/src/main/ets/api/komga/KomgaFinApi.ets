@@ -155,7 +155,7 @@ export class KomgaFinApi implements FinBookApi {
       })
     })
     let mediaType = book?.media?.mediaProfile
-    if (mediaType === "PDF") {
+    if (mediaType === "PDF" || mediaType === "DIVINA") {
       if (book.readProgress) {
         item.data = {
           playedPositionTicks: book.readProgress.page,
@@ -249,7 +249,7 @@ export class KomgaFinApi implements FinBookApi {
         console.info("KomgaFinApi: update progress id = " + id + ", position = " + position + ", playing = " + playing)
       }
       let mediaProfile = this.readingBook?.media?.mediaProfile
-      if (mediaProfile === "PDF") {
+      if (mediaProfile === "PDF" || mediaProfile === "DIVINA") {
         await this.komga.getItemsApi().markBookReadProgress(id, position)
       } else if (mediaProfile === "EPUB") {
         if (href) {

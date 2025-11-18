@@ -8,7 +8,7 @@ import { AbilityConstant } from "@kit.AbilityKit";
  * @Version V1.0
  * @Description: 
  */
-export class PdfCache extends RefLruCache<number, PixelMap> {
+export class ImageCache extends RefLruCache<number, PixelMap> {
 
   constructor() {
     super(128 * 1024 * 1024)
@@ -34,4 +34,4 @@ export class PdfCache extends RefLruCache<number, PixelMap> {
   }
 }
 
-export const pdfCache = new PdfCache()
+export const imageCache = new ImageCache()

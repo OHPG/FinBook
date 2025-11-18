@@ -1,4 +1,6 @@
 import fs from '@ohos.file.fs';
+import { BookType } from '../enum/BookType';
+
 /**
  * @Author ZhiMing.Wang
  * @Email wangzhiming@pwrd.com
@@ -13,7 +15,7 @@ export class FileUtil {
    * @param path
    * @returns
    */
-  public static async isPdf(path: string): Promise<boolean> {
+  public static async getBookType(path: string): Promise<BookType> {
     let file = await fs.open(path)
     try {
       let buffer = new ArrayBuffer(4)
@@ -22,12 +24,28 @@ export class FileUtil {
         throw new Error("Read file error.")
       }
       let bytes = new Uint8Array(buffer)
-      return bytes[0] === 0x25 &&
-        bytes[1] === 0x50 &&
-        bytes[2] === 0x44 &&
-        bytes[3] === 0x46;
+      let type = BookType.OTHER
+      // 如何实现准确判断压缩文件类型
+      // https://developer.huawei.com/consumer/cn/doc/architecture-guides/kids-v1_2-ts_12-0000002442710557
+      if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) {
+        type = BookType.PDF
+      } else if (bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x03 && bytes[3] === 0x04) {
+        type = BookType.ARCHIVE
+      } else if (bytes[0] === 0x52 && bytes[1] === 0x61 && bytes[2] === 0x72 && bytes[3] === 0x21) {
+        throw new Error("CBR not support.")
+      }
+      return type
     } finally {
       fs.close(file.fd)
+    }
+  }
+
+  public static async isFileExists(path: string): Promise<boolean> {
+    try {
+      let exists = await fs.access(path, fs.AccessModeType.EXIST)
+      return exists
+    } catch (e) {
+      return false
     }
   }
 
@@ -36,6 +54,26 @@ export class FileUtil {
     if (!exist) {
       await fs.mkdir(dir)
     }
+  }
+
+  public static async rmdir(dir: string): Promise<void> {
+    // 判断目录是否存在
+    if (!(await fs.access(dir))) return;
+    // 获取目录下所有子项
+    let files: string[] = fs.listFileSync(dir);
+    for (const name of files) {
+      let fullPath = dir + '/' + name;
+      let stat = fs.statSync(fullPath);
+      if (stat.isDirectory()) {
+        // 递归删除子目录
+        await FileUtil.rmdir(fullPath);
+      } else {
+        // 删除文件
+        await fs.unlink(fullPath);
+      }
+    }
+    // 删除当前空目录
+    await fs.rmdir(dir);
   }
 
 }

@@ -1,16 +1,19 @@
-import { PdfLoader } from './PdfLoader';
-import { PdfPageInfo } from './PdfPageInfo';
+import { PdfLoader } from './loader/PdfLoader';
+import { ArchiveLoader } from './loader/ArchiveLoader';
+import { ImagePageInfo } from './ImagePageInfo';
 import LazyDataSource from '../../common/LazyDataSource';
 import { CommonConstants } from '../../common/CommonConstants';
 import { CacheRef } from '@ohpg/fin-core';
+import { BookType } from '../../enum/BookType';
+import { ImageLoader } from './loader/ImageLoader';
 
 @Reusable
 @Component
-export struct PdfView {
+export struct StaticReaderView {
 
   @StorageProp('currentWidthBreakpoint') currentBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_MD;
 
-  private dataSource: LazyDataSource<PdfPageInfo> = new LazyDataSource<PdfPageInfo>();
+  private dataSource: LazyDataSource<ImagePageInfo> = new LazyDataSource<ImagePageInfo>();
 
   private controller = new SwiperController()
 
@@ -18,12 +21,15 @@ export struct PdfView {
 
   @Consume readProgress: number
 
-  @Require @Prop pdfPath: string = '';
+  @Require @Prop bookPath: string = '';
 
-  @Provide pdfLoader: PdfLoader = new PdfLoader()
+  @Require @Prop bookType: BookType
+
+  @Provide imageLoader?: ImageLoader = undefined
 
   aboutToAppear() {
-    this.pdfLoader.load(this.pdfPath)
+    this.imageLoader = this.bookType === BookType.ARCHIVE ? new ArchiveLoader() : new PdfLoader()
+    this.imageLoader.load(this.bookPath)
       .then((count) => {
         this.constructData(count)
       })
@@ -33,7 +39,7 @@ export struct PdfView {
   }
 
   private constructData(count: number) {
-    let dataArray = new Array<PdfPageInfo>()
+    let dataArray = new Array<ImagePageInfo>()
     for (let i = 0; i < count; i++) {
       dataArray.push({
         index: i,
@@ -46,9 +52,9 @@ export struct PdfView {
   build() {
     Stack() {
       Swiper(this.controller) {
-        LazyForEach(this.dataSource, (info: PdfPageInfo) => {
-          PdfPage({info: info})
-        }, (item: PdfPageInfo, index: number) => item.index.toString())
+        LazyForEach(this.dataSource, (info: ImagePageInfo) => {
+          StaticPage({info: info})
+        }, (item: ImagePageInfo, index: number) => item.index.toString())
       }
       .index(this.readProgress)
       .displayCount(this.currentBreakpoint >= WidthBreakpoint.WIDTH_LG ? 2 : 1, true)
@@ -86,20 +92,20 @@ export struct PdfView {
   }
 
   aboutToDisappear() {
-    this.pdfLoader.release()
+    this.imageLoader?.release()
   }
 
 }
 
 @Reusable
 @Component
-struct PdfPage {
+struct StaticPage {
 
-  @Consume pdfLoader: PdfLoader
+  @Consume imageLoader: ImageLoader
 
   @Consume immersiveMode: boolean
 
-  @Require @State info?: PdfPageInfo = undefined
+  @Require @State info?: ImagePageInfo = undefined
 
   @State pixel?: PixelMap = undefined
 
@@ -116,9 +122,9 @@ struct PdfPage {
     this.acquireImage()
   }
 
-  private acquireImage() {
+  private async acquireImage() {
     let index = this.info!.index
-    this.pixelRef = this.pdfLoader.getPage(index)
+    this.pixelRef = await this.imageLoader.get(index)
     this.pixel = this.pixelRef.acquire()
   }
 

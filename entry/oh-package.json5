@@ -9,6 +9,7 @@
     // https://ohpm.openharmony.cn/#/cn/detail/@abner%2Frefresh
     "@abner/refresh": "1.4.3",
     "@ohos/imageknife": "3.2.7",
+    "@ohos/minizip": "1.0.2",
     "@ohpg/komga": 'file:../../FinSdk/komga',
     "@ohpg/network": 'file:../../FinSdk/network',
     "@ohpg/jellyfin": 'file:../../FinSdk/jellyfin',

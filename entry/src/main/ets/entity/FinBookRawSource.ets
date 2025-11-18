@@ -1,3 +1,5 @@
+import { BookType } from "../enum/BookType"
+
 /**
  * @Author peerless2012
  * @Email peerless2012@126.com
@@ -15,6 +17,6 @@ export interface FinBookRawSource {
 
   path: string
 
-  pdf?: boolean
+  type: BookType
 
 }

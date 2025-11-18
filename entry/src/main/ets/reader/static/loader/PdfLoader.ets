@@ -1,7 +1,8 @@
 import { pdfService } from "@kit.PDFKit";
 import { deviceInfo } from "@kit.BasicServicesKit";
-import { pdfCache } from "./PdfCache";
+import { imageCache } from "../ImageCache";
 import { CacheRef, ImageRef } from "@ohpg/fin-core";
+import { ImageLoader } from "./ImageLoader";
 
 /**
  * @Author peerless2012
@@ -10,7 +11,7 @@ import { CacheRef, ImageRef } from "@ohpg/fin-core";
  * @Version V1.0
  * @Description
  */
-export class PdfLoader {
+export class PdfLoader implements ImageLoader {
 
   private readonly document: pdfService.PdfDocument
 
@@ -26,8 +27,8 @@ export class PdfLoader {
     return this.document.getPageCount()
   }
 
-  public getPage(index: number): CacheRef<PixelMap> {
-    let pixelRef = pdfCache.get(index)
+  public async get(index: number): Promise<CacheRef<PixelMap>> {
+    let pixelRef = imageCache.get(index)
     if (!pixelRef) {
       let page = this.document.getPage(index);
       let pdfMatrix: pdfService.PdfMatrix = new pdfService.PdfMatrix();
@@ -58,13 +59,13 @@ export class PdfLoader {
         pixel = page.getAreaPixelMap(pdfMatrix, width, height, false, true)
       }
       pixelRef = new ImageRef(pixel)
-      pdfCache.put(index, pixelRef)
+      imageCache.put(index, pixelRef)
     }
     return pixelRef
   }
 
-  public release() {
-    pdfCache.clear()
+  public async release(): Promise<void> {
+    imageCache.clear()
     this.document.releaseDocument()
   }
 

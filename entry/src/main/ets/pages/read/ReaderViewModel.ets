@@ -5,7 +5,6 @@ import { MediaArgs } from "../detail/MediaArgs";
 import { FileUtil } from "../../util/FileUtil";
 import { FinBookRawSource } from "../../entity/FinBookRawSource";
 import { AppDownload } from "../../down/AppDownload";
-import fs from '@ohos.file.fs';
 
 /**
  * @Author peerless2012
@@ -37,15 +36,20 @@ export class ReaderViewModel extends AppViewModel implements SimpleRepository {
         suffix = item.path.substring(index)
       }
     }
+    // 目标路径
     let dirPath = this.context.filesDir + "/" + activeInfo.serverInfo.serverId
+    // 创建文件夹（如果不存在的话）
     await FileUtil.mkdir(dirPath)
+    // 文件路径
     let filePath = dirPath + "/" + item.id + suffix;
-    let exists = await fs.access(filePath, fs.AccessModeType.EXIST)
+    // 判断文件是否存在
+    let exists = await FileUtil.isFileExists(filePath)
     if (!exists) {
+      // 下载文件
       filePath = await this.down.download(url, filePath, this.repository.getAuth())
     }
-    let pdf = await FileUtil.isPdf(filePath)
-    
+    let fileType = await FileUtil.getBookType(filePath)
+
     let progress = 0
     if (item.data?.playedPositionTicks) {
       progress = item.data.playedPositionTicks
@@ -54,7 +58,7 @@ export class ReaderViewModel extends AppViewModel implements SimpleRepository {
       progress = 0
     }
     
-    return {id: item.id, name: item.name, progress: progress, path: filePath, pdf: pdf}
+    return {id: item.id, name: item.name, progress: progress, path: filePath, type: fileType}
   }
 
   public startRead(): Promise<void> {

@@ -4,10 +4,11 @@ import { ScrollRefreshView, ToolBar } from '@ohpg/fin-framework'
 import { CommonConstants } from '../../common/CommonConstants'
 import { ReaderViewModel } from './ReaderViewModel'
 import { MediaArgs } from '../detail/MediaArgs'
-import { PdfView } from '../../widget/pdf/PdfView'
+import { StaticReaderView } from '../../reader/static/StaticReaderView'
 import { FinBookRawSource } from '../../entity/FinBookRawSource'
-import { XReaderView } from '../../widget/reader/XReaderView'
+import { DynamicReaderView } from '../../reader/dynamic/DynamicReaderView'
 import { common } from '@kit.AbilityKit'
+import { BookType } from '../../enum/BookType'
 
 @Entry
 @Component
@@ -47,15 +48,16 @@ struct ReaderPage {
   }
 
   @Builder
-  pdfView(path: string) {
-    PdfView({
-        pdfPath: path,
+  staticView(path: string, type: BookType) {
+    StaticReaderView({
+      bookPath: path,
+      bookType: type
     })
   }
 
   @Builder
-  normalView(path: string) {
-    XReaderView({
+  dynamicView(path: string) {
+    DynamicReaderView({
       bookPath: path
     })
   }
@@ -67,9 +69,9 @@ struct ReaderPage {
        source: this.viewModel,
        itemLayout: (source: FinBookRawSource) => {
          if (this.judgementType(source)) {
-           this.pdfView(source.path)
+           this.staticView(source.path, source.type)
          } else {
-           this.normalView(source.path)
+           this.dynamicView(source.path)
          }
        }
      })
@@ -97,9 +99,9 @@ struct ReaderPage {
   private judgementType(source: FinBookRawSource): boolean {
     this.readProgress = source.progress
     this.bookTitle = source.name
-    this.menuEnable = source.pdf ? false: true
+    this.menuEnable = source.type === BookType.ARCHIVE
     this.addImmersiveModeTimer()
-    return source.pdf ? true : false
+    return source.type !== BookType.OTHER ? true : false
   }
 
   private clearImmersiveModeTimer() {
