@@ -2,6 +2,7 @@ import { window } from '@kit.ArkUI'
 import { BreakpointSystem } from '@ohpg/fin-core'
 import { CommonConstants } from '../../common/CommonConstants'
 import { AboutPage } from './about/AboutPage'
+import { HomeControl } from './HomeControl'
 import { LocalPage } from './local/LocalPage'
 import { OnlinePage } from './online/OnlinePage'
 
@@ -19,8 +20,10 @@ struct HomePage {
 
   private tabsController: TabsController = new TabsController();
 
-  aboutToAppear(): void {
+  private homeControl = new HomeControl()
 
+  aboutToAppear(): void {
+    AppStorage.setOrCreate("currentHomeControl", this.homeControl)
   }
 
   @Builder TabBuilder(title: ResourceStr, targetIndex: number, img: Resource) {
@@ -76,7 +79,15 @@ struct HomePage {
     .height('100%')
   }
 
+  onBackPress(): boolean | void {
+    if (this.currentIndex > 0) {
+      return false
+    }
+    return this.homeControl.goBack()
+  }
+
   aboutToDisappear(): void {
+    AppStorage.delete("currentHomeControl")
   }
 
 }

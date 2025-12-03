@@ -67,6 +67,17 @@ export class FileUtil {
     }
   }
 
+  public static mkdirSync(dir: string) {
+    try {
+      fs.statSync(dir)
+    } catch (e) {
+      try {
+        fs.mkdirSync(dir)
+      } catch (e) {
+      }
+    }
+  }
+
   public static async mkdir(dir: string): Promise<void> {
     let exist = await fs.access(dir, fs.AccessModeType.EXIST)
     if (!exist) {
@@ -94,4 +105,7 @@ export class FileUtil {
     await fs.rmdir(dir);
   }
 
+  public static async rmFile(path: string): Promise<void> {
+    await fs.unlink(path)
+  }
 }
