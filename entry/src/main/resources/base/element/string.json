@@ -21,6 +21,22 @@
       "value": "后台播放音乐"
     },
     {
+      "name": "tab_local",
+      "value": "本地"
+    },
+    {
+      "name": "tab_online",
+      "value": "在线"
+    },
+    {
+      "name": "tab_online_empty_tips",
+      "value": "当前还没有可用服务\n点击开始添加"
+    },
+    {
+      "name": "tab_about",
+      "value": "关于"
+    },
+    {
       "name": "search_title",
       "value": "搜索"
     },
@@ -63,6 +79,10 @@
     {
       "name": "about",
       "value": "关于"
+    },
+    {
+      "name": "prefer_server_hint",
+      "value": "请先添加服务器"
     },
     {
       "name": "prefer_current_server",

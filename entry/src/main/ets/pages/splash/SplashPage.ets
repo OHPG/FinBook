@@ -1,4 +1,3 @@
-import { FinRouter } from '@ohpg/fin-framework'
 import { PrivacyDialog } from '@ohpg/fin-framework'
 import { Repository } from '../../data/Repository'
 import { AppPrefer } from '../../prefer/AppPrefer'
@@ -53,12 +52,7 @@ struct SplashPage {
   }
 
   private enterHomeOrAddServer() {
-    let activeInfo = this.repository?.getActiveInfo()
-    if (activeInfo) {
-      AppRouter.goToHome(this.getUIContext())
-    } else {
-      FinRouter.auth(this.getUIContext(), true)
-    }
+    AppRouter.goToHome(this.getUIContext())
   }
 
 }

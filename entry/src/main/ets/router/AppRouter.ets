@@ -22,7 +22,11 @@ export class AppRouter {
     context.getRouter().pushUrl({url: 'pages/detail/DetailPage', params: args})
   }
 
-  public static goToSearch(context: UIContext, args: SearchArgs) {
+  public static goToLocalSearch(context: UIContext, args: SearchArgs) {
+    context.getRouter().pushUrl({url: 'pages/search/SearchPage', params: args})
+  }
+
+  public static goToOnlineSearch(context: UIContext, args: SearchArgs) {
     context.getRouter().pushUrl({url: 'pages/search/SearchPage', params: args})
   }
 

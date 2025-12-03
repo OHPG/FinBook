@@ -1,46 +1,82 @@
 import { window } from '@kit.ArkUI'
-import { ListRefreshView } from '@ohpg/fin-framework'
+import { BreakpointSystem } from '@ohpg/fin-core'
 import { CommonConstants } from '../../common/CommonConstants'
-import { HomeToolBar } from '../../widget/bar/HomeToolBar'
-import { MediaGroup } from '../../widget/item/MediaGroup'
-import { HomeViewModel } from './HomeViewModel'
+import { AboutPage } from './about/AboutPage'
+import { LocalPage } from './local/LocalPage'
+import { OnlinePage } from './online/OnlinePage'
 
 @Entry
 @Component
 struct HomePage {
 
-  private viewModel = new HomeViewModel(getContext())
+  @State currentIndex: number = 0;
 
-  @StorageProp('currentAvoidArea') avoidArea?: window.AvoidArea = undefined
+  @StorageProp('currentAvoidArea') currentAvoidArea?: window.AvoidArea = undefined
 
-  @Builder
-  mediaCategory(info: ESObject, index: number) {
-    MediaGroup({item: info})
+  @StorageProp(BreakpointSystem.CURRENT_WIDTH_BREAKPOINT) currentWidthBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_SM
+
+  @StorageProp(BreakpointSystem.CURRENT_HEIGHT_BREAKPOINT) currentHeightBreakpoint: HeightBreakpoint = HeightBreakpoint.HEIGHT_SM
+
+  private tabsController: TabsController = new TabsController();
+
+  aboutToAppear(): void {
+
   }
 
-  build() {
-
-    Column() {
-      HomeToolBar({
-        title: $r('app.string.app_name')
-      })
-
-      ListRefreshView({
-        source: this.viewModel,
-        itemLayout: this.mediaCategory,
-        listAttribute: (attr) => {
-          attr.divider = {
-            color: Color.Transparent,
-            strokeWidth: CommonConstants.SPACE_12
-          }
-          attr.width = CommonConstants.FULL_PERCENT
-          attr.height = CommonConstants.FULL_PERCENT
-          attr.contentEndOffset = px2vp(this.avoidArea?.bottomRect.height)
-        },
-      })
-        .width(CommonConstants.FULL_PERCENT)
-        .layoutWeight(1)
+  @Builder TabBuilder(title: ResourceStr, targetIndex: number, img: Resource) {
+    Column({
+      space: CommonConstants.SPACE_4
+    }) {
+      SymbolGlyph(img)
+        .fontSize(24)
+        .fontColor([this.currentIndex === targetIndex ?  '#1698CE' : '#6B6B6B' ])
+      Text(title)
+        .fontSize($r('sys.float.Body_M'))
+        .fontColor(this.currentIndex === targetIndex ? '#1698CE' : '#6B6B6B')
     }
+    .width('100%')
+    .height(50)
+    .justifyContent(FlexAlign.Center)
+    .onClick(() => {
+      this.currentIndex = targetIndex;
+      this.tabsController.changeIndex(this.currentIndex);
+    })
+  }
+
+  // https://developer.huawei.com/consumer/cn/design/harmonyos-symbol/
+  build() {
+    Tabs({ barPosition: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
+      ? BarPosition.Start : BarPosition.End, controller: this.tabsController }) {
+      TabContent() {
+        LocalPage()
+      }
+      .tabBar(this.TabBuilder($r('app.string.tab_local'), 0, $r('sys.symbol.house_fill')))
+
+      TabContent() {
+        OnlinePage()
+      }
+      .tabBar(this.TabBuilder($r('app.string.tab_online'), 1, $r('sys.symbol.externaldrive_fill_3')))
+
+      TabContent() {
+        AboutPage()
+      }
+      .tabBar(this.TabBuilder($r('app.string.tab_about'), 2, $r('sys.symbol.square_fill_grid_2x2')))
+    }
+    .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
+    .vertical(this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD)
+    .barWidth(this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD ? 72 : '100%')
+    .barHeight(this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD ? '100%' : 50)
+    .animationDuration(0)
+    .backgroundColor($r('sys.color.background_primary'))
+    .onChange((index: number) => {
+      this.currentIndex = index;
+    })
+    .scrollable(false)
+    .width('100%')
+    .height('100%')
+  }
+
+  aboutToDisappear(): void {
   }
 
 }

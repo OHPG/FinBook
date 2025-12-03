@@ -1,13 +1,12 @@
 import { window } from '@kit.ArkUI'
 import { WebTool } from '@ohpg/fin-core'
-import { Repository } from '../../data/Repository'
-import { CommonConstants } from '../../common/CommonConstants'
-import { FinRouter, ToolBar } from '@ohpg/fin-framework'
+import { CommonConstants, FinRouter } from '@ohpg/fin-framework'
 import { pasteboard } from '@kit.BasicServicesKit'
+import { Repository } from '../../../data/Repository'
+import { HomeToolBar } from '../../../widget/bar/HomeToolBar'
 
-@Entry
 @Component
-struct AboutPage {
+export struct AboutPage {
 
   private repository: Repository = AppStorage.get(Repository.REPOSITORY)!
 
@@ -37,22 +36,22 @@ struct AboutPage {
 
   build() {
     Column({space: CommonConstants.SPACE_8}) {
-      ToolBar({
+      HomeToolBar({
         title: $r('app.string.about')
       })
 
       Column({ space: CommonConstants.SPACE_12}) {
         Row() {
           Text($r('app.string.prefer_current_server'))
-          Text(this.repository?.getActiveInfo()?.serverInfo.serverName)
+          Text(this.repository?.getActiveInfo()?.serverInfo.serverName || $r('app.string.prefer_server_hint'))
         }
         Row() {
           Text($r('app.string.prefer_current_address'))
-          Text(this.repository?.getActiveInfo()?.addressInfo.address)
+          Text(this.repository?.getActiveInfo()?.addressInfo.address || $r('app.string.prefer_server_hint'))
         }
         Row() {
           Text($r('app.string.prefer_current_user'))
-          Text(this.repository?.getActiveInfo()?.userInfo.userName)
+          Text(this.repository?.getActiveInfo()?.userInfo.userName || $r('app.string.prefer_server_hint'))
         }
       }
       .width(CommonConstants.FULL_PERCENT)
@@ -63,13 +62,25 @@ struct AboutPage {
       })
 
       this.preferItemBuilder($r('sys.symbol.externaldrive'), $r('app.string.prefer_server'), () => {
-        FinRouter.editServer(this.getUIContext())
+        if (this.repository?.getActiveInfo()) {
+          FinRouter.editServer(this.getUIContext())
+        } else {
+          FinRouter.auth(this.getUIContext())
+        }
       })
       this.preferItemBuilder($r('sys.symbol.worldclock'), $r('app.string.prefer_address'), () => {
-        FinRouter.editAddress(this.getUIContext())
+        if (this.repository?.getActiveInfo()) {
+          FinRouter.editAddress(this.getUIContext())
+        } else {
+          FinRouter.auth(this.getUIContext())
+        }
       })
       this.preferItemBuilder($r('sys.symbol.person'), $r('app.string.prefer_user'), () => {
-        FinRouter.editUser(this.getUIContext())
+        if (this.repository?.getActiveInfo()) {
+          FinRouter.editUser(this.getUIContext())
+        } else {
+          FinRouter.auth(this.getUIContext())
+        }
       })
 
       this.preferItemBuilder($r('sys.symbol.doc_plaintext'), $r('app.string.prefer_privacy'), () => {

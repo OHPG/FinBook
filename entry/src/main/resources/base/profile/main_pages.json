@@ -5,7 +5,6 @@
     "pages/grid/GridPage",
     "pages/detail/DetailPage",
     "pages/search/SearchPage",
-    "pages/read/ReaderPage",
-    "pages/about/AboutPage"
+    "pages/read/ReaderPage"
   ]
 }
