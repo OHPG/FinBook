@@ -2,6 +2,7 @@ import { FinBookApi } from "../api/FinBookApi";
 import { FinItem, FinPage, ServerType } from "@ohpg/fin-core";
 import { FinRepository } from "@ohpg/fin-framework";
 import { FinBookApiFactory } from "../api/FinBookApiFactory";
+import { AppDataStore } from "../store/AppDataStore";
 
 /**
  * @Author peerless2012
@@ -12,8 +13,11 @@ import { FinBookApiFactory } from "../api/FinBookApiFactory";
  */
 export class Repository extends FinRepository {
 
+  private bookDataStore: AppDataStore
+
   constructor(context: Context) {
     super(context, new FinBookApiFactory(context))
+    this.bookDataStore = new AppDataStore(context)
   }
 
   public getSupportServer(): ServerType {

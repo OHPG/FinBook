@@ -74,6 +74,11 @@ struct HomePage {
     .onChange((index: number) => {
       this.currentIndex = index;
     })
+    .padding({
+      bottom: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
+        ? 0
+        : px2vp(this.currentAvoidArea?.bottomRect.height)
+    })
     .scrollable(false)
     .width('100%')
     .height('100%')

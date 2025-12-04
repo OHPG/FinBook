@@ -1,10 +1,10 @@
 import { LoadType } from "@ohpg/fin-core";
 import { SimpleRepository } from "@ohpg/fin-framework";
-import { AppViewModel } from "../../lifecycle/AppViewModel";
-import { MediaArgs } from "../detail/MediaArgs";
-import { FileUtil } from "../../util/FileUtil";
-import { FinBookRawSource } from "../../entity/FinBookRawSource";
-import { AppDownload } from "../../down/AppDownload";
+import { AppViewModel } from "../../../lifecycle/AppViewModel";
+import { MediaArgs } from "../../detail/MediaArgs";
+import { FileUtil } from "../../../util/FileUtil";
+import { FinBookRawSource } from "../../../entity/FinBookRawSource";
+import { AppDownload } from "../../../down/AppDownload";
 
 /**
  * @Author peerless2012
@@ -13,7 +13,7 @@ import { AppDownload } from "../../down/AppDownload";
  * @Version V1.0
  * @Description
  */
-export class ReaderViewModel extends AppViewModel implements SimpleRepository {
+export class OnlineReaderViewModel extends AppViewModel implements SimpleRepository {
 
   private readonly args: MediaArgs
 

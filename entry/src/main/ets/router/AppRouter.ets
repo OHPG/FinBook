@@ -30,12 +30,12 @@ export class AppRouter {
     context.getRouter().pushUrl({url: 'pages/search/SearchPage', params: args})
   }
 
-  public static goToReader(context: UIContext, args: MediaArgs) {
-    context.getRouter().pushUrl({url: "pages/read/ReaderPage", params: args})
+  public static goToLocalReader(context: UIContext, args: MediaArgs) {
+    context.getRouter().pushUrl({url: "pages/read/local/LocalReaderPage", params: args})
   }
 
-  public static goToAbout(context: UIContext) {
-    context.getRouter().pushUrl({url: "pages/about/AboutPage"})
+  public static goToOnlineReader(context: UIContext, args: MediaArgs) {
+    context.getRouter().pushUrl({url: "pages/read/online/OnlineReaderPage", params: args})
   }
 
 }

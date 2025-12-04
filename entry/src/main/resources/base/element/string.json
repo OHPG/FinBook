@@ -21,6 +21,34 @@
       "value": "后台播放音乐"
     },
     {
+      "name": "dialog_delete_title",
+      "value": "警告"
+    },
+    {
+      "name": "dialog_delete_confirm",
+      "value": "删除"
+    },
+    {
+      "name": "dialog_delete_msg",
+      "value": "下列文件将会被永久删除：\n\n%s\n\n删除后将不可恢复，是否确认删除？"
+    },
+    {
+      "name": "dialog_delete_cancel",
+      "value": "取消"
+    },
+    {
+      "name": "file_delete_success",
+      "value": "%s已删除"
+    },
+    {
+      "name": "global_content_empty",
+      "value": "这里还没有内容\n请点击【+】添加媒体后下拉刷新试试吧。"
+    },
+    {
+      "name": "global_content_empty_simple",
+      "value": "这里还没有内容"
+    },
+    {
       "name": "tab_local",
       "value": "本地"
     },

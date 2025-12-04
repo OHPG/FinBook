@@ -11,4 +11,6 @@ export interface MediaArgs {
 
   name: string,
 
+  uri?: string
+
 }

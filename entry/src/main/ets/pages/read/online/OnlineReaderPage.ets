@@ -1,21 +1,21 @@
 import router from '@ohos.router'
 import { window } from '@kit.ArkUI'
 import { ScrollRefreshView, ToolBar } from '@ohpg/fin-framework'
-import { CommonConstants } from '../../common/CommonConstants'
-import { ReaderViewModel } from './ReaderViewModel'
-import { MediaArgs } from '../detail/MediaArgs'
-import { StaticReaderView } from '../../reader/static/StaticReaderView'
-import { FinBookRawSource } from '../../entity/FinBookRawSource'
-import { DynamicReaderView } from '../../reader/dynamic/DynamicReaderView'
+import { CommonConstants } from '../../../common/CommonConstants'
+import { OnlineReaderViewModel } from './OnlineReaderViewModel'
+import { MediaArgs } from '../../detail/MediaArgs'
+import { StaticReaderView } from '../../../reader/static/StaticReaderView'
+import { FinBookRawSource } from '../../../entity/FinBookRawSource'
+import { DynamicReaderView } from '../../../reader/dynamic/DynamicReaderView'
 import { common } from '@kit.AbilityKit'
-import { BookType } from '../../enum/BookType'
+import { BookType } from '../../../enum/BookType'
 
 @Entry
 @Component
-struct ReaderPage {
+struct OnlineReaderPage {
   private args: MediaArgs = router.getParams() as MediaArgs
 
-  private viewModel = new ReaderViewModel(getContext(), this.args)
+  private viewModel = new OnlineReaderViewModel(getContext(), this.args)
 
   private immersiveModeTimer?: number = undefined
 

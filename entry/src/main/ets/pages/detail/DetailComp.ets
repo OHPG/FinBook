@@ -85,7 +85,7 @@ export struct DetailOperate {
       id: this.item!.id!,
       name: this.item!.name!
     }
-    AppRouter.goToReader(this.getUIContext(), args)
+    AppRouter.goToOnlineReader(this.getUIContext(), args)
   }
 
   private finishOrNot() {

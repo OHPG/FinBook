@@ -1,3 +1,5 @@
+import { BookHistory } from "./BookHistory"
+
 export interface BookItem {
 
   id: string
@@ -5,6 +7,8 @@ export interface BookItem {
   key: string
 
   name: string
+
+  alias?: ResourceStr
 
   uri: string
 
@@ -15,5 +19,7 @@ export interface BookItem {
   date?: string
 
   size?: string
+
+  history?: BookHistory
 
 }

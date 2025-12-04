@@ -5,17 +5,174 @@ import { AppRouter } from "../../../router/AppRouter"
 import { HomeToolBar } from "../../../widget/bar/HomeToolBar"
 import { HomeControl } from "../HomeControl"
 import { deviceInfo } from "@kit.BasicServicesKit"
+import { MenuType } from '../../../enum/MenuType'
+import { Pair } from "../../../comp/Pair"
+import { fileUri } from "@kit.CoreFileKit"
+import { FolderItem } from "../../../entity/FolderItem"
+import LazyDataSource from "../../../common/LazyDataSource"
+import { window } from "@kit.ArkUI"
+import { LocalViewModel } from "./LocalViewModel"
+import { ProgressDialog } from "@ohpg/fin-framework"
+import { MediaArgs } from "../../detail/MediaArgs"
+import { actionMenuMediaItem } from "../../../menu/ActionMenu"
 
 @Component
 export struct LocalPage {
 
   @StorageLink("currentHomeControl") homeControl?: HomeControl = undefined
 
-  aboutToAppear(): void {
-    // this.homeControl!.callback = () => {
-    //
-    // }
+  private readonly mediaData: LocalViewModel = new LocalViewModel(this.getUIContext().getHostContext()!)
+
+  readonly emptyOrErrorResource: ResourceStr = $r('app.string.global_content_empty')
+
+  @StorageProp('currentAvoidArea') avoidArea?: window.AvoidArea = undefined
+
+  @State isRefreshing: boolean = false
+
+  @State errorOrEmptyContent: ResourceStr | undefined = undefined
+
+  private folderDataSource = new LazyDataSource<FolderItem>()
+
+  private currentFolder: FolderItem = {
+    name: "根目录",
+    path: ""
   }
+
+  private mediaDataSource = new LazyDataSource<BookItem>()
+
+  private readonly folderItemCallback: Callback<FolderItem> = (item) => {
+    this.backwardFolder(item)
+  }
+
+  private readonly mediaItemCallback: Callback<BookItem> = (item) => {
+    if (item.dir) {
+      this.forwardFolder(item)
+    } else {
+      this.play(item)
+    }
+  }
+
+  private readonly mediaMenuCallback: Callback<Pair<MenuType, BookItem>> = (item) => {
+    if (item.first === MenuType.DELETE) {
+      this.removeData(item.second)
+    }
+  }
+
+  aboutToAppear(): void {
+    this.homeControl!.callback = (): boolean => {
+      if (this.folderDataSource.totalCount() > 1) {
+        let lastIndex = this.folderDataSource.totalCount() - 1
+        this.folderDataSource.deleteData(lastIndex)
+        this.currentFolder = this.folderDataSource.getData(lastIndex - 1)
+        this.updateData()
+        return true
+      }
+      return false
+    }
+    // this.getUIContext().getHostContext()?.eventHub
+    //   .on(AppEvent.EVENT_MEDIA_INFO_HISTORY_CHANGED, (history: VideoHistory) => {
+    //     let index = this.mediaDataSource.getDataList().findIndex((item) => item.id === history.id)
+    //     if (index <0 ) {
+    //       return
+    //     }
+    //     let mediaItem = this.mediaDataSource.getData(index)
+    //     mediaItem.history = history
+    //     mediaItem.key = util.generateRandomUUID(true)
+    //     this.mediaDataSource.notifyDataChange(index)
+    //   })
+    this.folderDataSource.pushData(this.currentFolder)
+    this.isRefreshing = true
+  }
+
+  private backwardFolder(item: FolderItem) {
+    if (this.currentFolder === item) {
+      return
+    }
+    let dataList = this.folderDataSource.getDataList()
+    let index = dataList.indexOf(item)
+    if (index < 0) {
+      return
+    }
+    for (let i = dataList.length - 1; i > index; i--) {
+      this.folderDataSource.deleteData(i)
+    }
+    this.currentFolder = item
+    this.updateData()
+  }
+
+  private forwardFolder(item: BookItem) {
+    if (!this.currentFolder) {
+      return
+    }
+    let newFolder: FolderItem = {
+      name: item.name,
+      alias: item.alias,
+      path: this.currentFolder.path + "/" + item.name,
+    }
+    this.folderDataSource.pushData(newFolder)
+    this.currentFolder = newFolder
+    this.isRefreshing = true
+  }
+
+  private async updateData(force?: boolean): Promise<void> {
+    this.errorOrEmptyContent = undefined
+    // 更新当前目录下的元素
+    let items: Array<BookItem> | undefined = undefined
+    let errors: ResourceStr | undefined = this.emptyOrErrorResource
+    if (force || this.currentFolder.items === undefined) {
+      this.isRefreshing = true
+      try {
+        items = await this.mediaData.loadByPath(this.currentFolder.path)
+      } catch (error) {
+        errors = "Error: " + (error as Error).message
+      }
+      this.isRefreshing = false
+    } else {
+      items = this.currentFolder.items
+    }
+    if (items && items.length > 0) {
+      this.currentFolder!.items = items
+      this.mediaDataSource.pushArrayData(items)
+    } else {
+      this.mediaDataSource.clear()
+      this.errorOrEmptyContent = errors
+    }
+  }
+
+  private async removeData(item: BookItem): Promise<void> {
+    let name = item.alias || item.name
+    if (typeof name !== "string") {
+      name = this.getUIContext().getHostContext()!.resourceManager.getStringSync(name.id)
+    }
+    let response = await this.getUIContext().getPromptAction().showDialog({
+      title: $r('app.string.dialog_delete_title'),
+      message: $r('app.string.dialog_delete_msg', name),
+      buttons: [
+        {
+          text: $r("app.string.dialog_delete_cancel"),
+          color: $r("sys.color.ohos_id_color_text_secondary")
+        },
+        {
+          text: $r("app.string.dialog_delete_confirm"),
+          color: $r("sys.color.brand")
+        }
+      ]})
+    if (response.index <= 0) return
+    let progressDialog = new ProgressDialog(this.getUIContext())
+    try {
+      await progressDialog.show()
+      await this.mediaData.removeData(item.uri, item.dir)
+      let index = this.mediaDataSource.dataArray.findIndex((value) => value.id === item.id)
+      if (index >= 0) {
+        this.mediaDataSource.deleteData(index)
+      }
+      this.getUIContext().getPromptAction().showToast({message: $r('app.string.file_delete_success', name)})
+    } catch (e) {
+      this.getUIContext().getPromptAction().showToast({message: e['message']})
+    }
+    await progressDialog.dismiss(true)
+  }
+
 
   build() {
     Column() {
@@ -26,18 +183,132 @@ export struct LocalPage {
           AppRouter.goToLocalSearch(this.getUIContext(), args)
         }
       })
+      Column() {
 
+        // 目录结构
+        List() {
+          LazyForEach(this.folderDataSource, (item: FolderItem) => {
+            ListItem() {
+              FolderItemView({folderItem: item, callback: this.folderItemCallback})
+            }
+          })
+        }
+        .padding({
+          left: CommonConstants.SPACE_16,
+          right: CommonConstants.SPACE_16
+        })
+        .scrollBar(BarState.Off)
+        .listDirection(Axis.Horizontal)
+        .width(CommonConstants.FULL_PERCENT)
+        .height(24)
+
+        // 媒体列表
+        Stack() {
+          Refresh({ refreshing: $$this.isRefreshing }) {
+            List() {
+              LazyForEach(this.mediaDataSource, (item: BookItem) => {
+                ListItem() {
+                  BookItemView({mediaItem: item,
+                    callback: this.mediaItemCallback,
+                    menuCallback: this.mediaMenuCallback})
+                }
+                .swipeAction({
+                  end: actionMenuMediaItem.bind(this, item, this.mediaMenuCallback)
+                })
+              }, (item: BookItem) => item.key)
+            }
+            .divider({
+              strokeWidth: 1,
+              color: $r('sys.color.comp_divider')
+            })
+            .contentEndOffset(px2vp(this.avoidArea?.bottomRect.height))
+            .width('100%')
+            .height('100%')
+            .alignListItem(ListItemAlign.Center)
+            .scrollBar(BarState.Off)
+          }
+          .refreshOffset(64)
+          .pullToRefresh(true)
+          .height(CommonConstants.FULL_PERCENT)
+          .width(CommonConstants.FULL_PERCENT)
+          .onRefreshing(() => {
+            this.updateData(true)
+          })
+
+          // error empty
+          Text(this.errorOrEmptyContent)
+            .textAlign(TextAlign.Center)
+            .visibility(this.errorOrEmptyContent ? Visibility.Visible : Visibility.Hidden)
+            .fontSize($r('sys.float.Subtitle_M'))
+            .fontColor($r('sys.color.font_secondary'))
+        }
+        .width(CommonConstants.FULL_PERCENT)
+        .layoutWeight(1)
+      }
+        .width(CommonConstants.FULL_PERCENT)
+        .layoutWeight(1)
     }
     .width(CommonConstants.FULL_PERCENT)
     .height(CommonConstants.FULL_PERCENT)
   }
 
+  play(item: BookItem) {
+    // 开始播放
+    let playerArgs: MediaArgs = {
+      id: item.id,
+      name: item.name,
+      uri: item.uri
+    }
+    AppRouter.goToLocalReader(this.getUIContext(), playerArgs)
+  }
+
   aboutToDisappear(): void {
     this.homeControl!.callback = undefined
+    this.mediaData?.release()
+    // this.getUIContext().getHostContext()?.eventHub
+    //   .off(AppEvent.EVENT_MEDIA_INFO_HISTORY_CHANGED)
   }
 
 }
 
+
+@Reusable
+@Component
+struct FolderItemView {
+
+  @Require callback?: Callback<FolderItem>
+
+  @Require @State folderItem?: FolderItem = undefined
+
+  aboutToAppear(): void {
+
+  }
+
+  aboutToReuse(params: Record<string, object>): void {
+    this.folderItem = params['folderItem'] as FolderItem
+  }
+
+  build() {
+    Row() {
+      Text((this.folderItem?.alias || this.folderItem?.name))
+        .height(14)
+      Text(" > ")
+        .height(14)
+    }
+    .onClick(() => {
+      this.callback?.(this.folderItem)
+    })
+  }
+
+  aboutToRecycle(): void {
+
+  }
+
+  aboutToDisappear(): void {
+
+  }
+
+}
 
 @Reusable
 @Component
@@ -93,7 +364,7 @@ struct BookItemView {
       if (this.mediaItem) {
         this.mediaItem.thumb = path
       }
-    }, item.header)
+    })
   }
 
   private clearThumbWatch() {
@@ -105,7 +376,7 @@ struct BookItemView {
   }
 
   private updateState() {
-    this.finished = (this.mediaItem?.history && (this.mediaItem.history.duration - this.mediaItem.history.position < 5000)) ? true : false;
+    this.finished = (this.mediaItem?.history && (this.mediaItem.history.page >= this.mediaItem.history.pages)) ? true : false;
     if (!this.mediaItem?.dir) {
       // 给缩略图赋值
       this.mediaImage = this.mediaItem?.thumb
@@ -142,28 +413,6 @@ struct BookItemView {
             })
         }
 
-        // 角标背景
-        Shape() {
-          Path({width: 38, height: 38, commands: 'M0 0 L100 0 L100 100 Z'})
-        }
-        .width(38)
-        .height(38)
-        .visibility(this.finished ? Visibility.Visible : Visibility.Hidden)
-        .viewPort({ x: 0, y: 0, width: "100px", height: "100px" })
-        // .stroke($r('sys.color.ohos_id_color_activated'))
-        .strokeWidth(0)
-        .fill($r('sys.color.ohos_id_color_activated'))
-        .alignRules({
-          end: {
-            anchor: "__container__",
-            align: HorizontalAlign.End
-          },
-          top: {
-            anchor: "__container__",
-            align: VerticalAlign.Top
-          }
-        })
-
         // 完成标签
         SymbolGlyph($r('sys.symbol.checkmark'))
         // .fontSize(16)
@@ -183,7 +432,7 @@ struct BookItemView {
           })
 
         // 进度
-        Progress({ value: this.mediaItem?.history?.position, total: this.mediaItem?.history?.duration, type: ProgressType.Linear })
+        Progress({ value: this.mediaItem?.history?.page, total: this.mediaItem?.history?.pages, type: ProgressType.Linear })
           .visibility(this.mediaItem?.history && !this.finished ? Visibility.Visible : Visibility.Hidden)
           .alignRules({
             start: {
