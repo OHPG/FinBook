@@ -1,10 +1,6 @@
 export class TypeUtil {
 
   private static readonly BOOK_SUFFIX = [
-    /**
-     * txt
-     */
-    "txt",
 
     /**
      * pdf

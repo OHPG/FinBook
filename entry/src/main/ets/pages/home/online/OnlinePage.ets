@@ -43,7 +43,7 @@ export struct OnlinePage {
             attr.width = CommonConstants.FULL_PERCENT
             attr.height = CommonConstants.FULL_PERCENT
             attr.contentEndOffset = px2vp(this.avoidArea?.bottomRect.height)
-          },
+          }
         })
           .width(CommonConstants.FULL_PERCENT)
           .layoutWeight(1)

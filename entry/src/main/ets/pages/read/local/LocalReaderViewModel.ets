@@ -2,6 +2,7 @@ import { LoadType } from "@ohpg/fin-core";
 import { SimpleRepository } from "@ohpg/fin-framework";
 import { BookHistory } from "../../../entity/BookHistory";
 import { FinBookRawSource } from "../../../entity/FinBookRawSource";
+import { AppEvent } from "../../../event/AppEvent";
 import { AppViewModel } from "../../../lifecycle/AppViewModel";
 import { AppDataStore } from "../../../store/AppDataStore";
 import { FileUtil } from "../../../util/FileUtil";
@@ -42,6 +43,7 @@ export class LocalReaderViewModel extends AppViewModel implements SimpleReposito
       page: progress,
       pages: chapter,
     }
+    this.context.eventHub.emit(AppEvent.EVENT_MEDIA_INFO_HISTORY_CHANGED, bookHistory)
     return this.dataStore.insertBookHistory(bookHistory)
   }
 

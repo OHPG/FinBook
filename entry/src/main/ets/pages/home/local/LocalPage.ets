@@ -14,16 +14,19 @@ import { window } from "@kit.ArkUI"
 import { LocalViewModel } from "./LocalViewModel"
 import { ProgressDialog } from "@ohpg/fin-framework"
 import { MediaArgs } from "../../detail/MediaArgs"
-import { actionMenuMediaItem } from "../../../menu/ActionMenu"
+import { BreakpointSystem } from "@ohpg/fin-core"
+import { AppEvent } from "../../../event/AppEvent"
+import { util } from "@kit.ArkTS"
+import { BookHistory } from "../../../entity/BookHistory"
 
 @Component
 export struct LocalPage {
 
   @StorageLink("currentHomeControl") homeControl?: HomeControl = undefined
 
-  private readonly mediaData: LocalViewModel = new LocalViewModel(this.getUIContext().getHostContext()!)
+  @StorageProp(BreakpointSystem.CURRENT_WIDTH_BREAKPOINT) currentWidthBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_SM
 
-  readonly emptyOrErrorResource: ResourceStr = $r('app.string.global_content_empty')
+  private readonly mediaData: LocalViewModel = new LocalViewModel(this.getUIContext().getHostContext()!)
 
   @StorageProp('currentAvoidArea') avoidArea?: window.AvoidArea = undefined
 
@@ -69,17 +72,17 @@ export struct LocalPage {
       }
       return false
     }
-    // this.getUIContext().getHostContext()?.eventHub
-    //   .on(AppEvent.EVENT_MEDIA_INFO_HISTORY_CHANGED, (history: VideoHistory) => {
-    //     let index = this.mediaDataSource.getDataList().findIndex((item) => item.id === history.id)
-    //     if (index <0 ) {
-    //       return
-    //     }
-    //     let mediaItem = this.mediaDataSource.getData(index)
-    //     mediaItem.history = history
-    //     mediaItem.key = util.generateRandomUUID(true)
-    //     this.mediaDataSource.notifyDataChange(index)
-    //   })
+    this.getUIContext().getHostContext()?.eventHub
+      .on(AppEvent.EVENT_MEDIA_INFO_HISTORY_CHANGED, (history: BookHistory) => {
+        let index = this.mediaDataSource.getDataList().findIndex((item) => item.id === history.id)
+        if (index <0 ) {
+          return
+        }
+        let mediaItem = this.mediaDataSource.getData(index)
+        mediaItem.history = history
+        mediaItem.key = util.generateRandomUUID(true)
+        this.mediaDataSource.notifyDataChange(index)
+      })
     this.folderDataSource.pushData(this.currentFolder)
     this.isRefreshing = true
   }
@@ -118,7 +121,7 @@ export struct LocalPage {
     this.errorOrEmptyContent = undefined
     // 更新当前目录下的元素
     let items: Array<BookItem> | undefined = undefined
-    let errors: ResourceStr | undefined = this.emptyOrErrorResource
+    let errors: ResourceStr | undefined
     if (force || this.currentFolder.items === undefined) {
       this.isRefreshing = true
       try {
@@ -135,7 +138,15 @@ export struct LocalPage {
       this.mediaDataSource.pushArrayData(items)
     } else {
       this.mediaDataSource.clear()
-      this.errorOrEmptyContent = errors
+      if (errors) {
+        this.errorOrEmptyContent = errors
+      } else {
+        if (this.currentFolder.path.length <= 0) {
+          this.errorOrEmptyContent = $r('app.string.global_content_empty')
+        } else {
+          this.errorOrEmptyContent = $r('app.string.global_content_empty_simple')
+        }
+      }
     }
   }
 
@@ -205,26 +216,30 @@ export struct LocalPage {
         // 媒体列表
         Stack() {
           Refresh({ refreshing: $$this.isRefreshing }) {
-            List() {
+            Grid() {
               LazyForEach(this.mediaDataSource, (item: BookItem) => {
-                ListItem() {
+                GridItem() {
                   BookItemView({mediaItem: item,
                     callback: this.mediaItemCallback,
                     menuCallback: this.mediaMenuCallback})
                 }
-                .swipeAction({
-                  end: actionMenuMediaItem.bind(this, item, this.mediaMenuCallback)
-                })
+                // .swipeAction({
+                //   end: actionMenuMediaItem.bind(this, item, this.mediaMenuCallback)
+                // })
               }, (item: BookItem) => item.key)
             }
-            .divider({
-              strokeWidth: 1,
-              color: $r('sys.color.comp_divider')
+            .padding({
+              left: CommonConstants.SPACE_16,
+              right: CommonConstants.SPACE_16,
+              bottom: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD ?
+                px2vp(this.avoidArea?.bottomRect.height) :
+                0
             })
-            .contentEndOffset(px2vp(this.avoidArea?.bottomRect.height))
+            .rowsGap(CommonConstants.SPACE_12)
+            .columnsGap(CommonConstants.SPACE_12)
+            .columnsTemplate("repeat(auto-fit, 120)")
             .width('100%')
             .height('100%')
-            .alignListItem(ListItemAlign.Center)
             .scrollBar(BarState.Off)
           }
           .refreshOffset(64)
@@ -265,8 +280,8 @@ export struct LocalPage {
   aboutToDisappear(): void {
     this.homeControl!.callback = undefined
     this.mediaData?.release()
-    // this.getUIContext().getHostContext()?.eventHub
-    //   .off(AppEvent.EVENT_MEDIA_INFO_HISTORY_CHANGED)
+    this.getUIContext().getHostContext()?.eventHub
+      .off(AppEvent.EVENT_MEDIA_INFO_HISTORY_CHANGED)
   }
 
 }
@@ -388,7 +403,7 @@ struct BookItemView {
   }
 
   build() {
-    Row({space: CommonConstants.SPACE_8}) {
+    Column({space: CommonConstants.SPACE_8}) {
 
       RelativeContainer() {
 
@@ -398,8 +413,8 @@ struct BookItemView {
             .width(CommonConstants.FULL_PERCENT)
             .height(CommonConstants.FULL_PERCENT)
         } else {
-          SymbolGlyph(this.mediaItem?.dir ? $r('sys.symbol.folder_fill') : $r('sys.symbol.template_fill'))
-            .fontSize(36)
+          SymbolGlyph(this.mediaItem?.dir ? $r('sys.symbol.folder_fill') : $r('sys.symbol.book_open_fill'))
+            .fontSize(48)
             .fontColor([$r('sys.color.ohos_id_color_activated')])
             .alignRules({
               middle: {
@@ -412,42 +427,6 @@ struct BookItemView {
               }
             })
         }
-
-        // 完成标签
-        SymbolGlyph($r('sys.symbol.checkmark'))
-        // .fontSize(16)
-          .width(19)
-          .height(19)
-          .visibility(this.finished ? Visibility.Visible : Visibility.Hidden)
-          .fontColor([$r('sys.color.white')])
-          .alignRules({
-            end: {
-              anchor: "__container__",
-              align: HorizontalAlign.End
-            },
-            top: {
-              anchor: "__container__",
-              align: VerticalAlign.Top
-            }
-          })
-
-        // 进度
-        Progress({ value: this.mediaItem?.history?.page, total: this.mediaItem?.history?.pages, type: ProgressType.Linear })
-          .visibility(this.mediaItem?.history && !this.finished ? Visibility.Visible : Visibility.Hidden)
-          .alignRules({
-            start: {
-              anchor: "__container__",
-              align: HorizontalAlign.Start
-            },
-            end: {
-              anchor: "__container__",
-              align: HorizontalAlign.End
-            },
-            bottom: {
-              anchor: "__container__",
-              align: VerticalAlign.Bottom
-            }
-          })
 
         // new
         Text("New")
@@ -470,12 +449,12 @@ struct BookItemView {
       .clip(true)
       .backgroundColor($r('sys.color.background_secondary'))
       .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
-      .aspectRatio(16/9.0)
-      .height(68)
+      .width(CommonConstants.FULL_PERCENT)
+      .aspectRatio(0.67)
 
       Column() {
         Text(this.mediaItem?.alias || this.mediaItem?.name)
-          .maxLines(2)
+          .maxLines(1)
           .ellipsisMode(EllipsisMode.END)
           .wordBreak(WordBreak.BREAK_ALL)
           .textOverflow({overflow: TextOverflow.Ellipsis})
@@ -493,14 +472,9 @@ struct BookItemView {
           .fontSize($r('sys.float.Subtitle_S'))
       }
       .justifyContent(FlexAlign.SpaceAround)
-      .height(68)
-      .layoutWeight(1)
+      .height(48)
     }
-    .padding({
-      left: CommonConstants.SPACE_16
-    , right: CommonConstants.SPACE_16})
     .width(CommonConstants.FULL_PERCENT)
-    .height(78)
     .bindContextMenu(this.menuBuilder, ResponseType.RightClick, this.menuOptions)
     .bindContextMenu(this.menuBuilder, ResponseType.LongPress, this.menuOptions)
     .onClick(() => {

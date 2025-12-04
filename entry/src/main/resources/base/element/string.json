@@ -42,7 +42,7 @@
     },
     {
       "name": "global_content_empty",
-      "value": "这里还没有内容\n请点击【+】添加媒体后下拉刷新试试吧。"
+      "value": "导入指南\n\n系统文件管理器：\n    我的设备/Download/FinBook\n\nPC管理文件：\n    我的设备/Download/org.ohpg.fin.book\n\n导入完成后，刷新列表即可。"
     },
     {
       "name": "global_content_empty_simple",
