@@ -39,6 +39,11 @@ struct OnlineReaderPage {
   @Provide @Watch("onMenuChanged") menuVisible: boolean = false
 
   /**
+   * 书籍章节数
+   */
+  @Provide @Watch('onChapterChange') bookChapter: number = 0
+
+  /**
    * 阅读进度
    */
   @Provide @Watch('onProgressChange') readProgress: number = 0
@@ -124,6 +129,10 @@ struct OnlineReaderPage {
     } else {
       this.addImmersiveModeTimer()
     }
+  }
+
+  private onChapterChange() {
+
   }
 
   private onProgressChange() {

@@ -19,6 +19,8 @@ export struct StaticReaderView {
 
   @Consume immersiveMode: boolean
 
+  @Consume bookChapter: number
+
   @Consume readProgress: number
 
   @Require @Prop bookPath: string = '';
@@ -39,6 +41,7 @@ export struct StaticReaderView {
   }
 
   private constructData(count: number) {
+    this.bookChapter = count
     let dataArray = new Array<ImagePageInfo>()
     for (let i = 0; i < count; i++) {
       dataArray.push({

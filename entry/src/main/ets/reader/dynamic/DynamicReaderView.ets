@@ -21,6 +21,8 @@ export struct DynamicReaderView {
 
   @Consume menuVisible: boolean
 
+  @Consume bookChapter: number
+
   @Consume readProgress: number
 
   private bookCtrl: readerCore.ReaderComponentController = new readerCore.ReaderComponentController()
@@ -120,8 +122,8 @@ export struct DynamicReaderView {
     this.bookCtrlPrepared = true
     this.onSettingChange()
     this.bookHandler = await bookParser.getDefaultHandler(this.bookPath)
+    this.bookChapter = this.bookHandler.getCatalogList().length
     this.bookCtrl.registerBookParser(this.bookHandler)
-
   }
 
   build() {

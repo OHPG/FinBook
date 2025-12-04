@@ -53,6 +53,8 @@ export class FileUtil {
         throw new Error("Unsupported file type")
       }
       return type
+    } catch (e) {
+      throw e as Error
     } finally {
       fs.close(file.fd)
     }

@@ -7,6 +7,11 @@ export class TypeUtil {
     "txt",
 
     /**
+     * pdf
+     */
+    "pdf",
+
+    /**
      * epub
      */
     "epub",

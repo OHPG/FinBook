@@ -2,6 +2,7 @@ import { image } from '@kit.ImageKit';
 import { bookParser, readerCore } from '@kit.ReaderKit';
 import LazyDataSource from '../../../common/LazyDataSource';
 import { CommonConstants } from '../../../common/CommonConstants';
+import BuildProfile from 'BuildProfile';
 
 @Component
 export struct CataView {
@@ -31,11 +32,25 @@ export struct CataView {
     this.bookCataList = this.bookHandler.getCatalogList();
     this.cataDataSource.pushArrayData(this.bookCataList)
     // cover
-    let buffer = this.bookHandler.getResourceContent(-1, this.bookInfo.bookCoverImage)
-    let imageSource: image.ImageSource = image.createImageSource(buffer);
-    this.bookCover = imageSource.createPixelMapSync();
-    imageSource.release();
+    this.parseCover()
     this.onSpineChange()
+  }
+
+  private parseCover() {
+    try {
+      if (this.bookInfo?.bookCoverImage && this.bookInfo.bookCoverImage.length > 0) {
+        let buffer = this.bookHandler.getResourceContent(-1, this.bookInfo.bookCoverImage)
+        if (buffer && buffer.byteLength > 0) {
+          let imageSource: image.ImageSource = image.createImageSource(buffer);
+          this.bookCover = imageSource.createPixelMapSync();
+          imageSource.release();
+        }
+      }
+    } catch (e) {
+      if (BuildProfile.DEBUG) {
+        console.error("CataView parse cover error: " + JSON.stringify(e))
+      }
+    }
   }
 
   private onSpineChange() {
