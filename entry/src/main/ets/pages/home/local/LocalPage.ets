@@ -189,10 +189,10 @@ export struct LocalPage {
     Column() {
       HomeToolBar({
         title: $r('app.string.tab_local'),
-        searchEnable: true,
-        searchCallback: (args) => {
-          AppRouter.goToLocalSearch(this.getUIContext(), args)
-        }
+        // searchEnable: false,
+        // searchCallback: (args) => {
+        //   AppRouter.goToLocalSearch(this.getUIContext(), args)
+        // }
       })
       Column() {
 

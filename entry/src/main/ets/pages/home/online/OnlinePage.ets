@@ -27,6 +27,10 @@ export struct OnlinePage {
         title: $r('app.string.tab_online'),
         searchEnable: true,
         searchCallback: (args) => {
+          if (!this.activeInfo) {
+            this.getUIContext().getPromptAction().showToast({message: $r('app.string.prefer_server_hint')})
+            return
+          }
           AppRouter.goToOnlineSearch(this.getUIContext(), args)
         }
       })
