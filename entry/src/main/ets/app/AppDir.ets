@@ -15,14 +15,14 @@ export class AppDir {
     options.pickerMode = picker.DocumentPickerMode.DOWNLOAD;
     let selectResult: string[] = await documentPicker.save(options);
     let url = selectResult[0];
-    let videosDir = new fileUri.FileUri(url + "/Videos").path
+    let dir = new fileUri.FileUri(url).path
     let stat: fs.Stat | undefined
     try {
-      stat = await fs.stat(videosDir)
+      stat = await fs.stat(dir)
     } catch (e) {
       // file not found.
       try {
-        fs.mkdirSync(videosDir)
+        fs.mkdirSync(dir)
       } catch (e2) {
         throw new Error("Create directory failed.")
       }
@@ -31,7 +31,7 @@ export class AppDir {
     if (stat && !stat.isDirectory()) {
       throw new Error("Folder type error.")
     }
-    return videosDir
+    return dir
   }
 
   /**
