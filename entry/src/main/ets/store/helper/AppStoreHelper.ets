@@ -1,7 +1,8 @@
 import { StoreHelper } from "@ohpg/fin-core"
 import { relationalStore } from "@kit.ArkData"
-import BuildProfile from "BuildProfile"
 import { BookHistoryTable } from "../table/BookHistoryTable"
+import { StorageInfoTable } from "../table/StorageInfoTable"
+import BuildProfile from "BuildProfile"
 
 /**
  * @Author peerless2012
@@ -13,8 +14,7 @@ import { BookHistoryTable } from "../table/BookHistoryTable"
 export class AppStoreHelper extends StoreHelper {
 
   constructor(context: Context) {
-    super(context,
-      1, {
+    super(context, 2, {
         name: "fin_book.db",
         securityLevel: relationalStore.SecurityLevel.S1,
         encrypt: !BuildProfile.DEBUG
@@ -30,7 +30,10 @@ export class AppStoreHelper extends StoreHelper {
   }
 
   protected async onUpgrade(store: relationalStore.RdbStore, oldVersion: number, newVersion: number): Promise<void> {
-
+    switch (oldVersion) {
+      case 1:
+        await store.executeSql(StorageInfoTable.CREATE_SQL)
+    }
   }
 
 }

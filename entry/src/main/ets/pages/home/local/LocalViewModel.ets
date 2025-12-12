@@ -9,6 +9,7 @@ import { AppThumb } from '../../../thumb/AppThumb';
 import { TypeUtil } from '../../../util/TypeUtil';
 import { delay } from '../../../comp/Time';
 import { AppDataStore } from '../../../store/AppDataStore';
+import { NormalViewModel } from '../com/NormalViewModel';
 
 /**
  * @Author peerless2012
@@ -17,7 +18,7 @@ import { AppDataStore } from '../../../store/AppDataStore';
  * @Version V1.0
  * @Description
  */
-export class LocalViewModel {
+export class LocalViewModel extends NormalViewModel{
 
   private context: Context
 
@@ -28,6 +29,7 @@ export class LocalViewModel {
   private readonly dataStore: AppDataStore
 
   constructor(context: Context) {
+    super()
     this.context = context
     this.appDir = new AppDir(context)
     this.thumb = AppStorage.get(AppThumb.THUMB)!

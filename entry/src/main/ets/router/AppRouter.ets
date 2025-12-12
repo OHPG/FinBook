@@ -1,3 +1,4 @@
+import { StorageInfo } from "../entity/StorageInfo";
 import { MediaArgs } from "../pages/detail/MediaArgs";
 import { SearchArgs } from "../pages/search/SearchArgs";
 
@@ -36,6 +37,10 @@ export class AppRouter {
 
   public static goToOnlineReader(context: UIContext, args: MediaArgs) {
     context.getRouter().pushUrl({url: "pages/read/online/OnlineReaderPage", params: args})
+  }
+
+  public static goToStorageDetail(context: UIContext, info: StorageInfo) {
+    context.getRouter().pushUrl({url: "pages/storage/detail/StorageDetailPage", params: info})
   }
 
 }

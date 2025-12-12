@@ -13,6 +13,14 @@
       "value": "FinBook"
     },
     {
+      "name": "menu_edit",
+      "value": "编辑"
+    },
+    {
+      "name": "menu_delete",
+      "value": "删除"
+    },
+    {
       "name": "privacy",
       "value": "https://agreement-drcn.hispace.dbankcloud.cn/index.html?lang=zh&agreementId=1574188982982436096"
     },
@@ -51,6 +59,18 @@
     {
       "name": "tab_local",
       "value": "本地"
+    },
+    {
+      "name": "tab_storage",
+      "value": "存储"
+    },
+    {
+      "name": "storage_dav",
+      "value": "WebDAV"
+    },
+    {
+      "name": "storage_smb",
+      "value": "SMB"
     },
     {
       "name": "tab_online",
