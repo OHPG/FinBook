@@ -5,6 +5,8 @@ import { AboutPage } from './about/AboutPage'
 import { HomeControl } from './HomeControl'
 import { LocalPage } from './local/LocalPage'
 import { OnlinePage } from './online/OnlinePage'
+import { PreferPage } from './prefer/PreferPage'
+import { WifiPage } from './wifi/WifiPage'
 
 @Entry
 @Component
@@ -56,12 +58,14 @@ struct HomePage {
       .tabBar(this.TabBuilder($r('app.string.tab_local'), 0, $r('sys.symbol.house_fill')))
 
       TabContent() {
-        OnlinePage()
+        // OnlinePage()
+        WifiPage()
       }
       .tabBar(this.TabBuilder($r('app.string.tab_online'), 1, $r('sys.symbol.externaldrive_fill_3')))
 
       TabContent() {
-        AboutPage()
+        // AboutPage()
+        PreferPage()
       }
       .tabBar(this.TabBuilder($r('app.string.tab_about'), 2, $r('sys.symbol.square_fill_grid_2x2')))
     }

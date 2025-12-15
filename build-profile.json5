@@ -73,6 +73,18 @@
       ]
     },
     {
+      "name": "finder",
+      "srcPath": "./finder",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default","publish"
+          ]
+        }
+      ]
+    },
+    {
       "name": "core",
       "srcPath": "../FinFramework/lib_core"
     },

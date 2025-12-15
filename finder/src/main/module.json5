@@ -1,0 +1,21 @@
+{
+  "module": {
+    "name": "finder",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet",
+      "2in1"
+    ],
+    "requestPermissions": [
+      {
+        "name": "ohos.permission.INTERNET",
+        "reason": "$string:sandboxfinder_internet",
+      },
+      {
+        "name": "ohos.permission.GET_NETWORK_INFO",
+        "reason": "$string:sandboxfinder_get_network_info"
+      }
+    ]
+  }
+}
