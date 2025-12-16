@@ -83,23 +83,18 @@ export struct DynamicReaderView {
    * 恢复之前的配置
    */
   private restoreConfig() {
-    try {
-      let config = this.appPrefer.getBookConfig()
-      if (config && config.length > 0) {
-        let setting: readerCore.ReaderSetting = JSON.parse(config)
-        this.bookSetting.fontName = setting.fontName
-        this.bookSetting.fontPath = setting.fontPath
-        this.bookSetting.fontSize = setting.fontSize
-        this.bookSetting.fontColor = setting.fontColor
-        this.bookSetting.fontWeight = setting.fontWeight
-        this.bookSetting.lineHeight = setting.lineHeight
-        this.bookSetting.nightMode = setting.nightMode
-        this.bookSetting.themeColor = setting.themeColor
-        this.bookSetting.themeBgImg = setting.themeBgImg
-        this.bookSetting.flipMode = setting.flipMode
-      }
-    } catch (e) {
-      // ignore
+    let config = this.appPrefer.getBookConfig()
+    if (config) {
+      this.bookSetting.fontName = config.fontName
+      this.bookSetting.fontPath = config.fontPath
+      this.bookSetting.fontSize = config.fontSize
+      this.bookSetting.fontColor = config.fontColor
+      this.bookSetting.fontWeight = config.fontWeight
+      this.bookSetting.lineHeight = config.lineHeight
+      this.bookSetting.nightMode = config.nightMode
+      this.bookSetting.themeColor = config.themeColor
+      this.bookSetting.themeBgImg = config.themeBgImg
+      this.bookSetting.flipMode = config.flipMode
     }
   }
 
@@ -164,12 +159,7 @@ export struct DynamicReaderView {
     * 保存更改的配置
    */
   private saveSetting() {
-    try {
-      let config = JSON.stringify(this.bookSetting)
-      this.appPrefer.setBookConfig(config)
-    } catch (e) {
-      // ignore
-    }
+    this.appPrefer.setBookConfig(this.bookSetting)
   }
 
   aboutToDisappear(): void {

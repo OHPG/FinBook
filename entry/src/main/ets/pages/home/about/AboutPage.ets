@@ -4,6 +4,7 @@ import { CommonConstants, FinRouter } from '@ohpg/fin-framework'
 import { pasteboard } from '@kit.BasicServicesKit'
 import { Repository } from '../../../data/Repository'
 import { HomeToolBar } from '../../../widget/bar/HomeToolBar'
+import { AppRouter } from '../../../router/AppRouter'
 
 @Component
 export struct AboutPage {
@@ -24,7 +25,7 @@ export struct AboutPage {
       Blank()
     }
     .width(CommonConstants.FULL_PERCENT)
-    .height(48)
+    .height(60)
     .padding({
       left: CommonConstants.SPACE_16,
       right: CommonConstants.SPACE_16
@@ -40,47 +41,51 @@ export struct AboutPage {
         title: $r('app.string.about')
       })
 
-      Column({ space: CommonConstants.SPACE_12}) {
-        Row() {
-          Text($r('app.string.prefer_current_server'))
-          Text(this.repository?.getActiveInfo()?.serverInfo.serverName || $r('app.string.prefer_server_hint'))
-        }
-        Row() {
-          Text($r('app.string.prefer_current_address'))
-          Text(this.repository?.getActiveInfo()?.addressInfo.address || $r('app.string.prefer_server_hint'))
-        }
-        Row() {
-          Text($r('app.string.prefer_current_user'))
-          Text(this.repository?.getActiveInfo()?.userInfo.userName || $r('app.string.prefer_server_hint'))
-        }
-      }
-      .width(CommonConstants.FULL_PERCENT)
-      .alignItems(HorizontalAlign.Start)
-      .padding({
-        left: CommonConstants.SPACE_16,
-        right: CommonConstants.SPACE_16
-      })
+      // Column({ space: CommonConstants.SPACE_12}) {
+      //   Row() {
+      //     Text($r('app.string.prefer_current_server'))
+      //     Text(this.repository?.getActiveInfo()?.serverInfo.serverName || $r('app.string.prefer_server_hint'))
+      //   }
+      //   Row() {
+      //     Text($r('app.string.prefer_current_address'))
+      //     Text(this.repository?.getActiveInfo()?.addressInfo.address || $r('app.string.prefer_server_hint'))
+      //   }
+      //   Row() {
+      //     Text($r('app.string.prefer_current_user'))
+      //     Text(this.repository?.getActiveInfo()?.userInfo.userName || $r('app.string.prefer_server_hint'))
+      //   }
+      // }
+      // .width(CommonConstants.FULL_PERCENT)
+      // .alignItems(HorizontalAlign.Start)
+      // .padding({
+      //   left: CommonConstants.SPACE_16,
+      //   right: CommonConstants.SPACE_16
+      // })
 
-      this.preferItemBuilder($r('sys.symbol.externaldrive'), $r('app.string.prefer_server'), () => {
-        if (this.repository?.getActiveInfo()) {
-          FinRouter.editServer(this.getUIContext())
-        } else {
-          FinRouter.auth(this.getUIContext())
-        }
-      })
-      this.preferItemBuilder($r('sys.symbol.worldclock'), $r('app.string.prefer_address'), () => {
-        if (this.repository?.getActiveInfo()) {
-          FinRouter.editAddress(this.getUIContext())
-        } else {
-          FinRouter.auth(this.getUIContext())
-        }
-      })
-      this.preferItemBuilder($r('sys.symbol.person'), $r('app.string.prefer_user'), () => {
-        if (this.repository?.getActiveInfo()) {
-          FinRouter.editUser(this.getUIContext())
-        } else {
-          FinRouter.auth(this.getUIContext())
-        }
+      // this.preferItemBuilder($r('sys.symbol.externaldrive'), $r('app.string.prefer_server'), () => {
+      //   if (this.repository?.getActiveInfo()) {
+      //     FinRouter.editServer(this.getUIContext())
+      //   } else {
+      //     FinRouter.auth(this.getUIContext())
+      //   }
+      // })
+      // this.preferItemBuilder($r('sys.symbol.worldclock'), $r('app.string.prefer_address'), () => {
+      //   if (this.repository?.getActiveInfo()) {
+      //     FinRouter.editAddress(this.getUIContext())
+      //   } else {
+      //     FinRouter.auth(this.getUIContext())
+      //   }
+      // })
+      // this.preferItemBuilder($r('sys.symbol.person'), $r('app.string.prefer_user'), () => {
+      //   if (this.repository?.getActiveInfo()) {
+      //     FinRouter.editUser(this.getUIContext())
+      //   } else {
+      //     FinRouter.auth(this.getUIContext())
+      //   }
+      // })
+
+      this.preferItemBuilder($r('sys.symbol.satellite_map_fill'), $r('app.string.prefer_interface'), () => {
+        AppRouter.goToInterface(this.getUIContext())
       })
 
       this.preferItemBuilder($r('sys.symbol.doc_plaintext'), $r('app.string.prefer_privacy'), () => {

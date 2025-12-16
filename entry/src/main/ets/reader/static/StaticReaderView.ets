@@ -6,12 +6,15 @@ import { CommonConstants } from '../../common/CommonConstants';
 import { CacheRef } from '@ohpg/fin-core';
 import { BookType } from '../../enum/BookType';
 import { ImageLoader } from './loader/ImageLoader';
+import { AppPrefer } from '../../prefer/AppPrefer';
 
 @Reusable
 @Component
 export struct StaticReaderView {
 
   @StorageProp('currentWidthBreakpoint') currentBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_MD;
+
+  @StorageLink(AppPrefer.PREFER) appPrefer?: AppPrefer = undefined
 
   private dataSource: LazyDataSource<ImagePageInfo> = new LazyDataSource<ImagePageInfo>();
 
@@ -28,6 +31,7 @@ export struct StaticReaderView {
   @Require @Prop bookType: BookType
 
   @Provide imageLoader?: ImageLoader = undefined
+
 
   aboutToAppear() {
     this.imageLoader = this.bookType === BookType.ARCHIVE ? new ArchiveLoader() : new PdfLoader()
@@ -61,6 +65,7 @@ export struct StaticReaderView {
       }
       .index(this.readProgress)
       .displayCount(this.currentBreakpoint >= WidthBreakpoint.WIDTH_LG ? 2 : 1, true)
+      .vertical(this.appPrefer?.getBookOrientation() ? true : false)
       .indicator(false)
       .width('100%')
       .height('100%')

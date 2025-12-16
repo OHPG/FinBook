@@ -6,6 +6,7 @@
     "pages/grid/GridPage",
     "pages/detail/DetailPage",
     "pages/search/SearchPage",
+    "pages/interface/InterfacePage",
     "pages/read/local/LocalReaderPage",
     "pages/read/online/OnlineReaderPage"
   ]

@@ -5,7 +5,6 @@ import { AboutPage } from './about/AboutPage'
 import { HomeControl } from './HomeControl'
 import { LocalPage } from './local/LocalPage'
 import { OnlinePage } from './online/OnlinePage'
-import { PreferPage } from './prefer/PreferPage'
 import { WifiPage } from './wifi/WifiPage'
 
 @Entry
@@ -61,11 +60,6 @@ struct HomePage {
       //   OnlinePage()
       // }
       // .tabBar(this.TabBuilder($r('app.string.tab_online'), 1, $r('sys.symbol.externaldrive_fill_3')))
-      //
-      // TabContent() {
-      //   AboutPage()
-      // }
-      // .tabBar(this.TabBuilder($r('app.string.tab_about'), 2, $r('sys.symbol.square_fill_grid_2x2')))
 
       TabContent() {
         WifiPage()
@@ -73,7 +67,7 @@ struct HomePage {
       .tabBar(this.TabBuilder($r('app.string.tab_trans'), 1, $r('sys.symbol.worldclock_fill')))
 
       TabContent() {
-        PreferPage()
+        AboutPage()
       }
       .tabBar(this.TabBuilder($r('app.string.tab_about'), 2, $r('sys.symbol.square_fill_grid_2x2')))
     }

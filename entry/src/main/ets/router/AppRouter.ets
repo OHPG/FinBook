@@ -38,4 +38,7 @@ export class AppRouter {
     context.getRouter().pushUrl({url: "pages/read/online/OnlineReaderPage", params: args})
   }
 
+  public static goToInterface(context: UIContext) {
+    context.getRouter().pushUrl({url: "pages/interface/InterfacePage"})
+  }
 }
