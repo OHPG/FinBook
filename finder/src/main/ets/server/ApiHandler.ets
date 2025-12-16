@@ -219,7 +219,11 @@ export class ApiHandler {
     if (!filePath) {
       return { code: 400, message: 'Missing path' };
     }
-    await this.fileManager.mkdir(filePath, '');
-    return { code: 200, data: { success: true } };
+    let result = await this.fileManager.mkdir(filePath, '');
+    if (result) {
+      return { code: 200, data: { success: true } };
+    } else {
+      return { code: 400, message: "Can't mkdir" };
+    }
   }
 }

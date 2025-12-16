@@ -57,14 +57,22 @@ struct HomePage {
       }
       .tabBar(this.TabBuilder($r('app.string.tab_local'), 0, $r('sys.symbol.house_fill')))
 
-      TabContent() {
-        // OnlinePage()
-        WifiPage()
-      }
-      .tabBar(this.TabBuilder($r('app.string.tab_online'), 1, $r('sys.symbol.externaldrive_fill_3')))
+      // TabContent() {
+      //   OnlinePage()
+      // }
+      // .tabBar(this.TabBuilder($r('app.string.tab_online'), 1, $r('sys.symbol.externaldrive_fill_3')))
+      //
+      // TabContent() {
+      //   AboutPage()
+      // }
+      // .tabBar(this.TabBuilder($r('app.string.tab_about'), 2, $r('sys.symbol.square_fill_grid_2x2')))
 
       TabContent() {
-        // AboutPage()
+        WifiPage()
+      }
+      .tabBar(this.TabBuilder($r('app.string.tab_trans'), 1, $r('sys.symbol.worldclock_fill')))
+
+      TabContent() {
         PreferPage()
       }
       .tabBar(this.TabBuilder($r('app.string.tab_about'), 2, $r('sys.symbol.square_fill_grid_2x2')))

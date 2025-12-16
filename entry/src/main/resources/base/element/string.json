@@ -13,6 +13,10 @@
       "value": "FinBook"
     },
     {
+      "name": "permission_keep_background_running",
+      "value": "Wifi传书服务需要在后台运行才能正常工作。"
+    },
+    {
       "name": "privacy",
       "value": "https://agreement-drcn.hispace.dbankcloud.cn/index.html?lang=zh&agreementId=1574188982982436096"
     },
@@ -61,11 +65,31 @@
       "value": "当前还没有可用服务\n点击开始添加"
     },
     {
-      "name": "tab_about",
-      "value": "关于"
+      "name": "tab_trans",
+      "value": "传书"
     },
     {
-      "name": "tab_wifi",
+      "name": "trans_start",
+      "value": "开启"
+    },
+    {
+      "name": "trans_stop",
+      "value": "关闭"
+    },
+    {
+      "name": "trans_normal_tips",
+      "value": "服务未开启\n\n开启服务前，请确保已连接Wifi网络。"
+    },
+    {
+      "name": "trans_working_tips",
+      "value": "服务已开启\n\n请在浏览器里访问：\n%s"
+    },
+    {
+      "name": "trans_working_error",
+      "value": "服务开启失败：%s"
+    },
+    {
+      "name": "tab_about",
       "value": "关于"
     },
     {

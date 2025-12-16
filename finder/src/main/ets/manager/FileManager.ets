@@ -191,7 +191,7 @@ export class FileManager {
 
   async mkdir(path: string, name: string): Promise<boolean> {
     if (this.canMkdir(path)) {
-      await this.ensureDirectoryExists(path + '/' + name.trim().replace('/', ''))
+      await this.ensureDirectoryExists(path/* + '/' + name.trim().replace('/', '')*/)
       return true
     }
     return false
@@ -288,7 +288,12 @@ export class FileManager {
     try {
       const stat = await fileIo.stat(path);
       if (stat.isDirectory()) {
-        await fileIo.rmdir(path);
+        let files = await fileIo.listFile(path)
+        for (const file of files) {
+          const filePath = `${path}/${file}`;
+          await this.remove(filePath);
+        }
+        await fileIo.rmdir(path)
       } else {
         await fileIo.unlink(path);
       }
@@ -389,7 +394,9 @@ export class FileManager {
       return false
     }
 
-    if (!path.startsWith(SandboxDir.El1) && !path.startsWith(SandboxDir.El2)) {
+    if (!path.startsWith(SandboxDir.El1)
+      && !path.startsWith(SandboxDir.El2)
+      && !path.startsWith(this.rootPath)) {
       return false
     }
 

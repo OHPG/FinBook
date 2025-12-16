@@ -23,6 +23,10 @@
         "label": "$string:EntryAbility_label",
         "startWindowIcon": "$media:starticon",
         "startWindowBackground": "$color:start_window_background",
+        "backgroundModes": ["dataTransfer"],
+        "orientation": "auto_rotation_unspecified",
+        "preferMultiWindowOrientation": "landscape_auto",
+        "launchType": "singleton",
         "exported": true,
         "skills": [
           {
@@ -39,6 +43,10 @@
     "requestPermissions": [
       {
         "name": "ohos.permission.INTERNET"
+      },
+      {
+        "name": "ohos.permission.KEEP_BACKGROUND_RUNNING",
+        "reason": "$string:permission_keep_background_running"
       }
     ]
   }
