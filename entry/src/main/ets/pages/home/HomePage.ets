@@ -85,7 +85,7 @@ struct HomePage {
         ? px2vp(this.currentAvoidArea?.leftRect.width)
         : 0,
       right: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
-        ? px2vp(this.currentAvoidArea?.leftRect.width)
+        ? px2vp(this.currentAvoidArea?.rightRect.width)
         : 0,
       bottom: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
         ? 0
