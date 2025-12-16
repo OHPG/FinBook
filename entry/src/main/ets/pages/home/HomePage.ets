@@ -81,6 +81,12 @@ struct HomePage {
       this.currentIndex = index;
     })
     .padding({
+      left: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
+        ? px2vp(this.currentAvoidArea?.leftRect.width)
+        : 0,
+      right: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
+        ? px2vp(this.currentAvoidArea?.leftRect.width)
+        : 0,
       bottom: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
         ? 0
         : px2vp(this.currentAvoidArea?.bottomRect.height)
