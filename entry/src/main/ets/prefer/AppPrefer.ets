@@ -19,6 +19,8 @@ export class AppPrefer {
 
   private static readonly KEY_BOOK_ORIENTATION = "book_orientation"
 
+  private static readonly KEY_HOME_TAB_INDEX = "home_tab_index"
+
   private readonly preference: preferences.Preferences
 
   constructor(context: Context) {
@@ -78,6 +80,15 @@ export class AppPrefer {
    */
   public setBookOrientation(orientation: BookOrientation) {
     this.preference.putSync(AppPrefer.KEY_BOOK_ORIENTATION, orientation)
+    this.preference.flush()
+  }
+
+  public getHomeTabIndex(): number {
+    return this.preference.getSync(AppPrefer.KEY_HOME_TAB_INDEX, 0) as number
+  }
+
+  public setHomeTabIndex(index: number) {
+    this.preference.putSync(AppPrefer.KEY_HOME_TAB_INDEX, index)
     this.preference.flush()
   }
 

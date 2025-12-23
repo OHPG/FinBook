@@ -1,6 +1,7 @@
 import { window } from '@kit.ArkUI'
 import { BreakpointSystem } from '@ohpg/fin-core'
 import { CommonConstants } from '../../common/CommonConstants'
+import { AppPrefer } from '../../prefer/AppPrefer'
 import { AboutPage } from './about/AboutPage'
 import { HomeControl } from './HomeControl'
 import { LocalPage } from './local/LocalPage'
@@ -10,6 +11,8 @@ import { WifiPage } from './wifi/WifiPage'
 @Entry
 @Component
 struct HomePage {
+
+  @StorageLink(AppPrefer.PREFER) appPrefer?: AppPrefer = undefined
 
   @State currentIndex: number = 0;
 
@@ -25,6 +28,7 @@ struct HomePage {
 
   aboutToAppear(): void {
     AppStorage.setOrCreate("currentHomeControl", this.homeControl)
+    this.currentIndex = this.appPrefer!.getHomeTabIndex()
   }
 
   @Builder TabBuilder(title: ResourceStr, targetIndex: number, img: Resource) {
@@ -56,20 +60,20 @@ struct HomePage {
       }
       .tabBar(this.TabBuilder($r('app.string.tab_local'), 0, $r('sys.symbol.house_fill')))
 
-      // TabContent() {
-      //   OnlinePage()
-      // }
-      // .tabBar(this.TabBuilder($r('app.string.tab_online'), 1, $r('sys.symbol.externaldrive_fill_3')))
-
       TabContent() {
         WifiPage()
       }
       .tabBar(this.TabBuilder($r('app.string.tab_trans'), 1, $r('sys.symbol.worldclock_fill')))
 
       TabContent() {
+        OnlinePage()
+      }
+      .tabBar(this.TabBuilder($r('app.string.tab_online'), 2, $r('sys.symbol.externaldrive_fill_3')))
+
+      TabContent() {
         AboutPage()
       }
-      .tabBar(this.TabBuilder($r('app.string.tab_about'), 2, $r('sys.symbol.square_fill_grid_2x2')))
+      .tabBar(this.TabBuilder($r('app.string.tab_about'), 3, $r('sys.symbol.square_fill_grid_2x2')))
     }
     .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
     .vertical(this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD)
@@ -79,6 +83,7 @@ struct HomePage {
     .backgroundColor($r('sys.color.background_primary'))
     .onChange((index: number) => {
       this.currentIndex = index;
+      this.appPrefer?.setHomeTabIndex(index)
     })
     .padding({
       left: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
