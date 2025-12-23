@@ -53,7 +53,7 @@ struct HomePage {
 
   // https://developer.huawei.com/consumer/cn/design/harmonyos-symbol/
   build() {
-    Tabs({ barPosition: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
+    Tabs({ index: this.currentIndex, barPosition: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
       ? BarPosition.Start : BarPosition.End, controller: this.tabsController }) {
       TabContent() {
         LocalPage()
