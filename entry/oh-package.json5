@@ -10,6 +10,8 @@
     "@abner/refresh": "1.4.3",
     "@ohos/imageknife": "3.2.7",
     "@ohos/minizip": "1.0.2",
+    // https://gitcode.com/openharmony-sig/ohos_photoview
+    "@ohos/photoview": "2.1.0",
     "@cxy/sandboxfinder": "file:../finder",
     "@ohpg/komga": 'file:../../FinSdk/komga',
     "@ohpg/network": 'file:../../FinSdk/network',

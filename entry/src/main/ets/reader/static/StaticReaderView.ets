@@ -1,3 +1,4 @@
+import { PhotoView } from '@ohos/photoview';
 import { PdfLoader } from './loader/PdfLoader';
 import { ArchiveLoader } from './loader/ArchiveLoader';
 import { ImagePageInfo } from './ImagePageInfo';
@@ -18,6 +19,8 @@ export struct StaticReaderView {
 
   private dataSource: LazyDataSource<ImagePageInfo> = new LazyDataSource<ImagePageInfo>();
 
+  private sizeOptions?: SizeOptions
+
   private controller = new SwiperController()
 
   @Consume immersiveMode: boolean
@@ -32,8 +35,30 @@ export struct StaticReaderView {
 
   @Provide imageLoader?: ImageLoader = undefined
 
+  @Provide isVertical: boolean = false
+
+  private tapCallback: Callback<number> = (x) => {
+    if (this.dataSource.totalCount() <= 0 || !this.sizeOptions?.width) return
+    let width = this.sizeOptions.width as number
+    if (x < width / 3) {
+      if (this.readProgress <= 0) {
+        this.getUIContext().getPromptAction().showToast({message: $r('app.string.read_not_previous')})
+      } else {
+        this.controller.showPrevious()
+      }
+    } else if (x > width * 2 / 3) {
+      if (this.readProgress >= this.dataSource.totalCount() - 1) {
+        this.getUIContext().getPromptAction().showToast({ message: $r('app.string.read_not_next') })
+      } else {
+        this.controller.showNext()
+      }
+    } else {
+      this.immersiveMode = !this.immersiveMode
+    }
+  }
 
   aboutToAppear() {
+    this.isVertical = this.appPrefer?.getBookOrientation() ? true : false
     this.imageLoader = this.bookType === BookType.ARCHIVE ? new ArchiveLoader() : new PdfLoader()
     this.imageLoader.load(this.bookPath)
       .then((count) => {
@@ -60,12 +85,12 @@ export struct StaticReaderView {
     Stack() {
       Swiper(this.controller) {
         LazyForEach(this.dataSource, (info: ImagePageInfo) => {
-          StaticPage({info: info})
+          StaticPage({ info: info, tapCallback: this.tapCallback })
         }, (item: ImagePageInfo, index: number) => item.index.toString())
       }
       .index(this.readProgress)
       .displayCount(this.currentBreakpoint >= WidthBreakpoint.WIDTH_LG ? 2 : 1, true)
-      .vertical(this.appPrefer?.getBookOrientation() ? true : false)
+      .vertical(this.isVertical)
       .indicator(false)
       .width('100%')
       .height('100%')
@@ -74,33 +99,42 @@ export struct StaticReaderView {
         this.readProgress = index;
       })
     }
+    .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+      this.sizeOptions = newValue
+    })
     .width('100%')
     .height('100%')
-    .gesture(TapGesture({ count: 1 })
-      .onAction((event) => {
-        if (this.dataSource.totalCount() <= 0) return
-        let width = event.target.area.width as number
-        let x = event.fingerList[0].localX as number
-        if (x < width / 3) {
-          if (this.readProgress <= 0) {
-            this.getUIContext().getPromptAction().showToast({message: $r('app.string.read_not_previous')})
-          } else {
-            this.controller.showPrevious()
-          }
-        } else if (x > width * 2 / 3){
-          if (this.readProgress >= this.dataSource.totalCount() -1) {
-            this.getUIContext().getPromptAction().showToast({message: $r('app.string.read_not_next')})
-          } else {
-            this.controller.showNext()
-          }
-        } else {
-          this.immersiveMode = !this.immersiveMode
-        }
-      }))
   }
 
   aboutToDisappear() {
     this.imageLoader?.release()
+  }
+}
+
+interface OnViewTapListener {
+
+  /**
+   * A callback to receive where the user taps on a ImageView. You will receive a callback if
+   * the user taps anywhere on the view, tapping on 'whitespace' will not be ignored.
+   *
+   * @param x    - where the user tapped from the left of the View.
+   * @param y    - where the user tapped from the top of the View.
+   */
+
+  onViewTap(x: number, y: number): void;
+
+}
+
+class OnViewTapListenerImpl implements OnViewTapListener {
+
+  private readonly callback: Callback<number>
+
+  constructor(callback: Callback<number>) {
+    this.callback = callback
+  }
+
+  onViewTap(x: number, y: number): void {
+    this.callback(px2vp(x))
   }
 
 }
@@ -109,19 +143,28 @@ export struct StaticReaderView {
 @Component
 struct StaticPage {
 
+  private model: PhotoView.Model = new PhotoView.Model();
+
   @Consume imageLoader: ImageLoader
 
   @Consume immersiveMode: boolean
 
+  @Consume isVertical: boolean
+
   @Require @State info?: ImagePageInfo = undefined
-
-  @State pixel?: PixelMap = undefined
-
-  @State pixelFit:ImageFit = ImageFit.Contain
 
   private pixelRef?: CacheRef<PixelMap>
 
+  tapCallback?: Callback<number>
+
   aboutToAppear(): void {
+    let tapListener = new OnViewTapListenerImpl(this.tapCallback!)
+    Object.bind(tapListener, this)
+    this.model
+      .setScale(1, false)
+      .setVertical(this.isVertical)
+      .setImageFit(ImageFit.Contain)
+      .setOnViewTapListener(tapListener)
     this.acquireImage()
   }
 
@@ -133,14 +176,14 @@ struct StaticPage {
   private async acquireImage() {
     let index = this.info!.index
     this.pixelRef = await this.imageLoader.get(index)
-    this.pixel = this.pixelRef.acquire()
+    let pixel = this.pixelRef.acquire()
+    this.model.setImageElement(pixel)
   }
 
   build() {
-    Stack({alignContent: Alignment.Bottom}) {
+    Stack({ alignContent: Alignment.Bottom }) {
       // pdf
-      Image(this.pixel)
-        .objectFit(this.pixelFit)
+      PhotoViewV1({ model: this.model })
         .width(CommonConstants.FULL_PERCENT)
         .height(CommonConstants.FULL_PERCENT)
 
@@ -150,17 +193,6 @@ struct StaticPage {
         .visibility(this.immersiveMode ? Visibility.Hidden : Visibility.Visible)
         .margin(CommonConstants.SPACE_16)
     }
-    .gesture(TapGesture({count: 2})
-      .onAction((event) => {
-        if (this.pixelFit === ImageFit.Contain) {
-          this.pixelFit = ImageFit.Cover
-        } else if (this.pixelFit === ImageFit.Cover) {
-          this.pixelFit = ImageFit.Contain
-        } else {
-          // ignore
-        }
-      })
-    )
     .width(CommonConstants.FULL_PERCENT)
     .height(CommonConstants.FULL_PERCENT)
   }
@@ -171,13 +203,23 @@ struct StaticPage {
   }
 
   aboutToRecycle(): void {
-    this.pixelFit = ImageFit.Contain
+    this.model.resetMatrix()
     this.releaseImage()
   }
 
   aboutToDisappear(): void {
-    this.pixelFit = ImageFit.Contain
+    this.model.resetMatrix()
     this.releaseImage()
   }
+}
 
+@ComponentV2
+struct PhotoViewV1 {
+  @Param model?: PhotoView.Model = undefined
+
+  build() {
+    PhotoView({ model: this.model })
+      .width(CommonConstants.FULL_PERCENT)
+      .height(CommonConstants.FULL_PERCENT)
+  }
 }
