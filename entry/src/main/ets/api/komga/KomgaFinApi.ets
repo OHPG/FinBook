@@ -140,6 +140,7 @@ export class KomgaFinApi implements FinBookApi {
       originalTitle: book.name,
       overview: book.metadata?.summary,
       path: book.url,
+      productionYear: book.metadata?.releaseDate,
       person: [],
       image: {
         primary: this.buildBookImage(book),

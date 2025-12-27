@@ -2,7 +2,6 @@ import { BreakpointSystem, FinItem, FinItemType, FinPerson, FinPersonType } from
 import { CommonConstants } from "../../common/CommonConstants"
 import { DetailViewModel } from "./DetailViewModel"
 import { MediaArgs } from "./MediaArgs"
-import LazyDataSource from "../../common/LazyDataSource"
 import { AppRouter } from "../../router/AppRouter"
 import { CoverImage } from "../../widget/cover/CoverImage"
 
@@ -29,13 +28,13 @@ export struct DetailOperate {
   build() {
     Row({space: CommonConstants.SPACE_8}) {
       Button({type: ButtonType.Capsule}) {
-        SymbolGlyph($r('sys.symbol.play_fill'))
+        SymbolGlyph($r('sys.symbol.book_pages_fill_1'))
           .fontColor([$r('sys.color.font_on_primary')])
-          .fontSize($r('sys.float.Title_M'))
+          .fontSize($r('sys.float.Title_S'))
       }
       .id('episode_play')
       .width(80)
-      .height(32)
+      .height(36)
       .onClick(() => {
         this.playOrNot()
       })
@@ -162,16 +161,8 @@ export struct DetailHeader {
         Text(this.item.name)
           .fontSize($r('sys.float.Title_M'))
 
-        Row({space: CommonConstants.SPACE_8}) {
+        if (this.item.productionYear) {
           Text(this.item.productionYear)
-
-          Text(this.item.officialRating)
-
-          Text(this.item.communityRating)
-        }
-
-        Row() {
-          Text(this.item.sources?.[0].streams?.[0].displayTitle)
         }
 
         if (this.item.type === FinItemType.Book) {
@@ -204,85 +195,6 @@ export struct DetailHeader {
 
   aboutToDisappear(): void {
 
-  }
-
-}
-
-@Component
-export struct DetailFooter {
-
-  @Require item?: FinItem
-
-  private personDataSource: LazyDataSource<FinPerson> = new LazyDataSource();
-
-  aboutToAppear(): void {
-    if (this.item?.person) {
-      this.personDataSource.pushArrayData(this.item.person)
-    }
-  }
-
-  build() {
-    Column({space: CommonConstants.SPACE_12}) {
-      Text("人员")
-        .fontSize($r('sys.float.Title_S'))
-        .margin({
-          left: CommonConstants.SPACE_16
-        })
-
-      List({space: CommonConstants.SPACE_12}) {
-        LazyForEach(this.personDataSource, (person: FinPerson, index) => {
-          ListItem() {
-            PersonItem({item: person})
-          }
-        })
-      }
-      .contentStartOffset(CommonConstants.SPACE_16)
-      .contentEndOffset(CommonConstants.SPACE_16)
-      .listDirection(Axis.Horizontal)
-      .width(CommonConstants.FULL_PERCENT)
-      .scrollBar(BarState.Off)
-      .height(220)
-    }
-    .alignItems(HorizontalAlign.Start)
-  }
-
-  aboutToDisappear(): void {
-
-  }
-
-}
-
-@Reusable
-@Component
-struct PersonItem {
-
-  @Require @State item?: FinPerson = undefined
-
-  aboutToReuse(params: Record<string, object>): void {
-    this.item = params['item'] as FinPerson
-  }
-
-  build() {
-    Column({space: CommonConstants.SPACE_8}) {
-      Image(this.item?.image?.primary)
-        .alt($r('app.media.alt'))
-        .borderRadius($r('app.float.lg_border_radius'))
-        .objectFit(ImageFit.Cover)
-        .autoResize(true)
-        .width(120)
-        .height(180)
-      Text(this.item?.name)
-        .maxLines(1)
-        .ellipsisMode(EllipsisMode.END)
-        .height(20)
-      Text(this.item?.role)
-        .maxLines(1)
-        .ellipsisMode(EllipsisMode.END)
-        .height(20)
-    }
-    .alignItems(HorizontalAlign.Start)
-    .width(120)
-    .height(240)
   }
 
 }

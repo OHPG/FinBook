@@ -4,7 +4,7 @@ import { CommonConstants } from '../../common/CommonConstants'
 import { DetailViewModel } from './DetailViewModel'
 import { MediaArgs } from './MediaArgs'
 import { window } from '@kit.ArkUI'
-import { DetailFooter, DetailHeader } from './DetailComp'
+import { DetailHeader } from './DetailComp'
 let detailStorage: LocalStorage = new LocalStorage();
 
 @Entry(detailStorage)
@@ -25,7 +25,6 @@ struct DetailPage {
   showScrollView(info?: FinItem) {
     Column({space: CommonConstants.SPACE_12}) {
       DetailHeader({item: info})
-      DetailFooter({item: info})
     }
     .padding({
       bottom: px2vp(this.avoidArea?.bottomRect.height)
