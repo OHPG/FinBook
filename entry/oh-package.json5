@@ -13,10 +13,10 @@
     // https://gitcode.com/openharmony-sig/ohos_photoview
     "@ohos/photoview": "2.1.0",
     "@cxy/sandboxfinder": "file:../finder",
-    "@ohpg/komga": 'file:../../FinSdk/komga',
-    "@ohpg/network": 'file:../../FinSdk/network',
-    "@ohpg/jellyfin": 'file:../../FinSdk/jellyfin',
-    "@ohpg/fin-core": 'file:../../FinFramework/lib_core',
-    "@ohpg/fin-framework": 'file:../../FinFramework/lib_framework'
+    "@ohpg/komga": 'file:../sdk/komga',
+    "@ohpg/network": 'file:../sdk/network',
+    "@ohpg/jellyfin": 'file:../sdk/jellyfin',
+    "@ohpg/fin-core": 'file:../framework/lib_core',
+    "@ohpg/fin-framework": 'file:../framework/lib_framework'
   }
 }
