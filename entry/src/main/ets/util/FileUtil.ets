@@ -25,11 +25,9 @@ export class FileUtil {
       }
       let bytes = new Uint8Array(buffer)
       let type: BookType | undefined
-      // 如何实现准确判断压缩文件类型
-      // https://developer.huawei.com/consumer/cn/doc/architecture-guides/kids-v1_2-ts_12-0000002442710557
       if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) {
         type = BookType.PDF
-      } else if (bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x03 && bytes[3] === 0x04) {
+      } else if (bytes[0] === 0x50 && bytes[1] === 0x4B) {
         // zip azw3 epub
         let index = path.lastIndexOf(".")
         if (index) {
