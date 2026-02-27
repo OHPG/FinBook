@@ -1,10 +1,12 @@
 import { window } from '@kit.ArkUI'
-import { WebTool } from '@ohpg/fin-core'
+import { MarketUtil, WebTool } from '@ohpg/fin-core'
 import { CommonConstants, FinRouter } from '@ohpg/fin-framework'
 import { pasteboard } from '@kit.BasicServicesKit'
 import { Repository } from '../../../data/Repository'
 import { HomeToolBar } from '../../../widget/bar/HomeToolBar'
 import { AppRouter } from '../../../router/AppRouter'
+import BuildProfile from 'BuildProfile'
+import { common } from '@kit.AbilityKit'
 
 @Component
 export struct AboutPage {
@@ -14,7 +16,7 @@ export struct AboutPage {
   @StorageProp('currentAvoidArea') currentAvoidArea?: window.AvoidArea = undefined
 
   @Builder
-  preferItemBuilder(icon: Resource, title: ResourceStr, callback: Callback<void>) {
+  preferItemBuilder(icon: Resource, title: ResourceStr, callback: Callback<void>, tips?: string) {
     Row({space: CommonConstants.SPACE_12}) {
       SymbolGlyph(icon)
         .fontSize(24)
@@ -23,6 +25,11 @@ export struct AboutPage {
         .fontSize(18)
         .fontColor($r('sys.color.ohos_id_color_text_primary'))
       Blank()
+      if (tips) {
+        Text(tips)
+          .fontSize(16)
+          .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+      }
     }
     .width(CommonConstants.FULL_PERCENT)
     .height(60)
@@ -91,6 +98,10 @@ export struct AboutPage {
       this.preferItemBuilder($r('sys.symbol.doc_plaintext'), $r('app.string.prefer_privacy'), () => {
         WebTool.openBrowser(getContext(), "https://agreement-drcn.hispace.dbankcloud.cn/index.html?lang=zh&agreementId=1574188982982436096")
       })
+
+      this.preferItemBuilder($r('sys.symbol.bag'), $r('app.string.prefer_version'), () => {
+        MarketUtil.gotoMarket(this.getUIContext().getHostContext()! as common.UIAbilityContext)
+      }, `V${BuildProfile.VERSION_NAME}(${BuildProfile.VERSION_CODE})`)
 
       Blank()
 

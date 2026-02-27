@@ -1,3 +1,5 @@
+import { FinItemType } from "@ohpg/fin-core"
+
 /**
  * @Author peerless2012
  * @Email peerless2012@126.com
@@ -10,6 +12,8 @@ export interface MediaArgs {
   id: string,
 
   name: string,
+
+  type?: FinItemType
 
   uri?: string
 

@@ -1,3 +1,4 @@
+import { FinItemType } from "@ohpg/fin-core";
 import { CommonConstants } from "@ohpg/fin-framework";
 import { CategoryInfo } from "../../entity/CategoryInfo";
 import { AppRouter } from "../../router/AppRouter";
@@ -33,6 +34,7 @@ export struct CategoryItem {
           if (!this.item) return
           AppRouter.goToGrid(this.getUIContext(), {
             name: this.item.category.name,
+            type: FinItemType.Series,
             id: this.item.category.id
           })
         })

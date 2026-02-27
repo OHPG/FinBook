@@ -116,9 +116,9 @@ export class KomgaFinApi implements FinBookApi {
     , AccessToken: auth}
   }
 
-  private buildBookImage(dto: BookDto): string {
+  private buildBookImage(dto: BookDto, series?: boolean): string {
     let imageUri = new uri.URI(this.activeInfo!.addressInfo.address)
-    imageUri = imageUri.addEncodedSegment(`api/v1/books/${dto.id!}/thumbnail`)
+    imageUri = imageUri.addEncodedSegment(`api/v1/${series ? "series" : "books"}/${dto.id!}/thumbnail`)
     return imageUri.toString()
   }
 
@@ -132,18 +132,18 @@ export class KomgaFinApi implements FinBookApi {
     return item
   }
 
-  private bookToFinItem(book: BookDto, progress?: ProgressDto): FinItem {
+  private bookToFinItem(book: BookDto, progress?: ProgressDto, series?: boolean): FinItem {
     let item: FinItem = {
       id: book.id,
       name: book.name,
-      type: FinItemType.Book,
+      type: series ? FinItemType.Series : FinItemType.Book,
       originalTitle: book.name,
       overview: book.metadata?.summary,
       path: book.url,
       productionYear: book.metadata?.releaseDate,
       person: [],
       image: {
-        primary: this.buildBookImage(book),
+        primary: this.buildBookImage(book, series),
         header: this.komgaHeader
       }
     }
@@ -184,6 +184,15 @@ export class KomgaFinApi implements FinBookApi {
     return finLibraryArray
   }
 
+  public async getLibrary(id: string, page?: number | undefined): Promise<FinPage> {
+    let result = await this.komga.getSeriesApi().list(id, page)
+    let finItems = new Array<FinItem>()
+    result.content?.forEach((item) => {
+      finItems.push(this.bookToFinItem(item, undefined, true))
+    })
+    return {items: finItems, cur: 0, more: false }
+  }
+
   public async search(keyword: string): Promise<FinPage> {
     let finItems = new Array<FinItem>()
     let result = await this.komga.getItemsApi().search(keyword)
@@ -195,7 +204,7 @@ export class KomgaFinApi implements FinBookApi {
 
   public async getBookList(id: string, page?: number): Promise<FinPage> {
     let finItems = new Array<FinItem>()
-    let result = await this.komga.getItemsApi().getBooks(id, page)
+    let result = await this.komga.getItemsApi().getSeriesBooks(id, page)
     result.content?.forEach((item) => {
       finItems.push(this.bookToFinItem(item))
     })

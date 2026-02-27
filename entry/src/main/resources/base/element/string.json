@@ -173,6 +173,10 @@
       "value": "界面"
     },
     {
+      "name": "prefer_version",
+      "value": "版本"
+    },
+    {
       "name": "prefer_interface_orientation",
       "value": "PDF翻页方向"
     },

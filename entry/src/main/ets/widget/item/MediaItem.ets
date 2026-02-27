@@ -32,7 +32,7 @@ export struct MediaItem {
         id: this.item?.id!,
         name: this.item?.name!,
       }
-      if (this.item?.type === FinItemType.Folder) {
+      if (this.item?.type === FinItemType.Series) {
         AppRouter.goToGrid(this.getUIContext(), args)
       } else {
         AppRouter.goToDetail(this.getUIContext(), args)

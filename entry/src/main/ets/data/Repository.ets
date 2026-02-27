@@ -40,6 +40,10 @@ export class Repository extends FinRepository {
     return this.requireApi().search(keyword)
   }
 
+  public getLibrary(id: string, page?: number): Promise<FinPage> {
+    return this.requireApi().getLibrary(id, page)
+  }
+
   public getBookList(id: string, page?: number): Promise<FinPage> {
     return this.requireApi().getBookList(id, page)
   }

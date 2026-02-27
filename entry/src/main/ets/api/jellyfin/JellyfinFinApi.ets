@@ -163,6 +163,10 @@ export class JellyfinFinApi implements FinBookApi {
     return {items: [], cur: 0}
   }
 
+  public async getLibrary(id: string, page?: number | undefined): Promise<FinPage> {
+    return {items: [], cur: 0, more: false}
+  }
+
   public async getBookList(id: string, page?: number): Promise<FinPage> {
     let finItems = new Array<FinItem>()
     let result = await this.jellyfin.getItemsApi().getItems({
