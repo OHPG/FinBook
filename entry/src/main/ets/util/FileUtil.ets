@@ -48,7 +48,7 @@ export class FileUtil {
         type = BookType.OTHER
       }
       if (!type) {
-        throw new Error("Unsupported file type")
+        type = BookType.OTHER
       }
       return type
     } catch (e) {

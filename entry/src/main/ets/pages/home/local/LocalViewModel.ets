@@ -64,7 +64,7 @@ export class LocalViewModel {
         return 1; // a 不是文件夹，b 是
       }
       // 如果 dir 相同，则按名称排序
-      return left.name.toLowerCase().localeCompare(right.name.toLowerCase());
+      return left.name.localeCompare(right.name);
     });
 
     // 查询视频信息
