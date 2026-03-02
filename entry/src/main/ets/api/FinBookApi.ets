@@ -29,6 +29,30 @@ export interface FinBookApi extends FinApi {
   getLibrary(id: string, page?: number): Promise<FinPage>
 
   /**
+   * 查询继续阅读
+   * @returns
+   */
+  getResumeItems(): Promise<Array<FinItem>>
+
+  /**
+   * 查询最新
+   * @returns
+   */
+  getNewItems(): Promise<Array<FinItem>>
+
+  /**
+   * 查询最新系列
+   * @returns
+   */
+  getNewSeries(): Promise<Array<FinItem>>
+
+  /**
+   * 查询系列更新
+   * @returns
+   */
+  getUpdateSeries(): Promise<Array<FinItem>>
+
+  /**
    * 搜索媒体库
    * @param keyword 关键字
    * @returns

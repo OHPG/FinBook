@@ -44,6 +44,22 @@ export class Repository extends FinRepository {
     return this.requireApi().getLibrary(id, page)
   }
 
+  public getResumeItems(): Promise<Array<FinItem>> {
+    return this.requireApi().getResumeItems()
+  }
+
+  public getNewItems(): Promise<Array<FinItem>> {
+    return this.requireApi().getNewItems()
+  }
+
+  public getNewSeries(): Promise<Array<FinItem>> {
+    return this.requireApi().getNewSeries()
+  }
+
+  public getUpdateSeries(): Promise<Array<FinItem>> {
+    return this.requireApi().getUpdateSeries()
+  }
+
   public getBookList(id: string, page?: number): Promise<FinPage> {
     return this.requireApi().getBookList(id, page)
   }

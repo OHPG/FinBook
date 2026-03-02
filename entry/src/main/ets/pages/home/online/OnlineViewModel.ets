@@ -17,18 +17,10 @@ export class OnlineViewModel extends ListViewModel {
    */
   async loadData(type?: LoadType): Promise<void> {
     let categoryArray = new Array<CategoryInfo>()
-    let normalItems = await this.repository.getLibraryList()
-    if (normalItems) {
-      for (let item of normalItems) {
-        let page = await this.repository.getBookList(item.id)
-        if (page && page.items && page.items.length > 0) {
-          categoryArray.push({
-            category: item,
-            items: page.items
-          })
-        }
-      }
-    }
+    let resumeItems = await this.repository.getResumeItems()
+    let newItems = await this.repository.getNewItems()
+    let newSeries = await this.repository.getNewSeries()
+    let updateSeries = await this.repository.getUpdateSeries()
     this.dataSource.initData(categoryArray)
   }
 
