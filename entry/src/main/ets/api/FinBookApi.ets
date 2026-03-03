@@ -32,13 +32,13 @@ export interface FinBookApi extends FinApi {
    * 查询继续阅读
    * @returns
    */
-  getResumeItems(): Promise<Array<FinItem>>
+  getResumeBooks(): Promise<Array<FinItem>>
 
   /**
    * 查询最新
    * @returns
    */
-  getNewItems(): Promise<Array<FinItem>>
+  getNewBooks(): Promise<Array<FinItem>>
 
   /**
    * 查询最新系列

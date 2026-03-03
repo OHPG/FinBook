@@ -1,4 +1,4 @@
-import { FinItemType } from "@ohpg/fin-core";
+import { FinItem, FinItemType } from "@ohpg/fin-core";
 import { CommonConstants } from "@ohpg/fin-framework";
 import { CategoryInfo } from "../../entity/CategoryInfo";
 import { AppRouter } from "../../router/AppRouter";
@@ -7,20 +7,20 @@ import { AppRouter } from "../../router/AppRouter";
 @Component
 export struct CategoryItem {
 
-  @Require @State item?: CategoryInfo = undefined
+  @Require @State item?: FinItem = undefined
 
   aboutToReuse(params: Record<string, object>): void {
-    this.item = params['item'] as CategoryInfo
+    this.item = params['item'] as FinItem
   }
 
   build() {
 
     Row() {
-      Text(this.item?.category?.name)
+      Text(this.item?.name)
         .fontSize($r('app.float.lg_font_size'))
         .fontWeight(FontWeight.Medium)
         .fontFamily(CommonConstants.HARMONY_HEITI_MEDIUM_FONT_FAMILY)
-      if (/*this.item?.type === "Normal"*/true) {
+      if (this.item?.type === FinItemType.Folder) {
         Row() {
           Text($r('app.string.more'))
             .fontSize($r('app.float.md_font_size'))
@@ -32,11 +32,11 @@ export struct CategoryItem {
         }
         .onClick(() => {
           if (!this.item) return
-          AppRouter.goToGrid(this.getUIContext(), {
-            name: this.item.category.name,
-            type: FinItemType.Series,
-            id: this.item.category.id
-          })
+          // AppRouter.goToGrid(this.getUIContext(), {
+          //   name: this.item.category.name,
+          //   type: FinItemType.Series,
+          //   id: this.item.category.id
+          // })
         })
       }
     }

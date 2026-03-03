@@ -44,12 +44,12 @@ export class Repository extends FinRepository {
     return this.requireApi().getLibrary(id, page)
   }
 
-  public getResumeItems(): Promise<Array<FinItem>> {
-    return this.requireApi().getResumeItems()
+  public getResumeBooks(): Promise<Array<FinItem>> {
+    return this.requireApi().getResumeBooks()
   }
 
-  public getNewItems(): Promise<Array<FinItem>> {
-    return this.requireApi().getNewItems()
+  public getNewBooks(): Promise<Array<FinItem>> {
+    return this.requireApi().getNewBooks()
   }
 
   public getNewSeries(): Promise<Array<FinItem>> {

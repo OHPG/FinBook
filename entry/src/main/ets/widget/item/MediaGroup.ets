@@ -17,7 +17,7 @@ export struct MediaGroup {
   build() {
     Column() {
       // title
-      CategoryItem({item: this.item})
+      CategoryItem({item: this.item?.category})
       // list
       List({space: CommonConstants.SPACE_12}) {
         ForEach(this.item?.items, (item: FinItem) => {

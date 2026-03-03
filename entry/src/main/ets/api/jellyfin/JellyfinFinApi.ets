@@ -167,11 +167,11 @@ export class JellyfinFinApi implements FinBookApi {
     return {items: [], cur: 0, more: false}
   }
 
-  public async getResumeItems(): Promise<FinItem[]> {
+  public async getResumeBooks(): Promise<FinItem[]> {
     return []
   }
 
-  public async getNewItems(): Promise<FinItem[]> {
+  public async getNewBooks(): Promise<FinItem[]> {
     return []
   }
 

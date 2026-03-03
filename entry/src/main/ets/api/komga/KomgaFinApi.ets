@@ -198,7 +198,7 @@ export class KomgaFinApi implements FinBookApi {
     return {items: finItems, cur: 0, more: false }
   }
 
-  public async getResumeItems(): Promise<Array<FinItem>> {
+  public async getResumeBooks(): Promise<Array<FinItem>> {
     let libraryList = await this.getLibraryList()
     let ids: Array<string> = []
     libraryList.forEach((library) => {
@@ -212,7 +212,7 @@ export class KomgaFinApi implements FinBookApi {
     return fineItems
   }
 
-  public async getNewItems(): Promise<FinItem[]> {
+  public async getNewBooks(): Promise<FinItem[]> {
     let libraryList = await this.getLibraryList()
     let ids: Array<string> = []
     libraryList.forEach((library) => {
@@ -235,7 +235,7 @@ export class KomgaFinApi implements FinBookApi {
     let newBooks = await this.komga.getItemsApi().getNewSeries(ids)
     let fineItems = new Array<FinItem>()
     newBooks.content?.forEach((book) => {
-      fineItems.push(this.bookToFinItem(book))
+      fineItems.push(this.bookToFinItem(book, undefined, true))
     })
     return fineItems
   }
@@ -249,7 +249,7 @@ export class KomgaFinApi implements FinBookApi {
     let newBooks = await this.komga.getItemsApi().getUpdateSeries(ids)
     let fineItems = new Array<FinItem>()
     newBooks.content?.forEach((book) => {
-      fineItems.push(this.bookToFinItem(book))
+      fineItems.push(this.bookToFinItem(book, undefined, true))
     })
     return fineItems
   }
