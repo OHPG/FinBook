@@ -29,6 +29,14 @@ export interface FinBookApi extends FinApi {
   getLibrary(id: string, page?: number): Promise<FinPage>
 
   /**
+   * 获取系列详情
+   * @param id
+   * @param page
+   * @returns
+   */
+  getSeries(id: string, page?: number): Promise<FinPage>
+
+  /**
    * 查询继续阅读
    * @returns
    */

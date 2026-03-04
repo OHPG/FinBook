@@ -167,6 +167,10 @@ export class JellyfinFinApi implements FinBookApi {
     return {items: [], cur: 0, more: false}
   }
 
+  public async getSeries(id: string, page?: number | undefined): Promise<FinPage> {
+    return {items: [], cur: 0, more: false}
+  }
+
   public async getResumeBooks(): Promise<FinItem[]> {
     return []
   }

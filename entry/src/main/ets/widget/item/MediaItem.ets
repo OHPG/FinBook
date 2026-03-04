@@ -31,6 +31,7 @@ export struct MediaItem {
       let args: MediaArgs = {
         id: this.item?.id!,
         name: this.item?.name!,
+        type: this.item?.type
       }
       if (this.item?.type === FinItemType.Series) {
         AppRouter.goToGrid(this.getUIContext(), args)

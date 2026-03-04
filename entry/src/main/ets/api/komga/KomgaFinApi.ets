@@ -198,6 +198,17 @@ export class KomgaFinApi implements FinBookApi {
     return {items: finItems, cur: 0, more: false }
   }
 
+  public async getSeries(id: string, page?: number | undefined): Promise<FinPage> {
+    let result = await this.komga.getSeriesApi().seriesBooks(id, page)
+    let finItems = new Array<FinItem>()
+    result.content?.forEach((item) => {
+      finItems.push(this.bookToFinItem(item))
+    })
+    let cur: number = result.pageable ? result.pageable.pageNumber : 0
+    let more: boolean = cur < result.totalPages - 1
+    return {items: finItems, cur: cur, more: more }
+  }
+
   public async getResumeBooks(): Promise<Array<FinItem>> {
     let libraryList = await this.getLibraryList()
     let ids: Array<string> = []

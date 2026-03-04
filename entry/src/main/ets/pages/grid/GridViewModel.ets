@@ -34,7 +34,7 @@ export class GridViewModel extends ListViewModel {
     }
     let page: FinPage
     if (this.args.type === FinItemType.Series) {
-      page = await this.repository.getLibrary(this.args.id
+      page = await this.repository.getSeries(this.args.id
         , this.lastPage ? this.lastPage.cur + 1 : 0)
     } else {
       page = await this.repository.getBookList(this.args.id

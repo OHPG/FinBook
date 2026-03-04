@@ -177,7 +177,7 @@ export struct DetailHeader {
             return people.type === FinPersonType.Author
           })?.map((people) => {
             return people.name
-          }).join(","))
+          }).join(",") || "匿名")
         }
 
         Text(this.item.overview)
