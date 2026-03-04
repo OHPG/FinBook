@@ -2,8 +2,8 @@
   "src": [
     "pages/splash/SplashPage",
     "pages/home/HomePage",
-    "pages/home/MainPage",
-    "pages/grid/GridPage",
+    "pages/library/LibraryPage",
+    "pages/series/SeriesPage",
     "pages/detail/DetailPage",
     "pages/search/SearchPage",
     "pages/interface/InterfacePage",

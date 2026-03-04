@@ -14,8 +14,12 @@ export class AppRouter {
     context.getRouter().replaceUrl({url: 'pages/home/HomePage'})
   }
 
-  public static goToGrid(context: UIContext, args: MediaArgs) {
-    context.getRouter().pushUrl({url: 'pages/grid/GridPage', params: args})
+  public static goToLibrary(context: UIContext, args: MediaArgs) {
+    context.getRouter().pushUrl({url: 'pages/library/LibraryPage', params: args})
+  }
+
+  public static goToSeries(context: UIContext, args: MediaArgs) {
+    context.getRouter().pushUrl({url: 'pages/series/SeriesPage', params: args})
   }
 
   public static goToDetail(context: UIContext, args: MediaArgs) {

@@ -34,7 +34,7 @@ export struct MediaItem {
         type: this.item?.type
       }
       if (this.item?.type === FinItemType.Series) {
-        AppRouter.goToGrid(this.getUIContext(), args)
+        AppRouter.goToSeries(this.getUIContext(), args)
       } else {
         AppRouter.goToDetail(this.getUIContext(), args)
       }

@@ -17,6 +17,16 @@ export class OnlineViewModel extends ListViewModel {
    */
   async loadData(type?: LoadType): Promise<void> {
     let categoryArray = new Array<CategoryInfo>()
+    let libraryItems = await this.repository.getLibraryList()
+    if (libraryItems && libraryItems.length > 0) {
+      categoryArray.push({
+        category: {
+          id: "",
+          name: "媒体库"
+        },
+        items: libraryItems
+      })
+    }
     let resumeItems = await this.repository.getResumeBooks()
     if (resumeItems && resumeItems.length > 0) {
       categoryArray.push({

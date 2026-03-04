@@ -3,15 +3,15 @@ import { GridRefreshView, ToolBar } from '@ohpg/fin-framework'
 import { CommonConstants } from '../../common/CommonConstants'
 import { MediaItem } from '../../widget/item/MediaItem'
 import { MediaArgs } from '../detail/MediaArgs'
-import { GridViewModel } from './GridViewModel'
+import { LibraryViewModel } from './LibraryViewModel'
 
 @Entry
 @Component
-struct GridPage {
+struct LibraryPage {
 
   private readonly args: MediaArgs = this.getUIContext().getRouter().getParams() as MediaArgs
 
-  private viewModel = new GridViewModel(getContext(), this.args)
+  private viewModel = new LibraryViewModel(getContext(), this.args)
 
   @StorageProp('currentAvoidArea') currentAvoidArea?: window.AvoidArea = undefined
 

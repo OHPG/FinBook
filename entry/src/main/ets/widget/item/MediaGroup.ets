@@ -1,7 +1,8 @@
-import { FinItem } from "@ohpg/fin-core"
+import { FinItem, FinItemType } from "@ohpg/fin-core"
 import { CommonConstants } from "@ohpg/fin-framework"
 import { CategoryInfo } from "../../entity/CategoryInfo"
 import { CategoryItem } from "./CategoryItem"
+import { LibraryItem } from "./LibraryItem"
 import { MediaItem } from "./MediaItem"
 
 @Reusable
@@ -20,9 +21,13 @@ export struct MediaGroup {
       CategoryItem({item: this.item?.category})
       // list
       List({space: CommonConstants.SPACE_12}) {
-        ForEach(this.item?.items, (item: FinItem) => {
+        ForEach(this.item?.items, (item: FinItem, index: number) => {
           ListItem() {
-            MediaItem({item: item, itemWidth: 140})
+            if (item.type === FinItemType.Folder) {
+              LibraryItem({item: item, index: index})
+            } else {
+              MediaItem({item: item, itemWidth: 140})
+            }
           }
         })
       }
