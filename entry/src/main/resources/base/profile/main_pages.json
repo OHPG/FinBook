@@ -2,6 +2,7 @@
   "src": [
     "pages/splash/SplashPage",
     "pages/home/HomePage",
+    "pages/history/HistoryPage",
     "pages/library/LibraryPage",
     "pages/series/SeriesPage",
     "pages/detail/DetailPage",

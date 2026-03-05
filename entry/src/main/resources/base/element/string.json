@@ -97,6 +97,10 @@
       "value": "搜索"
     },
     {
+      "name": "history_title",
+      "value": "阅读历史"
+    },
+    {
       "name": "more",
       "value": "更多"
     },

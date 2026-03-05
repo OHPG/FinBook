@@ -193,7 +193,14 @@ export struct LocalPage {
         // searchCallback: (args) => {
         //   AppRouter.goToLocalSearch(this.getUIContext(), args)
         // }
-      })
+      }) {
+        SymbolGlyph($r('sys.symbol.arrow_counterclockwise_clock'))
+          .fontSize($r('sys.float.Title_M'))
+          .fontColor([$r('sys.color.font_primary')])
+          .onClick(() => {
+            AppRouter.goToHistory(this.getUIContext())
+          })
+      }
       Column() {
 
         // 目录结构
@@ -327,7 +334,7 @@ struct FolderItemView {
 
 @Reusable
 @Component
-struct BookItemView {
+export struct BookItemView {
 
   @StorageLink(AppThumb.THUMB) thumb?: AppThumb = undefined
 
@@ -415,7 +422,7 @@ struct BookItemView {
         } else {
           SymbolGlyph(this.mediaItem?.dir ? $r('sys.symbol.folder_fill') : $r('sys.symbol.book_open_fill'))
             .fontSize(48)
-            .fontColor([$r('sys.color.ohos_id_color_activated')])
+            .fontColor([this.mediaItem?.dir ? $r('app.color.folder_color') : $r('sys.color.ohos_id_color_activated')])
             .alignRules({
               middle: {
                 anchor: "__container__",
@@ -461,7 +468,7 @@ struct BookItemView {
           .width(CommonConstants.FULL_PERCENT)
           .fontSize($r('sys.float.Subtitle_M'))
 
-        Text(this.mediaItem?.dir
+        Text(this.mediaItem?.dir || !this.mediaItem?.size
           ? this.mediaItem?.date
           : this.mediaItem?.size + " / " + this.mediaItem?.date)
           .maxLines(1)

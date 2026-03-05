@@ -6,13 +6,17 @@ import { AppRouter } from "../../router/AppRouter"
 @Component
 export struct HomeToolBar {
 
+  @StorageProp("currentAvoidArea") avoidArea?: window.AvoidArea = undefined
+
   @Require @Prop title: ResourceStr
 
   @Prop searchEnable: boolean = false
 
   searchCallback?: Callback<SearchArgs>
 
-  @StorageProp("currentAvoidArea") avoidArea?: window.AvoidArea = undefined
+  @Builder closerBuilder(){};
+
+  @BuilderParam closer: () => void = this.closerBuilder;
 
   build() {
     Column() {
@@ -44,6 +48,9 @@ export struct HomeToolBar {
                 this.searchCallback?.(searchArgs)
               })
           }
+        } else {
+          // 自定义菜单
+          this.closer()
         }
       }
       .padding({

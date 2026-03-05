@@ -76,7 +76,7 @@ export class LocalViewModel {
 
     // 查询历史
     if (filterItemArr.length > 0 && itemIdArr.length > 0) {
-      let historyArr = await this.dataStore.queryAllBookHistory(itemIdArr)
+      let historyArr = await this.dataStore.queryBookHistoryByIds(itemIdArr)
       historyArr?.forEach((history) => {
         let item = filterItemArr.find((item) => item.id == history.id)
         if (item) {

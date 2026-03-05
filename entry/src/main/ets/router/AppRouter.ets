@@ -14,6 +14,10 @@ export class AppRouter {
     context.getRouter().replaceUrl({url: 'pages/home/HomePage'})
   }
 
+  public static goToHistory(context: UIContext) {
+    context.getRouter().pushUrl({url: 'pages/history/HistoryPage'})
+  }
+
   public static goToLibrary(context: UIContext, args: MediaArgs) {
     context.getRouter().pushUrl({url: 'pages/library/LibraryPage', params: args})
   }

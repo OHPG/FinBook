@@ -21,7 +21,7 @@ export class LocalReaderViewModel extends AppViewModel implements SimpleReposito
   }
 
   async loadData(type: LoadType): Promise<FinBookRawSource> {
-    let bookHistory = await this.dataStore.queryBookHistory(this.args.id)
+    let bookHistory = await this.dataStore.queryBookHistoryById(this.args.id)
     let fileType = await FileUtil.getBookType(this.args.uri!)
     let source: FinBookRawSource = {id: this.args.id,
       name: this.args.name,

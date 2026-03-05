@@ -27,6 +27,10 @@
     {
       "name": "ic_border_font_selected",
       "value": "#F34D4F"
+    },
+    {
+      "name": "folder_color",
+      "value": "#FBBF24"
     }
   ]
 }
