@@ -24,6 +24,7 @@ export struct MediaItem {
 
       Text(this.item?.name)
         .width('100%')
+        .wordBreak(WordBreak.BREAK_ALL)
         .maxLines(1)
     }
     .width(this.itemWidth)

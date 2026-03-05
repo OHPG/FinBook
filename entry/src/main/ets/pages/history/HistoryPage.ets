@@ -4,11 +4,11 @@ import { CommonConstants, GridRefreshView } from '@ohpg/fin-framework'
 import { HistoryViewModel } from './HistoryViewModel'
 import { BreakpointSystem } from '@ohpg/fin-core'
 import { BookItem } from '../../entity/BookItem'
-import { BookItemView } from '../home/local/LocalPage'
 import { MenuType } from '../../enum/MenuType'
 import { Pair } from '../../comp/Pair'
 import { AppRouter } from '../../router/AppRouter'
 import { MediaArgs } from '../detail/MediaArgs'
+import { BookItemView } from '../../widget/tree/TreeBodyView'
 
 @Entry
 @Component

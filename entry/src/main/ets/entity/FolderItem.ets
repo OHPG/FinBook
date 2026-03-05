@@ -16,7 +16,7 @@ export interface FolderItem {
    */
   alias?: ResourceStr
 
-  path: string
+  item?: BookItem
 
   items?: Array<BookItem>
 

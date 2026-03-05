@@ -13,4 +13,9 @@ export class AppEvent {
    */
   public static readonly EVENT_MEDIA_INFO_HISTORY_CHANGED = "event_media_info_history_changed"
 
+  /**
+   * 排序规则变更
+   */
+  public static readonly EVENT_SORT_CHANGED = "event_sort_changed"
+
 }
