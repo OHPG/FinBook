@@ -8,6 +8,11 @@ export class TypeUtil {
     "txt", "text",
 
     /**
+     * cbz
+     */
+    "cbz", "zip",
+
+    /**
      * pdf
      */
     "pdf",
