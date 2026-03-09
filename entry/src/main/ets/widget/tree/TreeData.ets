@@ -1,3 +1,5 @@
+import intl from '@ohos.intl';
+import i18n from "@ohos.i18n"
 import { delay } from "../../comp/Time"
 import { BookItem } from "../../entity/BookItem"
 import { AppDataStore } from "../../store/AppDataStore"
@@ -19,10 +21,19 @@ export abstract class TreeData {
 
   private readonly dataStore: AppDataStore
 
+  private readonly collator: intl.Collator
+
   constructor(context: Context) {
     this.context = context
     this.thumb = AppStorage.get(AppThumb.THUMB)!
     this.dataStore = AppStorage.get(AppDataStore.APP_DATA_STORE)!
+    let systemLanguage = i18n.System.getSystemLanguage();
+    let options: intl.CollatorOptions = {
+      localeMatcher: "lookup",
+      usage: "sort",
+      sensitivity: "case"
+    };
+    this.collator = new intl.Collator(systemLanguage, options);
   }
 
   /**
@@ -96,7 +107,7 @@ export abstract class TreeData {
         return 1; // a 不是文件夹，b 是
       }
       // 如果 dir 相同，则按名称排序
-      return left.name.localeCompare(right.name);
+      return this.collator.compare(left.name, right.name);
     });
   }
 
