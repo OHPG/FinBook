@@ -29,9 +29,8 @@ export abstract class TreeData {
     this.dataStore = AppStorage.get(AppDataStore.APP_DATA_STORE)!
     let systemLanguage = i18n.System.getSystemLanguage();
     let options: intl.CollatorOptions = {
-      localeMatcher: "lookup",
       usage: "sort",
-      sensitivity: "case"
+      numeric: true
     };
     this.collator = new intl.Collator(systemLanguage, options);
   }
