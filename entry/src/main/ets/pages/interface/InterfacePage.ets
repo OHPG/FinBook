@@ -130,7 +130,7 @@ struct InterfacePage {
               })
           }
           .width(CommonConstants.FULL_PERCENT)
-          .height(48)
+          .height(60)
           .padding({
             left: CommonConstants.SPACE_16,
             right: CommonConstants.SPACE_16
