@@ -5,6 +5,10 @@
       "value": "#FFFFFF"
     },
     {
+      "name": "placeholder_background",
+      "value": "#F1F3F5"
+    },
+    {
       "name": "shadow_color",
       "value": "#1400001E"
     },

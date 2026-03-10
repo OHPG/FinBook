@@ -316,7 +316,7 @@ export struct BookItemView {
           })
       }
       .clip(true)
-      .backgroundColor($r('sys.color.background_secondary'))
+      .backgroundColor($r('app.color.placeholder_background'))
       .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
       .width(CommonConstants.FULL_PERCENT)
       .aspectRatio(0.67)
