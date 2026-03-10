@@ -1,4 +1,4 @@
-import { ActuatorInfo, Auth, AuthType, ProgressDto, UserDto } from "@ohpg/komga";
+import { ActuatorInfo, Auth, AuthType, ProgressDto } from "@ohpg/komga";
 import { BookDto, Komga, LibraryDto } from "@ohpg/komga";
 import { FinBookApi } from "../FinBookApi";
 import { ActiveInfo, FinPage, FinPersonType, MD5, ServerType } from "@ohpg/fin-core";
@@ -6,6 +6,7 @@ import { FinItemType } from "@ohpg/fin-core";
 import { FinPublicSystemInfo } from "@ohpg/fin-core";
 import { FinItem, FinAuthResult } from "@ohpg/fin-core";
 import { ClientInfo, DeviceInfo } from "@ohpg/network";
+import { AppConfig } from "../../config/AppConfig";
 import BuildProfile from "BuildProfile";
 import uri from "@ohos.uri";
 
@@ -19,6 +20,8 @@ import uri from "@ohos.uri";
 export class KomgaFinApi implements FinBookApi {
 
   private readonly context: Context
+
+  private readonly appConfig: AppConfig
 
   private activeInfo?: ActiveInfo
 
@@ -37,6 +40,7 @@ export class KomgaFinApi implements FinBookApi {
 
   constructor(context: Context, clientInfo: ClientInfo, deviceInfo: DeviceInfo) {
     this.context = context
+    this.appConfig = AppStorage.get(AppConfig.CONFIG)!
     this.komga = new Komga(clientInfo, deviceInfo)
     this.komgaTmp = new Komga(clientInfo, deviceInfo)
   }
@@ -190,7 +194,7 @@ export class KomgaFinApi implements FinBookApi {
   }
 
   public async getLibrary(id: string, page?: number | undefined): Promise<FinPage> {
-    let result = await this.komga.getSeriesApi().list(id, page)
+    let result = await this.komga.getSeriesApi().list(id, page, this.appConfig?.pageSize)
     let finItems = new Array<FinItem>()
     result.content?.forEach((item) => {
       finItems.push(this.bookToFinItem(item, undefined, true))
@@ -201,7 +205,7 @@ export class KomgaFinApi implements FinBookApi {
   }
 
   public async getSeries(id: string, page?: number | undefined): Promise<FinPage> {
-    let result = await this.komga.getSeriesApi().seriesBooks(id, page)
+    let result = await this.komga.getSeriesApi().seriesBooks(id, page, this.appConfig?.pageSize)
     let finItems = new Array<FinItem>()
     result.content?.forEach((item) => {
       finItems.push(this.bookToFinItem(item))
@@ -278,7 +282,7 @@ export class KomgaFinApi implements FinBookApi {
 
   public async getBookList(id: string, page?: number): Promise<FinPage> {
     let finItems = new Array<FinItem>()
-    let result = await this.komga.getItemsApi().getSeriesBooks(id, page)
+    let result = await this.komga.getItemsApi().getSeriesBooks(id, page, this.appConfig?.pageSize)
     result.content?.forEach((item) => {
       finItems.push(this.bookToFinItem(item))
     })

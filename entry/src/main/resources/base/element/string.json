@@ -182,7 +182,11 @@
     },
     {
       "name": "prefer_interface_orientation",
-      "value": "PDF翻页方向"
+      "value": "PDF、CBZ等翻页方向"
+    },
+    {
+      "name": "prefer_interface_page_size",
+      "value": "分页大小"
     },
     {
       "name": "prefer_interface_orientation_land",

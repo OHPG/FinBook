@@ -13,7 +13,6 @@
     "installationFree": false,
     "srcEntry": "./ets/app/App.ets",
     "pages": "$profile:main_pages",
-    "appStartup": "$profile:startup_config",
     "abilities": [
       {
         "name": "EntryAbility",

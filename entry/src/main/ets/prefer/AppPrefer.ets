@@ -1,6 +1,7 @@
 import { preferences } from "@kit.ArkData"
 import { BookOrientation } from "../enum/BookOrientation"
 import { readerCore } from "@kit.ReaderKit"
+import { FinPageSize } from "@ohpg/fin-core"
 
 /**
  * @Author peerless2012
@@ -18,6 +19,8 @@ export class AppPrefer {
   private static readonly KEY_BOOK_X_CONFIG = "book_x_config"
 
   private static readonly KEY_BOOK_ORIENTATION = "book_orientation"
+
+  private static readonly KEY_BOOK_PAGE_SIZE = "book_page_size"
 
   private static readonly KEY_HOME_TAB_INDEX = "home_tab_index"
 
@@ -80,6 +83,18 @@ export class AppPrefer {
    */
   public setBookOrientation(orientation: BookOrientation) {
     this.preference.putSync(AppPrefer.KEY_BOOK_ORIENTATION, orientation)
+    this.preference.flush()
+  }
+
+  public getPageSize(): FinPageSize {
+    if (this.preference.hasSync(AppPrefer.KEY_BOOK_PAGE_SIZE)) {
+      return this.preference.getSync(AppPrefer.KEY_BOOK_PAGE_SIZE, FinPageSize.Size_50) as FinPageSize
+    }
+    return FinPageSize.Size_50
+  }
+
+  public setPageSize(pageSize: FinPageSize) {
+    this.preference.putSync(AppPrefer.KEY_BOOK_PAGE_SIZE, pageSize)
     this.preference.flush()
   }
 
