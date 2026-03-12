@@ -5,6 +5,8 @@ import { BookItem } from "../../entity/BookItem"
 import { AppDataStore } from "../../store/AppDataStore"
 import { AppThumb } from "../../thumb/AppThumb"
 import { TypeUtil } from "../../util/TypeUtil"
+import { AppConfig } from '../../config/AppConfig';
+import { FinSortBy, FinSortOrder } from '@ohpg/fin-core';
 
 /**
  * @Author peerless2012
@@ -17,6 +19,8 @@ export abstract class TreeData {
 
   protected readonly context: Context
 
+  private readonly config: AppConfig
+
   private readonly thumb: AppThumb
 
   private readonly dataStore: AppDataStore
@@ -25,6 +29,7 @@ export abstract class TreeData {
 
   constructor(context: Context) {
     this.context = context
+    this.config = AppStorage.get(AppConfig.CONFIG)!
     this.thumb = AppStorage.get(AppThumb.THUMB)!
     this.dataStore = AppStorage.get(AppDataStore.APP_DATA_STORE)!
     let systemLanguage = i18n.System.getSystemLanguage();
@@ -98,15 +103,24 @@ export abstract class TreeData {
    */
   public sortData(itemArray?: Array<BookItem>) {
     itemArray?.sort((left, right) => {
-      // 比较 dir 属性，文件夹优先
-      if (left.dir && !right.dir) {
-        return -1; // a 是文件夹，b 不是
+      if (this.config.sortDir) {
+        // 比较 dir 属性，文件夹优先
+        if (left.dir && !right.dir) {
+          return -1; // a 是文件夹，b 不是
+        }
+        if (!left.dir && right.dir) {
+          return 1; // a 不是文件夹，b 是
+        }
       }
-      if (!left.dir && right.dir) {
-        return 1; // a 不是文件夹，b 是
+      let sort: number = 0
+      if (this.config.sortBy === FinSortBy.DateCreated && left.date && right.date) {
+        // 按时间排序
+        sort = left.date.localeCompare(right.date);
+      } else {
+        // 如果 dir 相同，则按名称排序
+        sort = this.collator.compare(left.name, right.name)
       }
-      // 如果 dir 相同，则按名称排序
-      return this.collator.compare(left.name, right.name);
+      return this.config.sortOrder === FinSortOrder.Ascending ? sort : -sort
     });
   }
 

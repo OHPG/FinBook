@@ -1,7 +1,7 @@
-import { ActuatorInfo, Auth, AuthType, ProgressDto } from "@ohpg/komga";
+import { ActuatorInfo, Auth, AuthType, ProgressDto, SortBy, SortOrder } from "@ohpg/komga";
 import { BookDto, Komga, LibraryDto } from "@ohpg/komga";
 import { FinBookApi } from "../FinBookApi";
-import { ActiveInfo, FinPage, FinPersonType, MD5, ServerType } from "@ohpg/fin-core";
+import { ActiveInfo, FinPage, FinPersonType, FinSortBy, FinSortOrder, MD5, ServerType } from "@ohpg/fin-core";
 import { FinItemType } from "@ohpg/fin-core";
 import { FinPublicSystemInfo } from "@ohpg/fin-core";
 import { FinItem, FinAuthResult } from "@ohpg/fin-core";
@@ -194,7 +194,11 @@ export class KomgaFinApi implements FinBookApi {
   }
 
   public async getLibrary(id: string, page?: number | undefined): Promise<FinPage> {
-    let result = await this.komga.getSeriesApi().list(id, page, this.appConfig?.pageSize)
+    let result = await this.komga.getSeriesApi().list(id
+      , page
+      , this.appConfig?.pageSize
+      , this.appConfig?.sortBy === FinSortBy.DateCreated ? SortBy.Time : SortBy.Title
+      , this.appConfig?.sortOrder === FinSortOrder.Descending ? SortOrder.Desc : SortOrder.Asc)
     let finItems = new Array<FinItem>()
     result.content?.forEach((item) => {
       finItems.push(this.bookToFinItem(item, undefined, true))
@@ -205,7 +209,11 @@ export class KomgaFinApi implements FinBookApi {
   }
 
   public async getSeries(id: string, page?: number | undefined): Promise<FinPage> {
-    let result = await this.komga.getSeriesApi().seriesBooks(id, page, this.appConfig?.pageSize)
+    let result = await this.komga.getSeriesApi().seriesBooks(id
+      , page
+      , this.appConfig?.pageSize
+      , this.appConfig?.sortBy === FinSortBy.DateCreated ? SortBy.Time : SortBy.Title
+      , this.appConfig?.sortOrder === FinSortOrder.Descending ? SortOrder.Desc : SortOrder.Asc)
     let finItems = new Array<FinItem>()
     result.content?.forEach((item) => {
       finItems.push(this.bookToFinItem(item))
@@ -282,7 +290,11 @@ export class KomgaFinApi implements FinBookApi {
 
   public async getBookList(id: string, page?: number): Promise<FinPage> {
     let finItems = new Array<FinItem>()
-    let result = await this.komga.getItemsApi().getSeriesBooks(id, page, this.appConfig?.pageSize)
+    let result = await this.komga.getItemsApi().getSeriesBooks(id
+      , page
+      , this.appConfig?.pageSize
+      , this.appConfig?.sortBy === FinSortBy.DateCreated ? SortBy.Time : SortBy.Title
+      , this.appConfig?.sortOrder === FinSortOrder.Descending ? SortOrder.Desc : SortOrder.Asc)
     result.content?.forEach((item) => {
       finItems.push(this.bookToFinItem(item))
     })

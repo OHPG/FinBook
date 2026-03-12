@@ -5,6 +5,7 @@ import { HomeToolBar } from "../../../widget/bar/HomeToolBar"
 import { AppRouter } from "../../../router/AppRouter"
 import { LocalViewModel } from "./LocalViewModel"
 import { TreeView } from "../../../widget/tree/TreeView"
+import { SortMenu } from "../../../widget/menu/SortMenu"
 
 @Component
 export struct LocalPage {
@@ -34,6 +35,8 @@ export struct LocalPage {
           .onClick(() => {
             AppRouter.goToHistory(this.getUIContext())
           })
+
+        SortMenu({enableSortDir: true})
       }
 
       TreeView({

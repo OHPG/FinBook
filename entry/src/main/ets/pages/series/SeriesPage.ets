@@ -2,6 +2,7 @@ import { window } from '@kit.ArkUI'
 import { GridRefreshView, ToolBar } from '@ohpg/fin-framework'
 import { CommonConstants } from '../../common/CommonConstants'
 import { MediaItem } from '../../widget/item/MediaItem'
+import { SortMenu } from '../../widget/menu/SortMenu'
 import { MediaArgs } from '../detail/MediaArgs'
 import { SeriesViewModel } from './SeriesViewModel'
 
@@ -24,7 +25,9 @@ struct SeriesPage {
     Column() {
       ToolBar({
         title: this.args.name
-      })
+      }) {
+        SortMenu()
+      }
 
       GridRefreshView({
         source: this.viewModel,

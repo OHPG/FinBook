@@ -14,6 +14,8 @@ export class AppConfig {
 
   private readonly context: Context
 
+  sortDir: boolean = true
+
   sortBy: FinSortBy = FinSortBy.Name
 
   sortOrder: FinSortOrder = FinSortOrder.Ascending
@@ -23,6 +25,9 @@ export class AppConfig {
   constructor(context: Context) {
     this.context = context
     let prefer: AppPrefer = AppStorage.get(AppPrefer.PREFER)!
+    this.sortDir = prefer.getSortDir()
+    this.sortBy = prefer.getSortBy()
+    this.sortOrder = prefer.getSortOrder()
     this.pageSize = prefer.getPageSize()
   }
 

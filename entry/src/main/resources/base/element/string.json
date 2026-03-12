@@ -233,6 +233,26 @@
       "value": "横划模式"
     },
     {
+      "name": "menu_sort_folder_at_beginning",
+      "value": "文件夹在前"
+    },
+    {
+      "name": "menu_sort_by_name",
+      "value": "名称"
+    },
+    {
+      "name": "menu_sort_by_time",
+      "value": "时间"
+    },
+    {
+      "name": "menu_sort_order_asc",
+      "value": "正序"
+    },
+    {
+      "name": "menu_sort_order_desc",
+      "value": "倒序"
+    },
+    {
       "name": "prefer_about_qq_group",
       "value": "需求/反馈QQ群："
     },

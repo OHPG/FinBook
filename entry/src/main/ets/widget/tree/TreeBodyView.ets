@@ -1,5 +1,6 @@
 import deviceInfo from "@ohos.deviceInfo"
 import { AppEvent } from "../../event/AppEvent"
+import { AppEvents } from "@ohpg/fin-core"
 import { AppThumb } from "../../thumb/AppThumb"
 import { fileUri } from '@kit.CoreFileKit';
 import { MenuType } from "../../enum/MenuType"
@@ -62,7 +63,7 @@ export struct TreeBodyView {
     this.updateData(true)
   }
 
-  private readonly mediaSortCallback = () => {
+  private readonly mediaSortCallback: Callback<void> = () => {
     this.sortData()
   }
 
@@ -102,7 +103,7 @@ export struct TreeBodyView {
     this.getUIContext().getHostContext()?.eventHub
       .on(AppEvent.EVENT_MEDIA_INFO_HISTORY_CHANGED, this.mediaHistoryChangeCallback)
     this.getUIContext().getHostContext()?.eventHub
-      .on(AppEvent.EVENT_SORT_CHANGED, this.mediaSortCallback)
+      .on(AppEvents.EVENT_SORT_INFO_CHANGED, this.mediaSortCallback)
     this.isRefreshing = true
   }
 
@@ -189,7 +190,7 @@ export struct TreeBodyView {
     this.getUIContext().getHostContext()?.eventHub
       .off(AppEvent.EVENT_MEDIA_INFO_HISTORY_CHANGED, this.mediaHistoryChangeCallback)
     this.getUIContext().getHostContext()?.eventHub
-      .off(AppEvent.EVENT_SORT_CHANGED, this.mediaSortCallback)
+      .off(AppEvents.EVENT_SORT_INFO_CHANGED, this.mediaSortCallback)
   }
 
 }

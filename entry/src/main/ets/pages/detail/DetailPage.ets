@@ -5,6 +5,7 @@ import { DetailViewModel } from './DetailViewModel'
 import { MediaArgs } from './MediaArgs'
 import { window } from '@kit.ArkUI'
 import { DetailHeader } from './DetailComp'
+
 let detailStorage: LocalStorage = new LocalStorage();
 
 @Entry(detailStorage)
