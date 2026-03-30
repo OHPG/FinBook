@@ -20,8 +20,8 @@ export class Repository extends FinRepository {
     this.bookDataStore = new AppDataStore(context)
   }
 
-  public getSupportServer(): ServerType {
-    return ServerType.KOMGA
+  public getSupportServer(): Array<ServerType> {
+    return [ServerType.KOMGA]
   }
 
   protected requireApi(): FinBookApi {
