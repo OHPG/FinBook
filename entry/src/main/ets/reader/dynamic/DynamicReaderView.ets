@@ -72,6 +72,7 @@ export struct DynamicReaderView {
     })
     this.parseBook()
       .then(() => {
+        this.bookCtrl.setPageConfig(this.bookSetting)
         this.bookCtrl.startPlay(this.readProgress, "")
       })
       .catch((error: Error) => {
