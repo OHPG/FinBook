@@ -29,6 +29,8 @@ export class AppPrefer {
 
   private static readonly KEY_BOOK_PAGE_SIZE = "book_page_size"
 
+  private static readonly KEY_BOOK_READ_SCREEN_ON = "book_read_screen_on"
+
   private static readonly KEY_HOME_TAB_INDEX = "home_tab_index"
 
   private readonly preference: preferences.Preferences
@@ -102,6 +104,18 @@ export class AppPrefer {
 
   public setPageSize(pageSize: FinPageSize) {
     this.preference.putSync(AppPrefer.KEY_BOOK_PAGE_SIZE, pageSize)
+    this.preference.flush()
+  }
+
+  public getReadScreenOn(): boolean {
+    if (this.preference.hasSync(AppPrefer.KEY_BOOK_READ_SCREEN_ON)) {
+      return this.preference.getSync(AppPrefer.KEY_BOOK_READ_SCREEN_ON, true) as boolean
+    }
+    return true
+  }
+
+  public setReadScreenOn(on: boolean) {
+    this.preference.putSync(AppPrefer.KEY_BOOK_READ_SCREEN_ON, on)
     this.preference.flush()
   }
 

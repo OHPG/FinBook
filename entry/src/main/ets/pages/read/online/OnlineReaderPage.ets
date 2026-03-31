@@ -1,6 +1,6 @@
 import router from '@ohos.router'
 import { window } from '@kit.ArkUI'
-import { ScrollRefreshView, ToolBar } from '@ohpg/fin-framework'
+import { DeviceUtil, ScrollRefreshView, ToolBar } from '@ohpg/fin-framework'
 import { CommonConstants } from '../../../common/CommonConstants'
 import { OnlineReaderViewModel } from './OnlineReaderViewModel'
 import { MediaArgs } from '../../detail/MediaArgs'
@@ -9,6 +9,7 @@ import { FinBookRawSource } from '../../../entity/FinBookRawSource'
 import { DynamicReaderView } from '../../../reader/dynamic/DynamicReaderView'
 import { common } from '@kit.AbilityKit'
 import { BookType } from '../../../enum/BookType'
+import { AppPrefer } from '../../../prefer/AppPrefer'
 
 @Entry
 @Component
@@ -18,6 +19,8 @@ struct OnlineReaderPage {
   private viewModel = new OnlineReaderViewModel(getContext(), this.args)
 
   private immersiveModeTimer?: number = undefined
+
+  private appPrefer?: AppPrefer = AppStorage.get(AppPrefer.PREFER)
 
   @StorageProp("currentAvoidArea") avoidArea?: window.AvoidArea = undefined
 
@@ -50,6 +53,8 @@ struct OnlineReaderPage {
 
   aboutToAppear(): void {
     this.viewModel.startRead()
+    DeviceUtil.initWindow((this.getUIContext().getHostContext() as common.UIAbilityContext).windowStage.getMainWindowSync())
+    DeviceUtil.setWindowKeepScreenState(this.appPrefer?.getReadScreenOn() ?? true)
   }
 
   @Builder
@@ -169,6 +174,8 @@ struct OnlineReaderPage {
   aboutToDisappear(): void {
     this.immersiveMode = false
     this.viewModel.stopRead(this.readProgress)
+    DeviceUtil.setWindowKeepScreenState(false)
+    DeviceUtil.initWindow()
   }
 
 }

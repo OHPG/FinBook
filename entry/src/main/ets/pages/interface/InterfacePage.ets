@@ -52,10 +52,13 @@ struct InterfacePage {
 
   @State pageSizeIndex: number = 1
 
+  @State readScreenOn: boolean = true
+
   aboutToAppear(): void {
     this.bookOrientation = this.appPrefer.getBookOrientation()
     let pageSize = this.appPrefer.getPageSize()
     this.pageSizeIndex = this.pageSizeArray.findIndex((value) => value === pageSize)
+    this.readScreenOn = this.appPrefer.getReadScreenOn()
     this.bookConfig = this.appPrefer.getBookConfig()
   }
 
@@ -128,6 +131,29 @@ struct InterfacePage {
                 let pageSize = this.pageSizeArray[index]
                 this.appPrefer.setPageSize(pageSize)
                 this.appConfig!.pageSize = pageSize
+              })
+          }
+          .width(CommonConstants.FULL_PERCENT)
+          .height(60)
+          .padding({
+            left: CommonConstants.SPACE_16,
+            right: CommonConstants.SPACE_16
+          })
+
+          itemDividerBuilder()
+
+          Row({space: CommonConstants.SPACE_8}) {
+            SymbolGlyph($r('sys.symbol.sun_max_fill'))
+              .fontSize(24)
+              .fontColor([$r('sys.color.ohos_id_color_text_primary')])
+            Text($r('app.string.prefer_interface_keep_screen_on'))
+              .fontSize(18)
+              .fontColor($r('sys.color.ohos_id_color_text_primary'))
+            Blank()
+            Toggle({type: ToggleType.Switch, isOn: this.readScreenOn})
+              .onChange((isOn) => {
+                this.readScreenOn = isOn
+                this.appPrefer.setReadScreenOn(isOn)
               })
           }
           .width(CommonConstants.FULL_PERCENT)

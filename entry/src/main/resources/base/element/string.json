@@ -189,6 +189,10 @@
       "value": "分页大小"
     },
     {
+      "name": "prefer_interface_keep_screen_on",
+      "value": "阅读时保持屏幕常亮"
+    },
+    {
       "name": "prefer_interface_orientation_land",
       "value": "横向"
     },

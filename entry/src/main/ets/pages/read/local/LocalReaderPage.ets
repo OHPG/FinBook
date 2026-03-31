@@ -3,16 +3,19 @@ import { router, window } from '@kit.ArkUI'
 import { LocalReaderViewModel } from './LocalReaderViewModel'
 import { StaticReaderView } from '../../../reader/static/StaticReaderView'
 import { DynamicReaderView } from '../../../reader/dynamic/DynamicReaderView'
-import { CommonConstants, ScrollRefreshView } from '@ohpg/fin-framework'
+import { CommonConstants, DeviceUtil, ScrollRefreshView } from '@ohpg/fin-framework'
 import { ToolBar } from '@ohpg/fin-framework'
 import { FinBookRawSource } from '../../../entity/FinBookRawSource'
 import { BookType } from '../../../enum/BookType'
 import { common } from '@kit.AbilityKit'
+import { AppPrefer } from '../../../prefer/AppPrefer'
 
 @Entry
 @Component
 struct LocalReaderPage {
   private args: MediaArgs = router.getParams() as MediaArgs
+
+  private appPrefer?: AppPrefer = AppStorage.get(AppPrefer.PREFER)
 
   private viewModel = new LocalReaderViewModel(getContext(), this.args)
 
@@ -49,6 +52,8 @@ struct LocalReaderPage {
 
   aboutToAppear(): void {
     this.viewModel.startRead()
+    DeviceUtil.initWindow((this.getUIContext().getHostContext() as common.UIAbilityContext).windowStage.getMainWindowSync())
+    DeviceUtil.setWindowKeepScreenState(this.appPrefer?.getReadScreenOn() ?? true)
   }
 
   @Builder
@@ -168,6 +173,8 @@ struct LocalReaderPage {
   aboutToDisappear(): void {
     this.immersiveMode = false
     this.viewModel.stopRead(this.readProgress)
+    DeviceUtil.setWindowKeepScreenState(false)
+    DeviceUtil.initWindow()
   }
 
 }
