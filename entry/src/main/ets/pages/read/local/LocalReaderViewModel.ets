@@ -6,6 +6,7 @@ import { AppEvent } from "../../../event/AppEvent";
 import { AppViewModel } from "../../../lifecycle/AppViewModel";
 import { AppDataStore } from "../../../store/AppDataStore";
 import { FileUtil } from "../../../util/FileUtil";
+import { TypeUtil } from "../../../util/TypeUtil";
 import { MediaArgs } from "../../detail/MediaArgs";
 
 export class LocalReaderViewModel extends AppViewModel implements SimpleRepository {
@@ -22,11 +23,17 @@ export class LocalReaderViewModel extends AppViewModel implements SimpleReposito
 
   async loadData(type: LoadType): Promise<FinBookRawSource> {
     let bookHistory = await this.dataStore.queryBookHistoryById(this.args.id)
-    let fileType = await FileUtil.getBookType(this.args.uri!)
+    let readPath = this.args.uri!
+    // epub、mobi、azw、azw3 需要拷贝到沙盒后再阅读
+    // 系统阅读器会在目标目录产生临时文件
+    if (TypeUtil.needSandboxCopy(this.args.name)) {
+      readPath = await FileUtil.copyToSandbox(this.context, readPath)
+    }
+    let fileType = await FileUtil.getBookType(readPath)
     let source: FinBookRawSource = {id: this.args.id,
       name: this.args.name,
       progress: bookHistory ? bookHistory.page : 0,
-      path: this.args.uri!,
+      path: readPath,
       type: fileType}
     return source
   }

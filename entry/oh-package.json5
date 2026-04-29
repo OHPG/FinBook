@@ -8,8 +8,10 @@
   "dependencies": {
     // https://ohpm.openharmony.cn/#/cn/detail/@abner%2Frefresh
     "@abner/refresh": "1.4.3",
+    // https://ohpm.openharmony.cn/#/cn/detail/@ohos%2Fimageknife
     "@ohos/imageknife": "3.2.7",
-    "@ohos/minizip": "1.0.2",
+    // https://ohpm.openharmony.cn/#/cn/detail/@ohos%2Fminizip
+    "@ohos/minizip": "1.0.4",
     // https://gitcode.com/openharmony-sig/ohos_photoview
     "@ohos/photoview": "2.1.0",
     "@cxy/sandboxfinder": "file:../finder",

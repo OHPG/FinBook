@@ -5,6 +5,7 @@ import { pasteboard } from '@kit.BasicServicesKit'
 import { Repository } from '../../../data/Repository'
 import { HomeToolBar } from '../../../widget/bar/HomeToolBar'
 import { AppRouter } from '../../../router/AppRouter'
+import { FileUtil } from '../../../util/FileUtil'
 import BuildProfile from 'BuildProfile'
 import { common } from '@kit.AbilityKit'
 
@@ -39,6 +40,23 @@ export struct AboutPage {
     })
     .onClick(() => {
       callback()
+    })
+  }
+
+  private showClearLocalCopyDialog() {
+    this.getUIContext().getPromptAction().showDialog({
+      title: getContext().resourceManager.getStringSync($r('app.string.prefer_clear_local_copy_confirm_title')),
+      message: getContext().resourceManager.getStringSync($r('app.string.prefer_clear_local_copy_confirm_msg')),
+      buttons: [
+        { text: getContext().resourceManager.getStringSync($r('app.string.prefer_clear_local_copy_cancel')), color: $r('sys.color.ohos_id_color_text_secondary') },
+        { text: getContext().resourceManager.getStringSync($r('app.string.prefer_clear_local_copy_confirm')), color: $r('sys.color.ohos_id_color_warning') }
+      ]
+    }).then((result) => {
+      if (result.index === 1) {
+        FileUtil.clearLocalCopyFiles(getContext()).then(() => {
+          this.getUIContext().getPromptAction().showToast({ message: $r('app.string.prefer_clear_local_copy_success') })
+        })
+      }
     })
   }
 
@@ -93,6 +111,10 @@ export struct AboutPage {
 
       this.preferItemBuilder($r('sys.symbol.satellite_map_fill'), $r('app.string.prefer_interface'), () => {
         AppRouter.goToInterface(this.getUIContext())
+      })
+
+      this.preferItemBuilder($r('sys.symbol.trash'), $r('app.string.prefer_clear_local_copy'), () => {
+        this.showClearLocalCopyDialog()
       })
 
       this.preferItemBuilder($r('sys.symbol.doc_plaintext'), $r('app.string.prefer_privacy'), () => {

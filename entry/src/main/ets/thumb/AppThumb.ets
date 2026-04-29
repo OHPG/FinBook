@@ -131,6 +131,7 @@ export class AppThumb {
           callback(path)
           this.callbackMap.delete(task.id)
         }
+        img.release()
       } else {
         // 保存出错的资源uri，避免多次尝试
         this.ignoreSet.add(task.uri)

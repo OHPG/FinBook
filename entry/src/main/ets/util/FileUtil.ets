@@ -1,4 +1,5 @@
 import fs from '@ohos.file.fs';
+import { MD5 } from '@ohpg/fin-core';
 import { BookType } from '../enum/BookType';
 
 /**
@@ -107,5 +108,77 @@ export class FileUtil {
 
   public static async rmFile(path: string): Promise<void> {
     await fs.unlink(path)
+  }
+
+  /**
+   * 本地阅读沙盒拷贝目录名
+   * 与在线缓存目录分开，方便独立清理
+   */
+  private static readonly LOCAL_COPY_DIR = "local_copy"
+
+  /**
+   * 获取本地阅读沙盒拷贝根目录
+   * @param context 上下文
+   * @returns 沙盒拷贝根目录路径
+   */
+  public static getLocalCopyDir(context: Context): string {
+    return context.filesDir + "/" + FileUtil.LOCAL_COPY_DIR
+  }
+
+  /**
+   * 根据文件路径和大小生成唯一标识
+   * @param filePath 原始文件路径
+   * @param fileSize 文件大小
+   * @returns 唯一标识字符串
+   */
+  private static generateCopyKey(filePath: string, fileSize: number): string {
+    return MD5.digestSync(filePath + "|" + fileSize)
+  }
+
+  /**
+   * 获取文件后缀名
+   * @param path 文件路径
+   * @returns 后缀名（含点号），如 ".epub"
+   */
+  private static getFileSuffix(path: string): string {
+    let index = path.lastIndexOf(".")
+    if (index >= 0) {
+      return path.substring(index)
+    }
+    return ""
+  }
+
+  /**
+   * 将本地文件拷贝到沙盒目录
+   * 使用文件路径+大小作为唯一标识，如果沙盒中已存在则直接返回沙盒路径
+   * @param context 上下文
+   * @param srcPath 源文件路径
+   * @returns 沙盒中的文件路径
+   */
+  public static async copyToSandbox(context: Context, srcPath: string): Promise<string> {
+    let stat = await fs.stat(srcPath)
+    let key = FileUtil.generateCopyKey(srcPath, stat.size)
+    let suffix = FileUtil.getFileSuffix(srcPath)
+    let copyDir = FileUtil.getLocalCopyDir(context)
+    await FileUtil.mkdir(copyDir)
+    let destPath = copyDir + "/" + key + suffix
+    let exists = await FileUtil.isFileExists(destPath)
+    if (exists) {
+      return destPath
+    }
+    await fs.copyFile(srcPath, destPath)
+    return destPath
+  }
+
+  /**
+   * 清理所有本地阅读沙盒拷贝文件
+   * @param context 上下文
+   */
+  public static async clearLocalCopyFiles(context: Context): Promise<void> {
+    let copyDir = FileUtil.getLocalCopyDir(context)
+    let exists = await FileUtil.isFileExists(copyDir)
+    if (exists) {
+      await FileUtil.rmdir(copyDir)
+    }
   }
 }

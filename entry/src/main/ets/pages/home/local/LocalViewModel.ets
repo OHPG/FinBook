@@ -30,12 +30,12 @@ export class LocalViewModel extends TreeData {
     } else {
       uri = await this.appDir.acquireRootUri(this.context)
     }
-    let fileArr = fs.listFileSync(uri)
+    let fileArr = await fs.listFile(uri)
     let itemArr = new Array<BookItem>()
 
     for (const name of fileArr) {
       let fileUri = uri + "/" + name
-      let stat = fs.statSync(fileUri)
+      let stat = await fs.stat(fileUri)
 
       let isDir = false
       if (stat.isFile()) {

@@ -275,6 +275,30 @@
     {
       "name": "read_not_next",
       "value": "没有下一页了"
+    },
+    {
+      "name": "prefer_clear_local_copy",
+      "value": "清理本地阅读缓存"
+    },
+    {
+      "name": "prefer_clear_local_copy_success",
+      "value": "本地阅读缓存已清理"
+    },
+    {
+      "name": "prefer_clear_local_copy_confirm_title",
+      "value": "确认清理"
+    },
+    {
+      "name": "prefer_clear_local_copy_confirm_msg",
+      "value": "将清理所有本地阅读时拷贝到沙盒的文件（epub、mobi、azw、azw3），下次阅读时会重新拷贝。是否继续？"
+    },
+    {
+      "name": "prefer_clear_local_copy_confirm",
+      "value": "清理"
+    },
+    {
+      "name": "prefer_clear_local_copy_cancel",
+      "value": "取消"
     }
   ]
 }
