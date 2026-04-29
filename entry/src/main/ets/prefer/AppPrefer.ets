@@ -33,6 +33,8 @@ export class AppPrefer {
 
   private static readonly KEY_HOME_TAB_INDEX = "home_tab_index"
 
+  private static readonly KEY_VOLUME_KEY_PAGE_TURN = "volume_key_page_turn"
+
   private readonly preference: preferences.Preferences
 
   constructor(context: Context) {
@@ -161,6 +163,18 @@ export class AppPrefer {
 
   public setHomeTabIndex(index: number) {
     this.preference.putSync(AppPrefer.KEY_HOME_TAB_INDEX, index)
+    this.preference.flush()
+  }
+
+  public getVolumeKeyPageTurn(): boolean {
+    if (this.preference.hasSync(AppPrefer.KEY_VOLUME_KEY_PAGE_TURN)) {
+      return this.preference.getSync(AppPrefer.KEY_VOLUME_KEY_PAGE_TURN, true) as boolean
+    }
+    return true
+  }
+
+  public setVolumeKeyPageTurn(on: boolean) {
+    this.preference.putSync(AppPrefer.KEY_VOLUME_KEY_PAGE_TURN, on)
     this.preference.flush()
   }
 

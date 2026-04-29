@@ -8,6 +8,8 @@ import { CacheRef } from '@ohpg/fin-core';
 import { BookType } from '../../enum/BookType';
 import { ImageLoader } from './loader/ImageLoader';
 import { AppPrefer } from '../../prefer/AppPrefer';
+import { inputConsumer, KeyEvent as InputKeyEvent } from '@kit.InputKit';
+import { KeyCode } from '@kit.InputKit';
 
 @Reusable
 @Component
@@ -36,6 +38,9 @@ export struct StaticReaderView {
   @Provide imageLoader?: ImageLoader = undefined
 
   @Provide isVertical: boolean = false
+
+  private volumeUpCallback?: (event: InputKeyEvent) => void
+  private volumeDownCallback?: (event: InputKeyEvent) => void
 
   private tapCallback: Callback<number> = (x) => {
     if (this.dataSource.totalCount() <= 0 || !this.sizeOptions?.width) return
@@ -67,6 +72,7 @@ export struct StaticReaderView {
       .catch((error: Error) => {
         // 显示错误，重试等
       })
+    this.registerVolumeKeyListener()
   }
 
   private constructData(count: number) {
@@ -79,6 +85,41 @@ export struct StaticReaderView {
       })
     }
     this.dataSource.pushArrayData(dataArray)
+  }
+
+  private registerVolumeKeyListener() {
+    if (!this.appPrefer?.getVolumeKeyPageTurn()) return
+    this.volumeUpCallback = (event: InputKeyEvent) => {
+      if (this.readProgress > 0) {
+        this.controller.showPrevious()
+      }
+    }
+    this.volumeDownCallback = (event: InputKeyEvent) => {
+      if (this.readProgress < this.dataSource.totalCount() - 1) {
+        this.controller.showNext()
+      }
+    }
+    inputConsumer.on('keyPressed', {
+      key: KeyCode.KEYCODE_VOLUME_UP,
+      action: 1,
+      isRepeat: false
+    }, this.volumeUpCallback)
+    inputConsumer.on('keyPressed', {
+      key: KeyCode.KEYCODE_VOLUME_DOWN,
+      action: 1,
+      isRepeat: false
+    }, this.volumeDownCallback)
+  }
+
+  private unregisterVolumeKeyListener() {
+    if (this.volumeUpCallback) {
+      inputConsumer.off('keyPressed', this.volumeUpCallback)
+      this.volumeUpCallback = undefined
+    }
+    if (this.volumeDownCallback) {
+      inputConsumer.off('keyPressed', this.volumeDownCallback)
+      this.volumeDownCallback = undefined
+    }
   }
 
   build() {
@@ -107,6 +148,7 @@ export struct StaticReaderView {
   }
 
   aboutToDisappear() {
+    this.unregisterVolumeKeyListener()
     this.imageLoader?.release()
   }
 }

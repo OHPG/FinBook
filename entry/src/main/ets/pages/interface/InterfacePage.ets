@@ -54,11 +54,14 @@ struct InterfacePage {
 
   @State readScreenOn: boolean = true
 
+  @State volumeKeyPageTurn: boolean = false
+
   aboutToAppear(): void {
     this.bookOrientation = this.appPrefer.getBookOrientation()
     let pageSize = this.appPrefer.getPageSize()
     this.pageSizeIndex = this.pageSizeArray.findIndex((value) => value === pageSize)
     this.readScreenOn = this.appPrefer.getReadScreenOn()
+    this.volumeKeyPageTurn = this.appPrefer.getVolumeKeyPageTurn()
     this.bookConfig = this.appPrefer.getBookConfig()
   }
 
@@ -154,6 +157,29 @@ struct InterfacePage {
               .onChange((isOn) => {
                 this.readScreenOn = isOn
                 this.appPrefer.setReadScreenOn(isOn)
+              })
+          }
+          .width(CommonConstants.FULL_PERCENT)
+          .height(60)
+          .padding({
+            left: CommonConstants.SPACE_16,
+            right: CommonConstants.SPACE_16
+          })
+
+          itemDividerBuilder()
+
+          Row({space: CommonConstants.SPACE_8}) {
+            SymbolGlyph($r('sys.symbol.speaker_wave_2'))
+              .fontSize(24)
+              .fontColor([$r('sys.color.ohos_id_color_text_primary')])
+            Text($r('app.string.prefer_interface_volume_key_page_turn'))
+              .fontSize(18)
+              .fontColor($r('sys.color.ohos_id_color_text_primary'))
+            Blank()
+            Toggle({type: ToggleType.Switch, isOn: this.volumeKeyPageTurn})
+              .onChange((isOn) => {
+                this.volumeKeyPageTurn = isOn
+                this.appPrefer.setVolumeKeyPageTurn(isOn)
               })
           }
           .width(CommonConstants.FULL_PERCENT)

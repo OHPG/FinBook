@@ -299,6 +299,10 @@
     {
       "name": "prefer_clear_local_copy_cancel",
       "value": "取消"
+    },
+    {
+      "name": "prefer_interface_volume_key_page_turn",
+      "value": "音量键翻页"
     }
   ]
 }

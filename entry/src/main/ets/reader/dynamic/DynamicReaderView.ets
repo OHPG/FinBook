@@ -4,6 +4,8 @@ import { ReadPageComponent } from "@kit.ReaderKit";
 import { CommonConstants } from "../../common/CommonConstants";
 import { display } from '@kit.ArkUI';
 import { common } from '@kit.AbilityKit';
+import { inputConsumer, KeyEvent as InputKeyEvent } from '@kit.InputKit';
+import { KeyCode } from '@kit.InputKit';
 import { XMenuView } from './menu/XMenuView';
 import { AppPrefer } from '../../prefer/AppPrefer';
 
@@ -53,9 +55,13 @@ export struct DynamicReaderView {
 
   private screenDensityCallBack?: Callback<number> = undefined;
 
+  private volumeUpCallback?: (event: InputKeyEvent) => void
+  private volumeDownCallback?: (event: InputKeyEvent) => void
+
   aboutToAppear(): void {
     this.restoreConfig()
     this.registerScreenDensityChange()
+    this.registerVolumeKeyListener()
     AppStorage.setOrCreate('bookCtrl', this.bookCtrl)
     this.bookCtrl.on('pageShow', (info) => {
       if (info.state === readerCore.PageState.PAGE_ON_SHOW) {
@@ -122,6 +128,37 @@ export struct DynamicReaderView {
     this.bookCtrl.registerBookParser(this.bookHandler)
   }
 
+  private registerVolumeKeyListener() {
+    if (!this.appPrefer.getVolumeKeyPageTurn()) return
+    this.volumeUpCallback = (event: InputKeyEvent) => {
+      this.bookCtrl.flipPage(false)
+    }
+    this.volumeDownCallback = (event: InputKeyEvent) => {
+      this.bookCtrl.flipPage(true)
+    }
+    inputConsumer.on('keyPressed', {
+      key: KeyCode.KEYCODE_VOLUME_UP,
+      action: 1,
+      isRepeat: false
+    }, this.volumeUpCallback)
+    inputConsumer.on('keyPressed', {
+      key: KeyCode.KEYCODE_VOLUME_DOWN,
+      action: 1,
+      isRepeat: false
+    }, this.volumeDownCallback)
+  }
+
+  private unregisterVolumeKeyListener() {
+    if (this.volumeUpCallback) {
+      inputConsumer.off('keyPressed', this.volumeUpCallback)
+      this.volumeUpCallback = undefined
+    }
+    if (this.volumeDownCallback) {
+      inputConsumer.off('keyPressed', this.volumeDownCallback)
+      this.volumeDownCallback = undefined
+    }
+  }
+
   build() {
     Stack() {
       ReadPageComponent({controller: this.bookCtrl, readerCallback: (error, ctrl) => {}})
@@ -164,6 +201,7 @@ export struct DynamicReaderView {
   }
 
   aboutToDisappear(): void {
+    this.unregisterVolumeKeyListener()
     display.off('change', this.screenDensityCallBack);
     this.bookCtrl.off('pageShow')
     this.bookCtrl.off('resourceRequest')
