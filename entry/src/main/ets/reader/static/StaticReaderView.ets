@@ -8,8 +8,66 @@ import { CacheRef } from '@ohpg/fin-core';
 import { BookType } from '../../enum/BookType';
 import { ImageLoader } from './loader/ImageLoader';
 import { AppPrefer } from '../../prefer/AppPrefer';
+import { ComponentContent, OverlayManager } from '@kit.ArkUI';
 import { inputConsumer, KeyEvent as InputKeyEvent } from '@kit.InputKit';
 import { KeyCode } from '@kit.InputKit';
+
+/**
+ * 滑动条 overlay 参数
+ */
+class SliderOverlayParams {
+  controller: SwiperController
+  touching: boolean = false
+  onTouchChange?: (touching: boolean) => void
+  constructor(controller: SwiperController) {
+    this.controller = controller
+  }
+}
+
+@Builder
+function sliderOverlayBuilder(params: SliderOverlayParams) {
+  Row() {
+    Blank()
+    Column() {
+      Slider({
+        value: AppStorage.get<number>('staticReaderProgress') ?? 0,
+        min: 0,
+        max: Math.max((AppStorage.get<number>('staticReaderPageCount') ?? 1) - 1, 0),
+        step: 1,
+        style: SliderStyle.OutSet,
+        direction: Axis.Vertical
+      })
+        .selectedColor($r('sys.color.ohos_id_color_component_activated'))
+        .trackColor('#33808080')
+        .trackThickness(2)
+        .blockSize({ width: 12, height: 12 })
+        .backgroundColor('#40000000')
+        .borderRadius(10)
+        .onChange((value: number, mode: SliderChangeMode) => {
+          let index = Math.round(value)
+          let current = AppStorage.get<number>('staticReaderProgress') ?? 0
+          if (index !== current) {
+            AppStorage.setOrCreate('staticReaderProgress', index)
+            params.controller.changeIndex(index, false)
+          }
+          let isTouching = mode === SliderChangeMode.Begin || mode === SliderChangeMode.Moving
+          if (isTouching !== params.touching) {
+            params.onTouchChange?.(isTouching)
+          }
+        })
+        .height('100%')
+    }
+    .justifyContent(FlexAlign.Center)
+    .width(48)
+    .padding({ top: 16, bottom: 16, left: 14, right: 14 })
+    .margin({ top: 32, bottom: 32 })
+    .opacity(params.touching ? 1 : 0)
+    .animation({ duration: 200 })
+  }
+  .width('100%')
+  .height('100%')
+  .hitTestBehavior(HitTestMode.Transparent)
+}
 
 @Reusable
 @Component
@@ -42,6 +100,10 @@ export struct StaticReaderView {
   private volumeUpCallback?: (event: InputKeyEvent) => void
   private volumeDownCallback?: (event: InputKeyEvent) => void
 
+  private overlayManager?: OverlayManager
+  private overlayContent?: ComponentContent<SliderOverlayParams>
+  private sliderParams?: SliderOverlayParams
+
   private tapCallback: Callback<number> = (x) => {
     if (this.dataSource.totalCount() <= 0 || !this.sizeOptions?.width) return
     let width = this.sizeOptions.width as number
@@ -73,10 +135,48 @@ export struct StaticReaderView {
         // 显示错误，重试等
       })
     this.registerVolumeKeyListener()
+    this.addSliderOverlay()
+  }
+
+  private addSliderOverlay() {
+    AppStorage.setOrCreate('staticReaderProgress', this.readProgress)
+    AppStorage.setOrCreate('staticReaderPageCount', 0)
+    let uiContext = this.getUIContext()
+    this.overlayManager = uiContext.getOverlayManager()
+    this.sliderParams = new SliderOverlayParams(this.controller)
+    this.sliderParams.onTouchChange = (touching: boolean) => {
+      this.sliderParams!.touching = touching
+      this.overlayContent?.update(this.sliderParams!)
+    }
+    this.overlayContent = new ComponentContent(
+      uiContext,
+      wrapBuilder<[SliderOverlayParams]>(sliderOverlayBuilder),
+      this.sliderParams
+    )
+    this.overlayManager.addComponentContent(this.overlayContent, 0)
+    // 进入时短暂显示滑动条，提示用户
+    this.sliderParams.touching = true
+    this.overlayContent.update(this.sliderParams)
+    setTimeout(() => {
+      if (this.sliderParams && this.overlayContent) {
+        this.sliderParams.touching = false
+        this.overlayContent.update(this.sliderParams)
+      }
+    }, 1500)
+  }
+
+  private removeSliderOverlay() {
+    if (this.overlayContent) {
+      this.overlayManager?.removeComponentContent(this.overlayContent)
+      this.overlayContent = undefined
+    }
+    AppStorage.delete('staticReaderProgress')
+    AppStorage.delete('staticReaderPageCount')
   }
 
   private constructData(count: number) {
     this.bookChapter = count
+    AppStorage.setOrCreate('staticReaderPageCount', count)
     let dataArray = new Array<ImagePageInfo>()
     for (let i = 0; i < count; i++) {
       dataArray.push({
@@ -122,6 +222,12 @@ export struct StaticReaderView {
     }
   }
 
+  aboutToDisappear() {
+    this.removeSliderOverlay()
+    this.unregisterVolumeKeyListener()
+    this.imageLoader?.release()
+  }
+
   build() {
     Stack() {
       Swiper(this.controller) {
@@ -138,6 +244,7 @@ export struct StaticReaderView {
       .loop(false)
       .onChange((index) => {
         this.readProgress = index;
+        AppStorage.setOrCreate('staticReaderProgress', index)
       })
     }
     .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
@@ -145,11 +252,6 @@ export struct StaticReaderView {
     })
     .width('100%')
     .height('100%')
-  }
-
-  aboutToDisappear() {
-    this.unregisterVolumeKeyListener()
-    this.imageLoader?.release()
   }
 }
 
