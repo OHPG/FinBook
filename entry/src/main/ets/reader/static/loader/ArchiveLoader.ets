@@ -13,7 +13,6 @@ export class ArchiveLoader implements ImageLoader {
   async load(file: string): Promise<number> {
     this.archiveArray.splice(0)
     this.minizipEntry = new MinizipNative(file);
-    this.minizipEntry.SetCharEncoding(936)
     if (this.minizipEntry.Open() == 0) {
       let entryNames = this.minizipEntry.GetEntryNames();
       for (let i = 0; i < entryNames.length; i++) {
