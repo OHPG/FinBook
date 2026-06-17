@@ -65,6 +65,9 @@ export struct OnlinePage {
           .layoutWeight(1)
       }
     }
+    .padding({left: this.navStartOffset})
+    .width(CommonConstants.FULL_PERCENT)
+    .height(CommonConstants.FULL_PERCENT)
   }
 
 }

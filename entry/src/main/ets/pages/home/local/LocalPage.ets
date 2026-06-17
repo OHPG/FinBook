@@ -51,6 +51,7 @@ export struct LocalPage {
         .width(CommonConstants.FULL_PERCENT)
         .layoutWeight(1)
     }
+    .padding({left: this.navStartOffset})
     .width(CommonConstants.FULL_PERCENT)
     .height(CommonConstants.FULL_PERCENT)
   }
