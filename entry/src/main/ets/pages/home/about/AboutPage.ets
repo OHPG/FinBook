@@ -1,6 +1,6 @@
 import { window } from '@kit.ArkUI'
 import { MarketUtil, WebTool } from '@ohpg/fin-core'
-import { CommonConstants, FinRouter } from '@ohpg/fin-framework'
+import { CommonConstants, FinRouter, FinWebTool } from '@ohpg/fin-framework'
 import { pasteboard } from '@kit.BasicServicesKit'
 import { Repository } from '../../../data/Repository'
 import { HomeToolBar } from '../../../widget/bar/HomeToolBar'
@@ -118,7 +118,7 @@ export struct AboutPage {
       })
 
       this.preferItemBuilder($r('sys.symbol.doc_plaintext'), $r('app.string.prefer_privacy'), () => {
-        WebTool.openBrowser(getContext(), "https://agreement-drcn.hispace.dbankcloud.cn/index.html?lang=zh&agreementId=1574188982982436096")
+        FinWebTool.open(this.getUIContext(), $r('app.string.prefer_privacy'), "https://agreement-drcn.hispace.dbankcloud.cn/index.html?lang=zh&agreementId=1574188982982436096")
       })
 
       this.preferItemBuilder($r('sys.symbol.bag'), $r('app.string.prefer_version'), () => {
@@ -153,7 +153,7 @@ export struct AboutPage {
         Text("豫ICP备2025110731号-6A")
           .fontColor($r('sys.color.ohos_id_color_component_activated'))
           .onClick(() => {
-            WebTool.openBrowser(getContext(), "https://beian.miit.gov.cn")
+            FinWebTool.openSystemBrowser(this.getUIContext(), "https://beian.miit.gov.cn")
           })
       }
       .margin(CommonConstants.SPACE_16)
