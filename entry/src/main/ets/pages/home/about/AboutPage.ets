@@ -1,4 +1,3 @@
-import { window } from '@kit.ArkUI'
 import { MarketUtil, WebTool } from '@ohpg/fin-core'
 import { CommonConstants, FinRouter, FinWebTool } from '@ohpg/fin-framework'
 import { pasteboard } from '@kit.BasicServicesKit'
@@ -14,7 +13,9 @@ export struct AboutPage {
 
   private repository: Repository = AppStorage.get(Repository.REPOSITORY)!
 
-  @StorageProp('currentAvoidArea') currentAvoidArea?: window.AvoidArea = undefined
+  @Consume("navBottomOffset") navBottomOffset: number
+
+  @Consume("navStartOffset") navStartOffset: number
 
   @Builder
   preferItemBuilder(icon: Resource, title: ResourceStr, callback: Callback<void>, tips?: string) {
@@ -159,7 +160,7 @@ export struct AboutPage {
       .margin(CommonConstants.SPACE_16)
     }
     .padding({
-      bottom: px2vp(this.currentAvoidArea?.bottomRect.height)
+      bottom: this.navBottomOffset
     })
     .width(CommonConstants.FULL_PERCENT)
     .height(CommonConstants.FULL_PERCENT)

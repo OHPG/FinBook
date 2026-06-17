@@ -1,12 +1,9 @@
-import { window } from '@kit.ArkUI'
-import { BreakpointSystem } from '@ohpg/fin-core'
-import { CommonConstants } from '../../common/CommonConstants'
+import { AdaptiveNavBar, LazyDataSource, NavTabMeta } from '@ohpg/fin-framework'
 import { AppPrefer } from '../../prefer/AppPrefer'
-import { AboutPage } from './about/AboutPage'
 import { HomeControl } from './HomeControl'
 import { LocalPage } from './local/LocalPage'
 import { OnlinePage } from './online/OnlinePage'
-import { WifiPage } from './wifi/WifiPage'
+import { AboutPage } from './about/AboutPage'
 
 @Entry
 @Component
@@ -14,91 +11,75 @@ struct HomePage {
 
   @StorageLink(AppPrefer.PREFER) appPrefer?: AppPrefer = undefined
 
-  @State currentIndex: number = 0;
+  @State currentIndex: number = 0
 
-  @StorageProp('currentAvoidArea') currentAvoidArea?: window.AvoidArea = undefined
-
-  @StorageProp(BreakpointSystem.CURRENT_WIDTH_BREAKPOINT) currentWidthBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_SM
-
-  @StorageProp(BreakpointSystem.CURRENT_HEIGHT_BREAKPOINT) currentHeightBreakpoint: HeightBreakpoint = HeightBreakpoint.HEIGHT_SM
-
-  private tabsController: TabsController = new TabsController();
+  @Provide("navTopOffset") navTopOffset: number = 0
+  @Provide("navBottomOffset") navBottomOffset: number = 0
+  @Provide("navStartOffset") navStartOffset: number = 0
+  @Provide("navEndOffset") navEndOffset: number = 0
 
   private homeControl = new HomeControl()
 
+  private swiperController: SwiperController = new SwiperController()
+
+  private tabs: NavTabMeta[] = [
+    { title: $r('app.string.tab_local'), icon: $r('sys.symbol.house_fill') } as NavTabMeta,
+    { title: $r('app.string.tab_online'), icon: $r('sys.symbol.externaldrive_fill_3') } as NavTabMeta,
+    { title: $r('app.string.tab_about'), icon: $r('sys.symbol.square_fill_grid_2x2') } as NavTabMeta,
+  ]
+
+  private tabDataSource: LazyDataSource<NavTabMeta> = new LazyDataSource<NavTabMeta>()
+
   aboutToAppear(): void {
     AppStorage.setOrCreate("currentHomeControl", this.homeControl)
-    this.currentIndex = this.appPrefer!.getHomeTabIndex()
+    this.tabDataSource.dataArray = this.tabs
+    const savedIndex = this.appPrefer!.getHomeTabIndex()
+    this.currentIndex = savedIndex < this.tabs.length ? savedIndex : 0
   }
 
-  @Builder TabBuilder(title: ResourceStr, targetIndex: number, img: Resource) {
-    Column({
-      space: CommonConstants.SPACE_4
-    }) {
-      SymbolGlyph(img)
-        .fontSize(24)
-        .fontColor([this.currentIndex === targetIndex ?  '#1698CE' : '#6B6B6B' ])
-      Text(title)
-        .fontSize($r('sys.float.Body_M'))
-        .fontColor(this.currentIndex === targetIndex ? '#1698CE' : '#6B6B6B')
-    }
-    .width('100%')
-    .height(50)
-    .justifyContent(FlexAlign.Center)
-    .onClick(() => {
-      this.currentIndex = targetIndex;
-      this.tabsController.changeIndex(this.currentIndex);
-    })
+  private onTabSelect(index: number): void {
+    this.currentIndex = index
+    this.swiperController.changeIndex(index, false)
+    this.appPrefer?.setHomeTabIndex(index)
   }
 
-  // https://developer.huawei.com/consumer/cn/design/harmonyos-symbol/
   build() {
-    Tabs({ index: this.currentIndex, barPosition: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
-      ? BarPosition.Start : BarPosition.End, controller: this.tabsController }) {
-      TabContent() {
-        LocalPage()
+    Stack() {
+      // 内容区
+      Swiper(this.swiperController) {
+        LazyForEach(this.tabDataSource, (item: NavTabMeta, index: number) => {
+          if (index === 0) {
+            LocalPage()
+          } else if (index === 1) {
+            OnlinePage()
+          } else {
+            AboutPage()
+          }
+        }, (item: NavTabMeta, index: number) => index.toString())
       }
-      .tabBar(this.TabBuilder($r('app.string.tab_local'), 0, $r('sys.symbol.house_fill')))
+      .cachedCount(1)
+      .index(this.currentIndex)
+      .indicator(false)
+      .loop(false)
+      .disableSwipe(true)
+      .duration(0)
+      .width('100%')
+      .height('100%')
 
-      // TabContent() {
-      //   WifiPage()
-      // }
-      // .tabBar(this.TabBuilder($r('app.string.tab_trans'), 1, $r('sys.symbol.worldclock_fill')))
-
-      TabContent() {
-        OnlinePage()
-      }
-      .tabBar(this.TabBuilder($r('app.string.tab_online'), 1, $r('sys.symbol.externaldrive_fill_3')))
-
-      TabContent() {
-        AboutPage()
-      }
-      .tabBar(this.TabBuilder($r('app.string.tab_about'), 2, $r('sys.symbol.square_fill_grid_2x2')))
+      // 导航栏（悬浮在内容上层）
+      AdaptiveNavBar({
+        tabs: this.tabs,
+        currentIndex: this.currentIndex,
+        onTabSelect: (index: number) => { this.onTabSelect(index) },
+        navTopOffset: $navTopOffset,
+        navBottomOffset: $navBottomOffset,
+        navStartOffset: $navStartOffset,
+        navEndOffset: $navEndOffset,
+      })
     }
-    .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
-    .vertical(this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD)
-    .barWidth(this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD ? 72 : '100%')
-    .barHeight(this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD ? '100%' : 50)
-    .animationDuration(0)
-    .backgroundColor($r('sys.color.background_primary'))
-    .onChange((index: number) => {
-      this.currentIndex = index;
-      this.appPrefer?.setHomeTabIndex(index)
-    })
-    .padding({
-      left: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
-        ? px2vp(this.currentAvoidArea?.leftRect.width)
-        : 0,
-      right: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
-        ? px2vp(this.currentAvoidArea?.rightRect.width)
-        : 0,
-      bottom: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD
-        ? 0
-        : px2vp(this.currentAvoidArea?.bottomRect.height)
-    })
-    .scrollable(false)
     .width('100%')
     .height('100%')
+    .backgroundColor($r('sys.color.background_primary'))
   }
 
   onBackPress(): boolean | void {
@@ -111,5 +92,4 @@ struct HomePage {
   aboutToDisappear(): void {
     AppStorage.delete("currentHomeControl")
   }
-
 }

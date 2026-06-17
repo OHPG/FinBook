@@ -12,6 +12,10 @@ export struct LocalPage {
 
   @StorageLink("currentHomeControl") homeControl?: HomeControl = undefined
 
+  @Consume("navBottomOffset") navBottomOffset: number
+
+  @Consume("navStartOffset") navStartOffset: number
+
   private control = new TreeControl()
 
   aboutToAppear(): void {

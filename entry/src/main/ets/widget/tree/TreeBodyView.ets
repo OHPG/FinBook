@@ -4,7 +4,6 @@ import { AppEvents } from "@ohpg/fin-core"
 import { AppThumb } from "../../thumb/AppThumb"
 import { fileUri } from '@kit.CoreFileKit';
 import { MenuType } from "../../enum/MenuType"
-import { window } from "@kit.ArkUI";
 import { TreeData } from "./TreeData";
 import { Pair } from "../../comp/Pair"
 import { CommonConstants } from "../../common/CommonConstants";
@@ -24,7 +23,9 @@ export struct TreeBodyView {
 
   @Require mediaItemCallback: Callback<BookItem>
 
-  @StorageProp('currentAvoidArea') currentAvoidArea?: window.AvoidArea = undefined
+  @Consume("navBottomOffset") navBottomOffset: number
+
+  @Consume("navStartOffset") navStartOffset: number
 
   @StorageProp(BreakpointSystem.CURRENT_WIDTH_BREAKPOINT) currentWidthBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_SM
 
@@ -122,9 +123,7 @@ export struct TreeBodyView {
         .padding({
           left: CommonConstants.SPACE_16,
           right: CommonConstants.SPACE_16,
-          bottom: this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD ?
-            px2vp(this.currentAvoidArea?.bottomRect.height) :
-            0
+          bottom: this.navBottomOffset
         })
         .rowsGap(CommonConstants.SPACE_12)
         .columnsGap(CommonConstants.SPACE_12)

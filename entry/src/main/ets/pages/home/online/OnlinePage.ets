@@ -1,4 +1,3 @@
-import { window } from '@kit.ArkUI'
 import { ActiveInfo, AppStorageKeys } from '@ohpg/fin-core'
 import { CommonConstants, FinRouter, ListRefreshView } from '@ohpg/fin-framework'
 import { AppRouter } from '../../../router/AppRouter'
@@ -11,7 +10,9 @@ export struct OnlinePage {
 
   private viewModel = new OnlineViewModel(getContext())
 
-  @StorageProp('currentAvoidArea') avoidArea?: window.AvoidArea = undefined
+  @Consume("navBottomOffset") navBottomOffset: number
+
+  @Consume("navStartOffset") navStartOffset: number
 
   @StorageLink(AppStorageKeys.KEY_ACTIVE_INFO) activeInfo?: ActiveInfo = undefined
 
@@ -46,7 +47,7 @@ export struct OnlinePage {
             }
             attr.width = CommonConstants.FULL_PERCENT
             attr.height = CommonConstants.FULL_PERCENT
-            attr.contentEndOffset = px2vp(this.avoidArea?.bottomRect.height)
+            attr.contentEndOffset = this.navBottomOffset
           }
         })
           .width(CommonConstants.FULL_PERCENT)
