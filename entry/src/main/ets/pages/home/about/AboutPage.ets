@@ -1,5 +1,5 @@
 import { window } from '@kit.ArkUI'
-import { MarketUtil } from '@ohpg/fin-core'
+import { ActiveInfo, AppStorageKeys, MarketUtil } from '@ohpg/fin-core'
 import { CommonConstants, FinRouter, FinWebTool, ToolBar } from '@ohpg/fin-framework'
 import { pasteboard } from '@kit.BasicServicesKit'
 import { Repository } from '../../../data/Repository'
@@ -17,6 +17,8 @@ export struct AboutPage {
   @Consume("navBottomOffset") navBottomOffset: number
 
   @Consume("navStartOffset") navStartOffset: number
+
+  @StorageLink(AppStorageKeys.KEY_ACTIVE_INFO) activeInfo?: ActiveInfo = undefined
 
   private repository: Repository = AppStorage.get(Repository.REPOSITORY)!
 
@@ -51,9 +53,9 @@ export struct AboutPage {
             PreferItem({
               icon: $r('sys.symbol.externaldrive'),
               title: $r('app.string.prefer_server'),
-              tips: this.repository?.getActiveInfo()?.serverInfo.serverName || $r('app.string.prefer_server_hint'),
+              tips: this.activeInfo?.serverInfo.serverName || $r('app.string.prefer_server_hint'),
               callback: () => {
-                if (this.repository?.getActiveInfo()) {
+                if (this.activeInfo) {
                   FinRouter.editServer(this.getUIContext())
                 } else {
                   FinRouter.auth(this.getUIContext())
@@ -66,9 +68,9 @@ export struct AboutPage {
             PreferItem({
               icon: $r('sys.symbol.worldclock'),
               title: $r('app.string.prefer_address'),
-              tips: this.repository?.getActiveInfo()?.addressInfo.address || $r('app.string.prefer_server_hint'),
+              tips: this.activeInfo?.addressInfo.address || $r('app.string.prefer_server_hint'),
               callback: () => {
-                if (this.repository?.getActiveInfo()) {
+                if (this.activeInfo) {
                   FinRouter.editAddress(this.getUIContext())
                 } else {
                   FinRouter.auth(this.getUIContext())
@@ -81,9 +83,9 @@ export struct AboutPage {
             PreferItem({
               icon: $r('sys.symbol.person'),
               title: $r('app.string.prefer_user'),
-              tips: this.repository?.getActiveInfo()?.userInfo.userName || $r('app.string.prefer_server_hint'),
+              tips: this.activeInfo?.userInfo.userName || $r('app.string.prefer_server_hint'),
               callback: () => {
-                if (this.repository?.getActiveInfo()) {
+                if (this.activeInfo) {
                   FinRouter.editUser(this.getUIContext())
                 } else {
                   FinRouter.auth(this.getUIContext())
