@@ -12,7 +12,12 @@ export class AppDownload {
     this.context = context
   }
 
-  public async download(url: string, path: string, auth: string): Promise<string> {
+  public async download(
+    url: string,
+    path: string,
+    auth: string,
+    onProgress?: (processed: number, total: number) => void
+  ): Promise<string> {
     if (this.downloadTask) {
       try {
         await this.downloadTask.stop()
@@ -45,6 +50,13 @@ export class AppDownload {
           console.log("FinBook download response: " + JSON.stringify(response))
         }
       })
+      if (onProgress) {
+        this.downloadTask!.on('progress', (progress) => {
+          // progress.processed: 已下载字节数；progress.sizes[0]: 文件总字节数
+          const total = progress.sizes && progress.sizes.length > 0 ? progress.sizes[0] : -1
+          onProgress(progress.processed, total)
+        })
+      }
       this.downloadTask!.on('completed', () => {
         if (BuildProfile.DEBUG) {
           console.log("FinBook download complete.")
