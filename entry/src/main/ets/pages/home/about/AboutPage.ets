@@ -1,4 +1,3 @@
-import { window } from '@kit.ArkUI'
 import { ActiveInfo, AppStorageKeys, MarketUtil } from '@ohpg/fin-core'
 import { CommonConstants, FinRouter, FinWebTool, ToolBar } from '@ohpg/fin-framework'
 import { pasteboard } from '@kit.BasicServicesKit'
@@ -24,15 +23,15 @@ export struct AboutPage {
 
   private showClearLocalCopyDialog() {
     this.getUIContext().getPromptAction().showDialog({
-      title: getContext().resourceManager.getStringSync($r('app.string.prefer_clear_local_copy_confirm_title')),
-      message: getContext().resourceManager.getStringSync($r('app.string.prefer_clear_local_copy_confirm_msg')),
+      title:$r('app.string.prefer_clear_local_copy_confirm_title'),
+      message: $r('app.string.prefer_clear_local_copy_confirm_msg'),
       buttons: [
-        { text: getContext().resourceManager.getStringSync($r('app.string.prefer_clear_local_copy_cancel')), color: $r('sys.color.ohos_id_color_text_secondary') },
-        { text: getContext().resourceManager.getStringSync($r('app.string.prefer_clear_local_copy_confirm')), color: $r('sys.color.ohos_id_color_warning') }
+        { text: $r('app.string.prefer_clear_local_copy_cancel'), color: $r('sys.color.ohos_id_color_text_secondary') },
+        { text: $r('app.string.prefer_clear_local_copy_confirm'), color: $r('sys.color.ohos_id_color_warning') }
       ]
     }).then((result) => {
       if (result.index === 1) {
-        FileUtil.clearLocalCopyFiles(getContext()).then(() => {
+        FileUtil.clearLocalCopyFiles(this.getUIContext().getHostContext()!).then(() => {
           this.getUIContext().getPromptAction().showToast({ message: $r('app.string.prefer_clear_local_copy_success') })
         })
       }

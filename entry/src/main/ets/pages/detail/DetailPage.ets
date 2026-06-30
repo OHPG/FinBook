@@ -34,7 +34,11 @@ struct DetailPage {
   }
 
   build() {
-    Stack() {
+    Column() {
+      ToolBar({
+        title: this.args.name
+      })
+
       ScrollRefreshView({
         refreshEnable: false,
         source: this.viewModel,
@@ -42,11 +46,8 @@ struct DetailPage {
           this.showScrollView(info)
         }
       })
-      ToolBar({
-        color: $r('sys.color.font_on_primary')
-      })
+        .layoutWeight(1)
     }
-    .alignContent(Alignment.Top)
     .width(CommonConstants.FULL_PERCENT)
     .height(CommonConstants.FULL_PERCENT)
   }
