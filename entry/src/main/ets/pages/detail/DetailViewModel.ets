@@ -1,5 +1,5 @@
 import { MediaArgs } from "./MediaArgs";
-import { FinItem, LoadType } from "@ohpg/fin-core";
+import { FinItem, LoadType, ServerType } from "@ohpg/fin-core";
 import { SimpleRepository } from "@ohpg/fin-framework";
 import { AppViewModel } from "../../lifecycle/AppViewModel";
 import { AppDownload } from "../../down/AppDownload";
@@ -27,8 +27,20 @@ export class DetailViewModel extends AppViewModel implements SimpleRepository {
     this.args = args
   }
 
+  /**
+   * 当前服务端是否支持收藏功能
+   */
+  get supportFavorite(): boolean {
+    const serverType = this.repository.getActiveInfo()?.serverInfo.serverType
+    return serverType === ServerType.JELLYFIN || serverType === ServerType.EMBY
+  }
+
   async loadData(type: LoadType): Promise<Object> {
-    return await this.repository.getBook(this.args.id)
+    let book = await this.repository.getBook(this.args.id)
+    console.info("DetailViewModel: loadData id = " + this.args.id
+      + ", isFavorite = " + book.data?.isFavorite
+      + ", played = " + book.data?.played)
+    return book
   }
 
   /**

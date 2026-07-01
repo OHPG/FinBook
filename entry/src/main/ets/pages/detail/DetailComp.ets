@@ -13,16 +13,25 @@ export struct DetailOperate {
 
   @LocalStorageLink("viewModel") viewModel?: DetailViewModel = undefined
 
-  @Require @Prop item?: FinItem = undefined
+  @Require @Prop @Watch('onItemChanged') item?: FinItem = undefined
 
   @State downloadingState: boolean = false
   @State downloadProgress: number = 0
   @State downloadSizeText: string = ''
   @State downloadSpeedText: string = ''
 
+  @State isFavorite: boolean = false
+
   private pollTimer?: number = undefined
 
+  onItemChanged(): void {
+    this.isFavorite = this.item?.data?.isFavorite ?? false
+  }
+
   aboutToAppear(): void {
+    // 初始化收藏状态
+    this.isFavorite = this.item?.data?.isFavorite ?? false
+
     this.pollTimer = setInterval(() => {
       if (this.viewModel?.downloadState) {
         const state = this.viewModel.downloadState
@@ -43,28 +52,51 @@ export struct DetailOperate {
 
   build() {
     Column({ space: 12 }) {
-      // 按钮行：收藏 + 阅读
-      Row({ space: 12 }) {
-        // 收藏按钮
-        Button({ type: ButtonType.Capsule }) {
-          Row({ space: 6 }) {
-            SymbolGlyph($r('sys.symbol.star'))
-              .fontColor([$r('sys.color.font_primary')])
-              .fontSize(16)
-            Text('收藏')
-              .fontColor($r('sys.color.font_primary'))
-              .fontSize($r('sys.float.Body_M'))
+      if (this.viewModel?.supportFavorite) {
+        // 双按钮模式：收藏 + 阅读（Jellyfin/Emby）
+        Row({ space: 12 }) {
+          // 收藏按钮
+          Button({ type: ButtonType.Capsule }) {
+            Row({ space: 6 }) {
+              SymbolGlyph(this.isFavorite ? $r('sys.symbol.star_fill') : $r('sys.symbol.star'))
+                .fontColor(this.isFavorite ? [Color.Orange] : [$r('sys.color.font_primary')])
+                .fontSize(16)
+              Text(this.isFavorite ? '已收藏' : '收藏')
+                .fontColor($r('sys.color.font_primary'))
+                .fontSize($r('sys.float.Body_M'))
+            }
+            .justifyContent(FlexAlign.Center)
           }
-          .justifyContent(FlexAlign.Center)
-        }
-        .backgroundColor($r('sys.color.comp_background_tertiary'))
-        .height(36)
-        .layoutWeight(1)
-        .onClick(() => {
-          this.viewModel?.favouriteOrNot(this.item?.data?.isFavorite)
-        })
+          .backgroundColor($r('sys.color.comp_background_tertiary'))
+          .height(36)
+          .layoutWeight(1)
+          .onClick(() => {
+            this.viewModel?.favouriteOrNot(this.isFavorite)
+              .then((newState) => {
+                this.isFavorite = newState
+              })
+          })
 
-        // 阅读按钮
+          // 阅读按钮
+          Button({ type: ButtonType.Capsule }) {
+            Row({ space: 6 }) {
+              SymbolGlyph($r('sys.symbol.book_pages_fill_1'))
+                .fontColor([$r('sys.color.font_on_primary')])
+                .fontSize(16)
+              Text(this.downloadingState ? '下载中' : '阅读')
+                .fontColor($r('sys.color.font_on_primary'))
+                .fontSize($r('sys.float.Body_M'))
+            }
+            .justifyContent(FlexAlign.Center)
+          }
+          .height(36)
+          .layoutWeight(1)
+          .enabled(!this.downloadingState)
+          .onClick(() => this.playOrNot())
+        }
+        .width('100%')
+      } else {
+        // 单按钮模式：仅阅读（Komga）
         Button({ type: ButtonType.Capsule }) {
           Row({ space: 6 }) {
             SymbolGlyph($r('sys.symbol.book_pages_fill_1'))
@@ -76,12 +108,11 @@ export struct DetailOperate {
           }
           .justifyContent(FlexAlign.Center)
         }
+        .width(128)
         .height(36)
-        .layoutWeight(1)
         .enabled(!this.downloadingState)
         .onClick(() => this.playOrNot())
       }
-      .width('100%')
 
       // 下载进度（在按钮下方显示）
       if (this.downloadingState) {
@@ -185,6 +216,8 @@ export struct DetailHeader {
   @StorageProp(BreakpointSystem.CURRENT_WIDTH_BREAKPOINT)
   currentWidthBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_SM
 
+  @LocalStorageLink("viewModel") viewModel?: DetailViewModel = undefined
+
   @Prop item: FinItem
 
   build() {
@@ -211,9 +244,10 @@ export struct DetailHeader {
         CoverImage({ image: this.item?.image, imageBorderRadius: 8 })
           .width(this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD ? 150 : 120)
           .aspectRatio(CommonConstants.ITEM_RATIO)
-          .shadow({ radius: 12, color: 'rgba(0, 0, 0, 0.15)', offsetY: 4 })
+          .borderRadius(8)
+          .clip(true)
 
-        // 右侧：核心元数据
+        // 右侧：元数据 + 按钮（底部对齐封面）
         Column({ space: 8 }) {
           // 评分
           if (this.item.communityRating) {
@@ -227,17 +261,23 @@ export struct DetailHeader {
             }
           }
 
-          // 核心元数据（紧凑展示）
+          // 核心元数据
           this.buildMetadataGrid()
+
+          // 单按钮模式：撑开后底部对齐封面
+          if (this.item.type === FinItemType.Book && !this.viewModel?.supportFavorite) {
+            Blank()
+            DetailOperate({ item: this.item })
+          }
         }
         .layoutWeight(1)
         .alignItems(HorizontalAlign.Start)
+        .alignSelf(ItemAlign.Stretch)
       }
       .width('100%')
-      .alignItems(VerticalAlign.Top)
 
-      // 操作按钮
-      if (this.item.type === FinItemType.Book) {
+      // 双按钮模式：收藏+阅读放在整行下方
+      if (this.item.type === FinItemType.Book && this.viewModel?.supportFavorite) {
         DetailOperate({ item: this.item })
       }
 
@@ -257,14 +297,15 @@ export struct DetailHeader {
   @Builder
   buildLargeScreenLayout() {
     Row({ space: 0 }) {
-      // 左栏：封面 + 标题 + 元数据 + 操作按钮
+      // 左栏：封面 + 元数据 + 操作按钮
       Column({ space: 16 }) {
-        // 封面 + 标题/元数据
+        // 封面 + 元数据
         Row({ space: 20 }) {
           CoverImage({ image: this.item?.image, imageBorderRadius: 8 })
             .width(160)
             .aspectRatio(CommonConstants.ITEM_RATIO)
-            .shadow({ radius: 16, color: 'rgba(0, 0, 0, 0.15)', offsetY: 4 })
+            .borderRadius(8)
+            .clip(true)
 
           Column({ space: 8 }) {
             if (this.item.communityRating) {
@@ -279,15 +320,21 @@ export struct DetailHeader {
             }
 
             this.buildMetadataGrid()
+
+            // 单按钮模式：撑开后底部对齐封面
+            if (!this.viewModel?.supportFavorite) {
+              Blank()
+              DetailOperate({ item: this.item })
+            }
           }
           .layoutWeight(1)
           .alignItems(HorizontalAlign.Start)
+          .alignSelf(ItemAlign.Stretch)
         }
         .width('100%')
-        .alignItems(VerticalAlign.Top)
 
-        // 操作按钮
-        if (this.item.type === FinItemType.Book) {
+        // 双按钮模式：收藏+阅读放在整行下方
+        if (this.viewModel?.supportFavorite) {
           DetailOperate({ item: this.item })
         }
       }
@@ -414,10 +461,11 @@ export struct DetailHeader {
           // 来源路径
           Text(this.item.path)
             .fontSize($r('sys.float.Body_S'))
+            .textAlign(TextAlign.Start)
             .fontColor($r('sys.color.font_secondary'))
+            .width('100%')
             .maxLines(3)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .margin({ left: 24 })
         }
         .padding(12)
         .borderRadius(8)

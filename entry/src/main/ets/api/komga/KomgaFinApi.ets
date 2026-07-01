@@ -305,6 +305,9 @@ export class KomgaFinApi implements FinBookApi {
 
   public async getBook(id: string): Promise<FinItem> {
     let item = await this.komga.getItemsApi().getBook(id)
+    if (BuildProfile.DEBUG) {
+      console.info("KomgaFinApi: getBook id = " + id + ", item = " + JSON.stringify(item))
+    }
     let progress: ProgressDto | undefined
     if (item.media.mediaProfile === "EPUB") {
       progress = await this.komga.getItemsApi().getBookProgression(id)
@@ -325,9 +328,11 @@ export class KomgaFinApi implements FinBookApi {
   }
 
   async markFavoriteItem(id: string): Promise<void> {
+    console.warn("KomgaFinApi: markFavoriteItem not supported by Komga, id = " + id)
   }
 
   async unmarkFavoriteItem(id: string): Promise<void> {
+    console.warn("KomgaFinApi: unmarkFavoriteItem not supported by Komga, id = " + id)
   }
 
   async markPlayedItem(id: string): Promise<void> {

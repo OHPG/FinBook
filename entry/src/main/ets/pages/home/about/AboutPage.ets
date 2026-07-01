@@ -1,7 +1,6 @@
 import { ActiveInfo, AppStorageKeys, MarketUtil } from '@ohpg/fin-core'
 import { CommonConstants, FinRouter, FinWebTool, ToolBar } from '@ohpg/fin-framework'
 import { pasteboard } from '@kit.BasicServicesKit'
-import { Repository } from '../../../data/Repository'
 import { AppRouter } from '../../../router/AppRouter'
 import { FileUtil } from '../../../util/FileUtil'
 import { common } from '@kit.AbilityKit'
@@ -18,8 +17,6 @@ export struct AboutPage {
   @Consume("navStartOffset") navStartOffset: number
 
   @StorageLink(AppStorageKeys.KEY_ACTIVE_INFO) activeInfo?: ActiveInfo = undefined
-
-  private repository: Repository = AppStorage.get(Repository.REPOSITORY)!
 
   private showClearLocalCopyDialog() {
     this.getUIContext().getPromptAction().showDialog({
