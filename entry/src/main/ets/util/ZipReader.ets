@@ -1,10 +1,16 @@
 import { zlib } from "@kit.BasicServicesKit";
+import { util } from "@kit.ArkTS";
 import fs from '@ohos.file.fs';
 
 /**
  * 轻量级 zip 单文件提取器
  * 通过解析 End of Central Directory 和 Central Directory 定位文件
  * 只读取和解压需要的文件，不解压整个 zip
+ *
+ * 编码策略（与 WinRAR 一致）：
+ * - 每个条目的 General Purpose Bit Flag bit 11 标记是否为 UTF-8
+ * - bit 11 = 1：使用 UTF-8 解码
+ * - bit 11 = 0：检测字节是否为合法 UTF-8，是则用 UTF-8，否则用 GBK
  */
 export class ZipReader {
 
@@ -127,6 +133,7 @@ export class ZipReader {
       // 验证 Central Directory 签名 0x02014b50
       if (cdView.getUint32(pos, true) !== 0x02014b50) break
 
+      let gpFlag = cdView.getUint16(pos + 8, true)
       let method = cdView.getUint16(pos + 10, true)
       let compSize = cdView.getUint32(pos + 20, true)
       let uncompSize = cdView.getUint32(pos + 24, true)
@@ -135,9 +142,10 @@ export class ZipReader {
       let commentLen = cdView.getUint16(pos + 32, true)
       let localOffset = cdView.getUint32(pos + 42, true)
 
-      // 读取文件名
+      // 读取文件名，根据 bit 11 (Language Encoding Flag) 决定编码
       let nameBytes = new Uint8Array(cdBuf, pos + 46, nameLen)
-      let name = ZipReader.decodeFileName(nameBytes)
+      let isUtf8Flag = (gpFlag & 0x0800) !== 0
+      let name = ZipReader.decodeName(nameBytes, isUtf8Flag)
 
       this.entries.set(name, {
         compressionMethod: method,
@@ -153,9 +161,71 @@ export class ZipReader {
   }
 
   /**
-   * 解码文件名（UTF-8）
+   * 根据 UTF-8 标志位和字节内容智能解码文件名
+   * @param bytes 原始文件名字节
+   * @param isUtf8Flag bit 11 是否设置（明确标记为 UTF-8）
    */
-  private static decodeFileName(bytes: Uint8Array): string {
+  private static decodeName(bytes: Uint8Array, isUtf8Flag: boolean): string {
+    if (isUtf8Flag) {
+      // bit 11 明确标记为 UTF-8
+      return ZipReader.decodeUtf8(bytes)
+    }
+    // bit 11 未设置，需要启发式判断
+    // 先检查是否为合法 UTF-8 序列
+    if (ZipReader.isValidUtf8(bytes)) {
+      return ZipReader.decodeUtf8(bytes)
+    }
+    // 不是合法 UTF-8，用 GBK 解码
+    return ZipReader.decodeGBK(bytes)
+  }
+
+  /**
+   * 检测字节序列是否为合法 UTF-8
+   * 纯 ASCII 也算合法 UTF-8，但对于纯 ASCII 无需区分
+   */
+  private static isValidUtf8(bytes: Uint8Array): boolean {
+    let i = 0
+    while (i < bytes.length) {
+      let b = bytes[i]
+      if (b < 0x80) {
+        // ASCII
+        i++
+      } else if ((b & 0xE0) === 0xC0) {
+        // 2字节序列 110xxxxx
+        if (i + 1 >= bytes.length) return false
+        if ((bytes[i + 1] & 0xC0) !== 0x80) return false
+        // 排除 overlong: 最小值应为 0x80，即首字节至少 0xC2
+        if (b < 0xC2) return false
+        i += 2
+      } else if ((b & 0xF0) === 0xE0) {
+        // 3字节序列 1110xxxx
+        if (i + 2 >= bytes.length) return false
+        if ((bytes[i + 1] & 0xC0) !== 0x80) return false
+        if ((bytes[i + 2] & 0xC0) !== 0x80) return false
+        // 排除 overlong
+        if (b === 0xE0 && bytes[i + 1] < 0xA0) return false
+        i += 3
+      } else if ((b & 0xF8) === 0xF0) {
+        // 4字节序列 11110xxx
+        if (i + 3 >= bytes.length) return false
+        if ((bytes[i + 1] & 0xC0) !== 0x80) return false
+        if ((bytes[i + 2] & 0xC0) !== 0x80) return false
+        if ((bytes[i + 3] & 0xC0) !== 0x80) return false
+        // 排除 overlong
+        if (b === 0xF0 && bytes[i + 1] < 0x90) return false
+        i += 4
+      } else {
+        // 无效的起始字节
+        return false
+      }
+    }
+    return true
+  }
+
+  /**
+   * UTF-8 解码
+   */
+  private static decodeUtf8(bytes: Uint8Array): string {
     let result = ""
     let i = 0
     while (i < bytes.length) {
@@ -182,6 +252,14 @@ export class ZipReader {
       }
     }
     return result
+  }
+
+  /**
+   * GBK 解码
+   */
+  private static decodeGBK(bytes: Uint8Array): string {
+    let decoder = new util.TextDecoder("gbk")
+    return decoder.decodeToString(bytes)
   }
 
   /**
