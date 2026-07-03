@@ -4,10 +4,9 @@ import { ReadPageComponent } from "@kit.ReaderKit";
 import { CommonConstants } from "../../common/CommonConstants";
 import { display } from '@kit.ArkUI';
 import { common } from '@kit.AbilityKit';
-import { inputConsumer, KeyEvent as InputKeyEvent } from '@kit.InputKit';
-import { KeyCode } from '@kit.InputKit';
 import { XMenuView } from './menu/XMenuView';
 import { AppPrefer } from '../../prefer/AppPrefer';
+import { VolumeKeyHelper } from '../VolumeKeyHelper';
 
 @Reusable
 @Component
@@ -55,8 +54,7 @@ export struct DynamicReaderView {
 
   private screenDensityCallBack?: Callback<number> = undefined;
 
-  private volumeUpCallback?: (event: InputKeyEvent) => void
-  private volumeDownCallback?: (event: InputKeyEvent) => void
+  private volumeKeyHelper = new VolumeKeyHelper()
 
   aboutToAppear(): void {
     this.restoreConfig()
@@ -130,33 +128,15 @@ export struct DynamicReaderView {
 
   private registerVolumeKeyListener() {
     if (!this.appPrefer.getVolumeKeyPageTurn()) return
-    this.volumeUpCallback = (event: InputKeyEvent) => {
-      this.bookCtrl.flipPage(false)
-    }
-    this.volumeDownCallback = (event: InputKeyEvent) => {
-      this.bookCtrl.flipPage(true)
-    }
-    inputConsumer.on('keyPressed', {
-      key: KeyCode.KEYCODE_VOLUME_UP,
-      action: 1,
-      isRepeat: false
-    }, this.volumeUpCallback)
-    inputConsumer.on('keyPressed', {
-      key: KeyCode.KEYCODE_VOLUME_DOWN,
-      action: 1,
-      isRepeat: false
-    }, this.volumeDownCallback)
+    this.volumeKeyHelper.register(
+      this.getUIContext(),
+      () => { this.bookCtrl.flipPage(false) },
+      () => { this.bookCtrl.flipPage(true) }
+    )
   }
 
   private unregisterVolumeKeyListener() {
-    if (this.volumeUpCallback) {
-      inputConsumer.off('keyPressed', this.volumeUpCallback)
-      this.volumeUpCallback = undefined
-    }
-    if (this.volumeDownCallback) {
-      inputConsumer.off('keyPressed', this.volumeDownCallback)
-      this.volumeDownCallback = undefined
-    }
+    this.volumeKeyHelper.unregister()
   }
 
   build() {

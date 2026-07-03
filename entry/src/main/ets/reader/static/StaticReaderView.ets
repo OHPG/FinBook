@@ -9,8 +9,7 @@ import { BookType } from '../../enum/BookType';
 import { ImageLoader } from './loader/ImageLoader';
 import { AppPrefer } from '../../prefer/AppPrefer';
 import { ComponentContent, OverlayManager } from '@kit.ArkUI';
-import { inputConsumer, KeyEvent as InputKeyEvent } from '@kit.InputKit';
-import { KeyCode } from '@kit.InputKit';
+import { VolumeKeyHelper } from '../VolumeKeyHelper';
 
 /**
  * 滑动条 overlay 参数
@@ -97,8 +96,7 @@ export struct StaticReaderView {
 
   @Provide isVertical: boolean = false
 
-  private volumeUpCallback?: (event: InputKeyEvent) => void
-  private volumeDownCallback?: (event: InputKeyEvent) => void
+  private volumeKeyHelper = new VolumeKeyHelper()
 
   private overlayManager?: OverlayManager
   private overlayContent?: ComponentContent<SliderOverlayParams>
@@ -189,37 +187,15 @@ export struct StaticReaderView {
 
   private registerVolumeKeyListener() {
     if (!this.appPrefer?.getVolumeKeyPageTurn()) return
-    this.volumeUpCallback = (event: InputKeyEvent) => {
-      if (this.readProgress > 0) {
-        this.controller.showPrevious()
-      }
-    }
-    this.volumeDownCallback = (event: InputKeyEvent) => {
-      if (this.readProgress < this.dataSource.totalCount() - 1) {
-        this.controller.showNext()
-      }
-    }
-    inputConsumer.on('keyPressed', {
-      key: KeyCode.KEYCODE_VOLUME_UP,
-      action: 1,
-      isRepeat: false
-    }, this.volumeUpCallback)
-    inputConsumer.on('keyPressed', {
-      key: KeyCode.KEYCODE_VOLUME_DOWN,
-      action: 1,
-      isRepeat: false
-    }, this.volumeDownCallback)
+    this.volumeKeyHelper.register(
+      this.getUIContext(),
+      () => { if (this.readProgress > 0) this.controller.showPrevious() },
+      () => { if (this.readProgress < this.dataSource.totalCount() - 1) this.controller.showNext() }
+    )
   }
 
   private unregisterVolumeKeyListener() {
-    if (this.volumeUpCallback) {
-      inputConsumer.off('keyPressed', this.volumeUpCallback)
-      this.volumeUpCallback = undefined
-    }
-    if (this.volumeDownCallback) {
-      inputConsumer.off('keyPressed', this.volumeDownCallback)
-      this.volumeDownCallback = undefined
-    }
+    this.volumeKeyHelper.unregister()
   }
 
   aboutToDisappear() {
