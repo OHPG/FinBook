@@ -142,7 +142,7 @@ export class KomgaFinApi implements FinBookApi {
   private bookToFinItem(book: BookDto, progress?: ProgressDto, series?: boolean): FinItem {
     let item: FinItem = {
       id: book.id,
-      name: book.name,
+      name: book.metadata.title || book.name,
       type: series ? FinItemType.Series : FinItemType.Book,
       originalTitle: book.name,
       overview: book.metadata?.summary,
