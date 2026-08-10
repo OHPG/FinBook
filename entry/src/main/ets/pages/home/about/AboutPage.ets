@@ -2,7 +2,6 @@ import { ActiveInfo, AppStorageKeys, MarketUtil } from '@ohpg/fin-core'
 import { CommonConstants, FinRouter, FinWebTool, ToolBar } from '@ohpg/fin-framework'
 import { pasteboard } from '@kit.BasicServicesKit'
 import { AppRouter } from '../../../router/AppRouter'
-import { FileUtil } from '../../../util/FileUtil'
 import { common } from '@kit.AbilityKit'
 import { PreferItem } from '../../../widget/item/PreferItem'
 import { groupAttributeModifier, itemDividerBuilder } from '../../../style/Modifier'
@@ -17,23 +16,6 @@ export struct AboutPage {
   @Consume("navStartOffset") navStartOffset: number
 
   @StorageLink(AppStorageKeys.KEY_ACTIVE_INFO) activeInfo?: ActiveInfo = undefined
-
-  private showClearLocalCopyDialog() {
-    this.getUIContext().getPromptAction().showDialog({
-      title:$r('app.string.prefer_clear_local_copy_confirm_title'),
-      message: $r('app.string.prefer_clear_local_copy_confirm_msg'),
-      buttons: [
-        { text: $r('app.string.prefer_clear_local_copy_cancel'), color: $r('sys.color.ohos_id_color_text_secondary') },
-        { text: $r('app.string.prefer_clear_local_copy_confirm'), color: $r('sys.color.ohos_id_color_warning') }
-      ]
-    }).then((result) => {
-      if (result.index === 1) {
-        FileUtil.clearLocalCopyFiles(this.getUIContext().getHostContext()!).then(() => {
-          this.getUIContext().getPromptAction().showToast({ message: $r('app.string.prefer_clear_local_copy_success') })
-        })
-      }
-    })
-  }
 
   build() {
     Column({space: CommonConstants.SPACE_8}) {
@@ -103,12 +85,12 @@ export struct AboutPage {
 
             itemDividerBuilder()
 
-            // 清理缓存
+            // 缓存管理
             PreferItem({
               icon: $r('sys.symbol.trash'),
-              title: $r('app.string.prefer_clear_local_copy'),
+              title: $r('app.string.prefer_cache_management'),
               callback: () => {
-                this.showClearLocalCopyDialog()
+                AppRouter.goToCache(this.getUIContext())
               }
             })
           }

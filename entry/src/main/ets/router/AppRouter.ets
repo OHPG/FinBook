@@ -49,4 +49,8 @@ export class AppRouter {
   public static goToInterface(context: UIContext) {
     context.getRouter().pushUrl({url: "pages/interface/InterfacePage"})
   }
+
+  public static goToCache(context: UIContext) {
+    context.getRouter().pushUrl({url: "pages/cache/CachePage"})
+  }
 }

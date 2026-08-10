@@ -35,7 +35,7 @@ struct SeriesPage {
           attr.padding = {
             left: CommonConstants.SPACE_16,
             right: CommonConstants.SPACE_16,
-            bottom: px2vp(this.currentAvoidArea?.bottomRect.height)
+            bottom: this.currentAvoidArea?.bottomRect.height
           }
           attr.rowsGap = CommonConstants.SPACE_12
           attr.columnsGap = CommonConstants.SPACE_12

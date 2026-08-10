@@ -8,6 +8,7 @@
     "pages/detail/DetailPage",
     "pages/search/SearchPage",
     "pages/interface/InterfacePage",
+    "pages/cache/CachePage",
     "pages/read/local/LocalReaderPage",
     "pages/read/online/OnlineReaderPage"
   ]

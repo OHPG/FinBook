@@ -181,4 +181,126 @@ export class FileUtil {
       await FileUtil.rmdir(copyDir)
     }
   }
+
+  /**
+   * 获取下载缓存目录（在线书籍下载到本地的目录）
+   * 下载文件存放在 filesDir 下以 serverId 命名的子目录中
+   * @param context 上下文
+   * @returns filesDir 路径
+   */
+  public static getDownloadCacheDir(context: Context): string {
+    return context.filesDir
+  }
+
+  /**
+   * 计算目录的总大小（递归）
+   * @param dirPath 目录路径
+   * @returns 目录总字节数
+   */
+  public static async getDirectorySize(dirPath: string): Promise<number> {
+    let exists = await FileUtil.isFileExists(dirPath)
+    if (!exists) {
+      return 0
+    }
+    let totalSize = 0
+    let files: string[] = fs.listFileSync(dirPath)
+    for (const name of files) {
+      let fullPath = dirPath + '/' + name
+      let stat = fs.statSync(fullPath)
+      if (stat.isDirectory()) {
+        totalSize += await FileUtil.getDirectorySize(fullPath)
+      } else {
+        totalSize += stat.size
+      }
+    }
+    return totalSize
+  }
+
+  /**
+   * 获取本地阅读缓存大小
+   * @param context 上下文
+   * @returns 字节数
+   */
+  public static async getLocalCopyCacheSize(context: Context): Promise<number> {
+    let copyDir = FileUtil.getLocalCopyDir(context)
+    return await FileUtil.getDirectorySize(copyDir)
+  }
+
+  /**
+   * 获取下载缓存大小（排除 local_copy 目录）
+   * @param context 上下文
+   * @returns 字节数
+   */
+  public static async getDownloadCacheSize(context: Context): Promise<number> {
+    let filesDir = context.filesDir
+    let exists = await FileUtil.isFileExists(filesDir)
+    if (!exists) {
+      return 0
+    }
+    let totalSize = 0
+    let files: string[] = fs.listFileSync(filesDir)
+    for (const name of files) {
+      // 排除 local_copy 目录，它由阅读缓存管理
+      if (name === FileUtil.LOCAL_COPY_DIR) {
+        continue
+      }
+      let fullPath = filesDir + '/' + name
+      let stat = fs.statSync(fullPath)
+      if (stat.isDirectory()) {
+        totalSize += await FileUtil.getDirectorySize(fullPath)
+      } else {
+        totalSize += stat.size
+      }
+    }
+    return totalSize
+  }
+
+  /**
+   * 清理所有下载缓存文件（排除 local_copy 目录）
+   * @param context 上下文
+   */
+  public static async clearDownloadCacheFiles(context: Context): Promise<void> {
+    let filesDir = context.filesDir
+    let exists = await FileUtil.isFileExists(filesDir)
+    if (!exists) {
+      return
+    }
+    let files: string[] = fs.listFileSync(filesDir)
+    for (const name of files) {
+      // 排除 local_copy 目录
+      if (name === FileUtil.LOCAL_COPY_DIR) {
+        continue
+      }
+      let fullPath = filesDir + '/' + name
+      let stat = fs.statSync(fullPath)
+      if (stat.isDirectory()) {
+        await FileUtil.rmdir(fullPath)
+      } else {
+        await fs.unlink(fullPath)
+      }
+    }
+  }
+
+  /**
+   * 将字节数格式化为可读的文件大小字符串
+   * @param bytes 字节数
+   * @returns 格式化后的字符串，如 "1.2 MB"
+   */
+  public static formatFileSize(bytes: number): string {
+    if (bytes <= 0) {
+      return "0 B"
+    }
+    const units: string[] = ["B", "KB", "MB", "GB"]
+    let unitIndex = 0
+    let size = bytes as number
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size = size / 1024
+      unitIndex++
+    }
+    if (unitIndex === 0) {
+      return `${size} B`
+    }
+    // 保留一位小数
+    return `${(Math.round(size * 10) / 10).toFixed(1)} ${units[unitIndex]}`
+  }
 }

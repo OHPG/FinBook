@@ -198,7 +198,7 @@ struct InterfacePage {
       .layoutWeight(1)
     }
     .padding({
-      bottom: px2vp(this.currentAvoidArea?.bottomRect.height)
+      bottom: this.currentAvoidArea?.bottomRect.height
     })
     .attributeModifier(windowAttributeModifier)
   }

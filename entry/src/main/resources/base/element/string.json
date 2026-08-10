@@ -301,6 +301,22 @@
       "value": "取消"
     },
     {
+      "name": "prefer_cache_management",
+      "value": "缓存管理"
+    },
+    {
+      "name": "prefer_clear_download_cache",
+      "value": "清理下载缓存"
+    },
+    {
+      "name": "prefer_clear_download_cache_success",
+      "value": "下载缓存已清理"
+    },
+    {
+      "name": "prefer_clear_download_cache_confirm_msg",
+      "value": "将清理所有在线下载到本地的书籍文件，下次阅读时需要重新下载。是否继续？"
+    },
+    {
       "name": "prefer_interface_volume_key_page_turn",
       "value": "音量键翻页"
     },

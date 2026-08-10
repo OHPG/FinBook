@@ -22,7 +22,7 @@ export struct HomeToolBar {
     Column() {
       Column()
         .width('100%')
-        .height(px2vp(this.avoidArea?.topRect.height))
+        .height(this.avoidArea?.topRect.height || 0)
 
       Row({space: CommonConstants.SPACE_16}) {
         Text(this.title)
