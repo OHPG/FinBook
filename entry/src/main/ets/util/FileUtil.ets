@@ -183,13 +183,65 @@ export class FileUtil {
   }
 
   /**
-   * 获取下载缓存目录（在线书籍下载到本地的目录）
-   * 下载文件存放在 filesDir 下以 serverId 命名的子目录中
+   * 下载缓存目录名
+   */
+  private static readonly DOWNLOAD_DIR = "download"
+
+  /**
+   * 获取下载缓存根目录
    * @param context 上下文
-   * @returns filesDir 路径
+   * @returns 下载缓存根目录路径 filesDir/download
    */
   public static getDownloadCacheDir(context: Context): string {
-    return context.filesDir
+    return context.filesDir + "/" + FileUtil.DOWNLOAD_DIR
+  }
+
+  /**
+   * 判断目录名是否为32位十六进制字符串（MD5格式的serverId）
+   * @param name 目录名
+   * @returns 是否匹配
+   */
+  private static isMd5DirName(name: string): boolean {
+    if (name.length !== 32) {
+      return false
+    }
+    const hexChars = "0123456789abcdef"
+    for (let i = 0; i < name.length; i++) {
+      if (hexChars.indexOf(name.charAt(i).toLowerCase()) < 0) {
+        return false
+      }
+    }
+    return true
+  }
+
+  /**
+   * 迁移旧的下载缓存目录到新的 download/ 目录下
+   * 当 download/ 目录不存在时触发，扫描 filesDir 根下名字为32位十六进制的目录，
+   * 将其移动到 download/ 下
+   * @param context 上下文
+   */
+  public static async migrateDownloadCache(context: Context): Promise<void> {
+    let downloadDir = FileUtil.getDownloadCacheDir(context)
+    let exists = await FileUtil.isFileExists(downloadDir)
+    if (exists) {
+      return
+    }
+    // 创建 download 目录
+    await fs.mkdir(downloadDir)
+    // 扫描 filesDir 根下的旧 serverId 目录
+    let filesDir = context.filesDir
+    let files: string[] = fs.listFileSync(filesDir)
+    for (const name of files) {
+      if (!FileUtil.isMd5DirName(name)) {
+        continue
+      }
+      let fullPath = filesDir + '/' + name
+      let stat = fs.statSync(fullPath)
+      if (stat.isDirectory()) {
+        // 移动到 download/ 下
+        await fs.rename(fullPath, downloadDir + '/' + name)
+      }
+    }
   }
 
   /**
@@ -227,57 +279,24 @@ export class FileUtil {
   }
 
   /**
-   * 获取下载缓存大小（排除 local_copy 目录）
+   * 获取下载缓存大小
    * @param context 上下文
    * @returns 字节数
    */
   public static async getDownloadCacheSize(context: Context): Promise<number> {
-    let filesDir = context.filesDir
-    let exists = await FileUtil.isFileExists(filesDir)
-    if (!exists) {
-      return 0
-    }
-    let totalSize = 0
-    let files: string[] = fs.listFileSync(filesDir)
-    for (const name of files) {
-      // 排除 local_copy 目录，它由阅读缓存管理
-      if (name === FileUtil.LOCAL_COPY_DIR) {
-        continue
-      }
-      let fullPath = filesDir + '/' + name
-      let stat = fs.statSync(fullPath)
-      if (stat.isDirectory()) {
-        totalSize += await FileUtil.getDirectorySize(fullPath)
-      } else {
-        totalSize += stat.size
-      }
-    }
-    return totalSize
+    let downloadDir = FileUtil.getDownloadCacheDir(context)
+    return await FileUtil.getDirectorySize(downloadDir)
   }
 
   /**
-   * 清理所有下载缓存文件（排除 local_copy 目录）
+   * 清理所有下载缓存文件
    * @param context 上下文
    */
   public static async clearDownloadCacheFiles(context: Context): Promise<void> {
-    let filesDir = context.filesDir
-    let exists = await FileUtil.isFileExists(filesDir)
-    if (!exists) {
-      return
-    }
-    let files: string[] = fs.listFileSync(filesDir)
-    for (const name of files) {
-      // 排除 local_copy 目录
-      if (name === FileUtil.LOCAL_COPY_DIR) {
-        continue
-      }
-      let fullPath = filesDir + '/' + name
-      let stat = fs.statSync(fullPath)
-      if (stat.isDirectory()) {
-        await FileUtil.rmdir(fullPath)
-      } else {
-        await fs.unlink(fullPath)
-      }
+    let downloadDir = FileUtil.getDownloadCacheDir(context)
+    let exists = await FileUtil.isFileExists(downloadDir)
+    if (exists) {
+      await FileUtil.rmdir(downloadDir)
     }
   }
 

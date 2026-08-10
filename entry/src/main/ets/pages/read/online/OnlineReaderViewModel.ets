@@ -38,7 +38,7 @@ export class OnlineReaderViewModel extends AppViewModel implements SimpleReposit
         suffix = item.path.substring(index)
       }
     }
-    const dirPath = this.context.filesDir + '/' + activeInfo.serverInfo.serverId
+    const dirPath = this.context.filesDir + '/download/' + activeInfo.serverInfo.serverId
     const filePath = dirPath + '/' + item.id + suffix
 
     // 文件应已由详情页下载完毕，若意外缺失则抛出友好错误

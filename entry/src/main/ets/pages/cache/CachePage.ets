@@ -15,11 +15,14 @@ struct CachePage {
   @State downloadCacheSize: string = ''
 
   aboutToAppear(): void {
-    this.refreshCacheSizes()
+    this.refreshCacheSizes(true)
   }
 
-  private refreshCacheSizes() {
+  private async refreshCacheSizes(migrate: boolean = false) {
     const context = this.getUIContext().getHostContext()!
+    if (migrate) {
+      await FileUtil.migrateDownloadCache(context)
+    }
     FileUtil.getLocalCopyCacheSize(context).then((size) => {
       this.localCopyCacheSize = FileUtil.formatFileSize(size)
     })

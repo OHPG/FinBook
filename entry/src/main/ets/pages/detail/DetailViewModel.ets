@@ -46,7 +46,7 @@ export class DetailViewModel extends AppViewModel implements SimpleRepository {
   /**
    * 计算在线书籍的本地缓存路径
    * 与 OnlineReaderViewModel 保持一致的路径规则：
-   *   filesDir / serverId / itemId + suffix
+   *   filesDir / download / serverId / itemId + suffix
    */
   private async resolveLocalPath(item: FinItem): Promise<string> {
     const activeInfo = this.repository.getActiveInfo()!
@@ -57,7 +57,9 @@ export class DetailViewModel extends AppViewModel implements SimpleRepository {
         suffix = item.path.substring(index)
       }
     }
-    const dirPath = this.context.filesDir + '/' + activeInfo.serverInfo.serverId
+    const downloadDir = this.context.filesDir + '/download'
+    await FileUtil.migrateDownloadCache(this.context)
+    const dirPath = downloadDir + '/' + activeInfo.serverInfo.serverId
     await FileUtil.mkdir(dirPath)
     return dirPath + '/' + item.id + suffix
   }
