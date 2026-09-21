@@ -47,14 +47,10 @@ export struct FontView {
   build() {
     Column({space: CommonConstants.SPACE_16}) {
 
-      // 字体
-      GridRow({
-        columns: 2,
-        gutter: CommonConstants.SPACE_16,
-        direction: GridRowDirection.Row
-      }) {
+      // 字体：横向滚动，末尾为「添加」入口，屏幕放不下时可左右滑动
+      List({ space: CommonConstants.SPACE_16 }) {
         ForEach(this.fonts, (info: FontInfo) => {
-          GridCol({ span: 1 }) {
+          ListItem() {
             FontItemView({
               info: info,
               selected: this.isSelected(info),
@@ -63,19 +59,22 @@ export struct FontView {
               }
             })
           }
-        }, (info: FontInfo) => info.key);
-      }
-      .alignItems(ItemAlign.Center)
-      .width('100%')
-      .constraintSize({maxWidth: 400})
+        }, (info: FontInfo) => info.key)
 
-      // 管理字体入口
-      Text($r('app.string.font_manage_entry'))
-        .fontSize(13)
-        .fontColor($r('sys.color.ohos_id_color_component_activated'))
-        .onClick(() => {
-          AppRouter.goToFonts(this.getUIContext())
-        })
+        // 添加字体入口（跳转字体管理页）
+        ListItem() {
+          FontAddItemView({
+            onAddClick: () => {
+              AppRouter.goToFonts(this.getUIContext())
+            }
+          })
+        }
+      }
+      .listDirection(Axis.Horizontal)
+      .width('100%')
+      .height(48)
+      .scrollBar(BarState.Off)
+      .edgeEffect(EdgeEffect.Spring)
 
       // 分割线
       Divider()
@@ -130,7 +129,7 @@ struct FontItemView {
       .fontSize(14)
       .borderRadius(12)
       .borderWidth(1.5)
-      .width('100%')
+      .width(96)
       .height(48)
       .textAlign(TextAlign.Center)
       .maxLines(1)
@@ -142,6 +141,32 @@ struct FontItemView {
       .onClick(() => {
         this.onFontClick()
       })
+  }
+
+}
+
+@Component
+struct FontAddItemView {
+
+  onAddClick: () => void = () => {}
+
+  build() {
+    Row() {
+      SymbolGlyph($r('sys.symbol.plus'))
+        .fontSize(22)
+        .fontColor([Color.Black])
+    }
+    .justifyContent(FlexAlign.Center)
+    .alignItems(VerticalAlign.Center)
+    .borderRadius(12)
+    .borderWidth(1.5)
+    .width(96)
+    .height(48)
+    .backgroundColor($r('app.color.ic_bg_grey'))
+    .borderColor($r('app.color.color_transparent'))
+    .onClick(() => {
+      this.onAddClick()
+    })
   }
 
 }
