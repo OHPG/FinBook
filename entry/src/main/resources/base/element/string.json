@@ -205,10 +205,6 @@
       "value": "系统字体"
     },
     {
-      "name": "source_han_serif_font",
-      "value": "思源宋体"
-    },
-    {
       "name": "menu_spine",
       "value": "章节"
     },
@@ -315,6 +311,95 @@
     {
       "name": "prefer_clear_download_cache_confirm_msg",
       "value": "将清理所有在线下载到本地的书籍文件，下次阅读时需要重新下载。是否继续？"
+    },
+    {
+      "name": "prefer_font_management",
+      "value": "字体管理"
+    },
+    {
+      "name": "font_import",
+      "value": "导入字体"
+    },
+    {
+      "name": "font_import_success",
+      "value": "字体导入成功"
+    },
+    {
+      "name": "font_import_fail",
+      "value": "字体导入失败，请选择 ttf/otf/ttc 字体文件"
+    },
+
+    {
+      "name": "font_delete_confirm_title",
+      "value": "删除字体"
+    },
+    {
+      "name": "font_delete_confirm_msg",
+      "value": "确定删除该字体吗？删除后如需使用需重新导入。"
+    },
+    {
+      "name": "font_delete_confirm",
+      "value": "删除"
+    },
+    {
+      "name": "font_delete_success",
+      "value": "字体已删除"
+    },
+    {
+      "name": "font_clear",
+      "value": "清理全部字体"
+    },
+    {
+      "name": "font_clear_confirm_title",
+      "value": "清理字体"
+    },
+    {
+      "name": "font_clear_confirm_msg",
+      "value": "将删除所有导入的字体文件（保留系统字体）。是否继续？"
+    },
+    {
+      "name": "font_clear_success",
+      "value": "字体已清理"
+    },
+    {
+      "name": "font_desc_system",
+      "value": "系统默认字体"
+    },
+    {
+      "name": "font_desc_imported",
+      "value": "本地导入字体"
+    },
+    {
+      "name": "font_manage_entry",
+      "value": "管理字体（导入/删除）"
+    },
+    {
+      "name": "font_group_system",
+      "value": "系统"
+    },
+    {
+      "name": "font_group_imported",
+      "value": "我的字体"
+    },
+    {
+      "name": "font_group_manage",
+      "value": "管理"
+    },
+    {
+      "name": "font_imported_empty",
+      "value": "暂无导入字体，点击右上角导入"
+    },
+    {
+      "name": "font_status_in_use",
+      "value": "使用中"
+    },
+    {
+      "name": "font_apply_success",
+      "value": "已切换字体"
+    },
+    {
+      "name": "font_delete_current_forbid",
+      "value": "该字体正在使用，无法删除。请先切换其他字体。"
     },
     {
       "name": "prefer_interface_volume_key_page_turn",

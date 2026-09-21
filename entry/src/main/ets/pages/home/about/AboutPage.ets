@@ -85,6 +85,17 @@ export struct AboutPage {
 
             itemDividerBuilder()
 
+            // 字体管理
+            PreferItem({
+              icon: $r('sys.symbol.textformat'),
+              title: $r('app.string.prefer_font_management'),
+              callback: () => {
+                AppRouter.goToFonts(this.getUIContext())
+              }
+            })
+
+            itemDividerBuilder()
+
             // 缓存管理
             PreferItem({
               icon: $r('sys.symbol.trash'),

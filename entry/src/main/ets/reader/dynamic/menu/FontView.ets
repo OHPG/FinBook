@@ -1,7 +1,9 @@
-import { Fonts } from "../entity/Fonts";
 import { FontSlider } from "./FontSlider";
 import { bookParser, readerCore } from "@kit.ReaderKit";
 import { CommonConstants } from "../../../common/CommonConstants";
+import { FontManager } from "../entity/FontManager";
+import { FontInfo } from "../entity/FontInfo";
+import { AppRouter } from "../../../router/AppRouter";
 
 @Component
 export struct FontView {
@@ -10,7 +12,36 @@ export struct FontView {
 
   @Consume bookHandler: bookParser.BookParserHandler
 
+  private fontManager: FontManager = AppStorage.get(FontManager.MANAGER)!
+
+  @State fonts: FontInfo[] = []
+
   aboutToAppear(): void {
+    this.loadFonts()
+  }
+
+  private loadFonts() {
+    // 系统字体 + 沙盒中已导入的字体
+    this.fonts = this.fontManager.getAllFonts()
+  }
+
+  private isSelected(info: FontInfo): boolean {
+    if (info.isSystem()) {
+      return !this.bookSetting.fontPath
+    }
+    return this.bookSetting.fontPath === this.fontManager.getFontPath(info.fileName)
+      || (!!info.fileName && this.bookSetting.fontPath.endsWith(info.fileName))
+  }
+
+  private onFontClick(info: FontInfo) {
+    if (info.isSystem()) {
+      this.bookSetting.fontName = info.key
+      this.bookSetting.fontPath = ''
+    } else {
+      this.bookSetting.fontName = info.name
+      this.bookSetting.fontPath = this.fontManager.getFontPath(info.fileName)
+    }
+    this.fonts = this.fonts.slice()
   }
 
   build() {
@@ -18,19 +49,33 @@ export struct FontView {
 
       // 字体
       GridRow({
-        columns: Fonts.FONTS.length,
+        columns: 2,
         gutter: CommonConstants.SPACE_16,
         direction: GridRowDirection.Row
       }) {
-        ForEach(Fonts.FONTS, (font: string) => {
+        ForEach(this.fonts, (info: FontInfo) => {
           GridCol({ span: 1 }) {
-            FontItemView({font: font})
+            FontItemView({
+              info: info,
+              selected: this.isSelected(info),
+              onFontClick: () => {
+                this.onFontClick(info)
+              }
+            })
           }
-        });
+        }, (info: FontInfo) => info.key);
       }
       .alignItems(ItemAlign.Center)
       .width('100%')
       .constraintSize({maxWidth: 400})
+
+      // 管理字体入口
+      Text($r('app.string.font_manage_entry'))
+        .fontSize(13)
+        .fontColor($r('sys.color.ohos_id_color_component_activated'))
+        .onClick(() => {
+          AppRouter.goToFonts(this.getUIContext())
+        })
 
       // 分割线
       Divider()
@@ -74,38 +119,29 @@ export struct FontView {
 @Component
 struct FontItemView {
 
-  @Consume @Watch('onSettingChanged') bookSetting: readerCore.ReaderSetting
+  @Require @Prop info: FontInfo
 
-  @Consume bookHandler: bookParser.BookParserHandler
+  @Require @Prop selected: boolean
 
-  @Require @State font: string
-
-  @State fontSelected: boolean = false
-
-  aboutToAppear(): void {
-    this.onSettingChanged()
-  }
+  onFontClick: () => void = () => {}
 
   build() {
-    Text(Fonts.FONT_NAME[this.font])
+    Text(this.info.name)
       .fontSize(14)
       .borderRadius(12)
       .borderWidth(1.5)
       .width('100%')
       .height(48)
       .textAlign(TextAlign.Center)
-      .fontColor(this.fontSelected ? Color.Red : Color.Black)
-      .backgroundColor(this.fontSelected ? $r('app.color.ic_bg_font_selected') : $r('app.color.ic_bg_grey'))
-      .borderColor(this.fontSelected ? $r('app.color.ic_border_font_selected') : $r('app.color.color_transparent'))
-      .width('100%')
+      .maxLines(1)
+      .textOverflow({ overflow: TextOverflow.Ellipsis })
+      .padding({ left: 8, right: 8 })
+      .fontColor(this.selected ? Color.Red : Color.Black)
+      .backgroundColor(this.selected ? $r('app.color.ic_bg_font_selected') : $r('app.color.ic_bg_grey'))
+      .borderColor(this.selected ? $r('app.color.ic_border_font_selected') : $r('app.color.color_transparent'))
       .onClick(() => {
-        this.bookSetting.fontName = this.font
-        this.bookSetting.fontPath = Fonts.FONT_PATH[this.font]
+        this.onFontClick()
       })
-  }
-
-  private onSettingChanged() {
-    this.fontSelected = this.bookSetting.fontPath === Fonts.FONT_PATH[this.font]
   }
 
 }

@@ -7,12 +7,16 @@ import { common } from '@kit.AbilityKit';
 import { XMenuView } from './menu/XMenuView';
 import { AppPrefer } from '../../prefer/AppPrefer';
 import { VolumeKeyHelper } from '../VolumeKeyHelper';
+import { FontManager } from './entity/FontManager';
+import fs from '@ohos.file.fs';
 
 @Reusable
 @Component
 export struct DynamicReaderView {
 
   private appPrefer: AppPrefer = AppStorage.get(AppPrefer.PREFER)!
+
+  private fontManager: FontManager = AppStorage.get(FontManager.MANAGER)!
 
   @Require @Prop bookPath: string = '';
 
@@ -91,7 +95,7 @@ export struct DynamicReaderView {
     let config = this.appPrefer.getBookConfig()
     if (config) {
       this.bookSetting.fontName = config.fontName
-      this.bookSetting.fontPath = config.fontPath
+      this.bookSetting.fontPath = this.resolveFontPath(config.fontPath)
       this.bookSetting.fontSize = config.fontSize
       this.bookSetting.fontColor = config.fontColor
       this.bookSetting.fontWeight = config.fontWeight
@@ -101,6 +105,41 @@ export struct DynamicReaderView {
       this.bookSetting.themeBgImg = config.themeBgImg
       this.bookSetting.flipMode = config.flipMode
     }
+  }
+
+  /**
+   * 校验/迁移已保存的字体路径。
+   * 旧版本可能保存了打包在 rawfile 的相对路径（fonts/xxx.ttf），
+   * 或指向已被删除的沙盒字体。此时字体文件已不存在，回退为系统字体，避免阅读器加载失败。
+   */
+  private resolveFontPath(fontPath?: string): string {
+    if (!fontPath) {
+      return ''
+    }
+    try {
+      // 仅接受存在的沙盒绝对路径字体
+      let exists = fs.accessSync(fontPath, fs.AccessModeType.EXIST)
+      if (exists) {
+        return fontPath
+      }
+    } catch (e) {
+      // ignore
+    }
+    // 尝试通过文件名在沙盒字体目录中重新定位
+    let matched = this.fontManager.findByFontPath(fontPath)
+    if (matched && !matched.isSystem() && matched.fileName) {
+      let sandboxPath = this.fontManager.getFontPath(matched.fileName)
+      try {
+        if (fs.accessSync(sandboxPath, fs.AccessModeType.EXIST)) {
+          return sandboxPath
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    // 字体不可用，回退系统字体
+    this.bookSetting.fontName = FontManager.KEY_SYSTEM
+    return ''
   }
 
   /**

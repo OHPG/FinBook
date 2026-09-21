@@ -53,4 +53,8 @@ export class AppRouter {
   public static goToCache(context: UIContext) {
     context.getRouter().pushUrl({url: "pages/cache/CachePage"})
   }
+
+  public static goToFonts(context: UIContext) {
+    context.getRouter().pushUrl({url: "pages/font/FontsPage"})
+  }
 }
