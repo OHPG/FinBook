@@ -127,7 +127,9 @@ export struct TreeBodyView {
         })
         .rowsGap(CommonConstants.SPACE_12)
         .columnsGap(CommonConstants.SPACE_12)
-        .columnsTemplate("repeat(auto-fit, 100)")
+        .columnsTemplate(`repeat(auto-fit, ${this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_LG
+          ? 160
+          : (this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD ? 140 : 110)}vp)`)
         .width('100%')
         .height('100%')
         .scrollBar(BarState.Off)

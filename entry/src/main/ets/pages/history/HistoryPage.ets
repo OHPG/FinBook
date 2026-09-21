@@ -58,7 +58,10 @@ struct HistoryPage {
           }
           attr.rowsGap = CommonConstants.SPACE_12
           attr.columnsGap = CommonConstants.SPACE_12
-          attr.columnsTemplate = ('repeat(auto-fit, 100)')
+          // 封面列宽随宽度断点放大，Pad 上封面更大（进入页面时确定，与本地列表一致）
+          attr.columnsTemplate = `repeat(auto-fit, ${this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_LG
+            ? 160
+            : (this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD ? 140 : 110)}vp)`
           attr.width = CommonConstants.FULL_PERCENT
           attr.height = CommonConstants.FULL_PERCENT
         },

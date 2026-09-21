@@ -1,5 +1,6 @@
 import { window } from '@kit.ArkUI'
 import { GridRefreshView, ToolBar } from '@ohpg/fin-framework'
+import { BreakpointSystem } from '@ohpg/fin-core'
 import { CommonConstants } from '../../common/CommonConstants'
 import { MediaItem } from '../../widget/item/MediaItem'
 import { SortMenu } from '../../widget/menu/SortMenu'
@@ -15,6 +16,8 @@ struct SeriesPage {
   private viewModel = new SeriesViewModel(getContext(), this.args)
 
   @StorageProp('currentAvoidArea') currentAvoidArea?: window.AvoidArea = undefined
+
+  @StorageProp(BreakpointSystem.CURRENT_WIDTH_BREAKPOINT) currentWidthBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_SM
 
   @Builder
   mediaListView(info: ESObject, index: number) {
@@ -39,7 +42,10 @@ struct SeriesPage {
           }
           attr.rowsGap = CommonConstants.SPACE_12
           attr.columnsGap = CommonConstants.SPACE_12
-          attr.columnsTemplate = ('repeat(auto-fit, 100)')
+          // 封面列宽随宽度断点放大，Pad 上封面更大（进入页面时确定，与本地列表一致）
+          attr.columnsTemplate = `repeat(auto-fit, ${this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_LG
+            ? 160
+            : (this.currentWidthBreakpoint >= WidthBreakpoint.WIDTH_MD ? 140 : 110)}vp)`
           attr.width = CommonConstants.FULL_PERCENT
           attr.height = CommonConstants.FULL_PERCENT
         },
