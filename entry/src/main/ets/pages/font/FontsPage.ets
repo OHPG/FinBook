@@ -257,7 +257,9 @@ struct FontsPage {
         this.titleGroup($r('app.string.font_group_system'))
         ListItemGroup() {
           if (this.systemRow) {
-            this.fontListItem(this.systemRow)
+            ForEach([this.systemRow], (row: FontRow) => {
+              this.fontListItem(row)
+            }, (row: FontRow) => `${row.info.key}_${row.current}`)
           }
         }
         .cardStyle()
@@ -268,7 +270,7 @@ struct FontsPage {
           if (this.importedRows.length > 0) {
             ForEach(this.importedRows, (row: FontRow) => {
               this.fontListItem(row)
-            }, (row: FontRow) => row.info.key)
+            }, (row: FontRow) => `${row.info.key}_${row.current}`)
           } else {
             ListItem() {
               Text($r('app.string.font_imported_empty'))
