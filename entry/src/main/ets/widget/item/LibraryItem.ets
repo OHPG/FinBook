@@ -17,6 +17,8 @@ export struct LibraryItem {
 
   @Require @State index: number = 0
 
+  @State itemWidth: string | number = 100
+
   aboutToReuse(params: Record<string, object>): void {
     this.item = params['item'] as FinItem
   }
@@ -26,7 +28,7 @@ export struct LibraryItem {
     .textAlign(TextAlign.Center)
     .borderRadius(CommonConstants.SPACE_16)
     .height(60)
-    .width(100)
+    .width(this.itemWidth)
     .backgroundColor(COLORS[this.index % COLORS.length])
     .onClick(() => {
       let args: MediaArgs = {
