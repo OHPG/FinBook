@@ -29,18 +29,17 @@ export struct FontView {
     if (info.isSystem()) {
       return !this.bookSetting.fontPath
     }
+    if (info.isPreset()) {
+      return this.bookSetting.fontPath === info.absolutePath
+    }
     return this.bookSetting.fontPath === this.fontManager.getFontPath(info.fileName)
       || (!!info.fileName && this.bookSetting.fontPath.endsWith(info.fileName))
   }
 
   private onFontClick(info: FontInfo) {
-    if (info.isSystem()) {
-      this.bookSetting.fontName = info.key
-      this.bookSetting.fontPath = ''
-    } else {
-      this.bookSetting.fontName = info.name
-      this.bookSetting.fontPath = this.fontManager.getFontPath(info.fileName)
-    }
+    // fontName 使用内核可定位的基名（非 UI 中文名），fontPath 由来源决定
+    this.bookSetting.fontName = this.fontManager.getKernelFontName(info)
+    this.bookSetting.fontPath = this.fontManager.getFontPathOf(info)
     this.fonts = this.fonts.slice()
   }
 

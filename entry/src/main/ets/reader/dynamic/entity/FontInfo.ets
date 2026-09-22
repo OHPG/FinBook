@@ -1,17 +1,24 @@
 /**
  * 字体信息
  *
- * 字体分为三类：
- * 1. 系统内置字体（system）：无需下载，fontPath 为空，直接使用系统默认字体。
- * 2. 内置可下载字体（builtin）：应用预置了标题和下载地址，但字体文件不打包进包体，
+ * 字体分为四类：
+ * 1. 系统字体（system）：无需下载，fontPath 为空，直接使用系统默认字体。
+ * 2. 系统预置字体（preset）：设备 /system/fonts 目录下预置的字体，无需导入到沙盒，
+ *    直接以其系统绝对路径作为 fontPath 交给阅读器加载。
+ * 3. 内置可下载字体（builtin）：应用预置了标题和下载地址，但字体文件不打包进包体，
  *    需要用户手动下载到沙盒后才能使用，以此减小安装包体积。
- * 3. 用户导入字体（imported）：用户从设备中选择的本地字体文件，拷贝到沙盒。
+ * 4. 用户导入字体（imported）：用户从设备中选择的本地字体文件，拷贝到沙盒。
  */
 export enum FontType {
   /**
    * 系统字体
    */
   SYSTEM = 'system',
+
+  /**
+   * 系统预置字体（/system/fonts 下精选字体）
+   */
+  PRESET = 'preset',
 
   /**
    * 内置可下载字体
@@ -52,16 +59,29 @@ export class FontInfo {
    */
   fileName: string
 
-  constructor(key: string, name: string, type: FontType, url: string = '', fileName: string = '') {
+  /**
+   * 字体文件的绝对路径。
+   * 仅系统预置字体（PRESET）使用，指向 /system/fonts 下的字体文件。
+   * 其余类型为空，路径由 FontManager 根据 fileName 拼接得到。
+   */
+  absolutePath: string
+
+  constructor(key: string, name: string, type: FontType, url: string = '', fileName: string = '',
+    absolutePath: string = '') {
     this.key = key
     this.name = name
     this.type = type
     this.url = url
     this.fileName = fileName
+    this.absolutePath = absolutePath
   }
 
   public isSystem(): boolean {
     return this.type === FontType.SYSTEM
+  }
+
+  public isPreset(): boolean {
+    return this.type === FontType.PRESET
   }
 
 }

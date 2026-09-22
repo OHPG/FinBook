@@ -6,6 +6,15 @@ import { FontInfo, FontType } from './FontInfo'
 import { XUtil } from '../util/XUtil'
 
 /**
+ * 系统预置字体定义（白名单条目）
+ */
+interface PresetFontDef {
+  key: string
+  name: string
+  fileName: string
+}
+
+/**
  * 字体管理器
  *
  * 负责管理阅读器可用字体：
@@ -29,6 +38,25 @@ export class FontManager {
    * 沙盒字体目录名
    */
   private static readonly FONTS_DIR = 'fonts'
+
+  /**
+   * 系统预置字体所在目录（设备只读分区）
+   */
+  private static readonly SYSTEM_FONTS_DIR = '/system/fonts'
+
+  /**
+   * 系统预置字体白名单。
+   * 仅收录能正常渲染中英文正文、适合作为阅读字体的通用字体，
+   * 排除 emoji / 符号 / 数字子集 / 各类小语种脚本等不适合作为正文的字体。
+   * key 用于唯一标识与选中态匹配；fileName 为 /system/fonts 下的实际文件名。
+   */
+  private static readonly PRESET_FONTS: PresetFontDef[] = [
+    { key: 'preset_harmony_sans_sc', name: '鸿蒙黑体', fileName: 'HarmonyOS_Sans_SC.ttf' },
+    { key: 'preset_harmony_sans_condensed', name: '鸿蒙黑体 窄体', fileName: 'HarmonyOS_Sans_Condensed.ttf' },
+    { key: 'preset_noto_sans_cjk', name: '思源黑体', fileName: 'NotoSansCJK-Regular.ttc' },
+    { key: 'preset_noto_serif_cjk', name: '思源宋体', fileName: 'NotoSerifCJK-Regular.ttc' },
+    { key: 'preset_hy_qihei', name: '汉仪旗黑', fileName: 'HYQiHeiL3.ttf' }
+  ]
 
   private readonly context: Context
 
@@ -69,12 +97,96 @@ export class FontManager {
   }
 
   /**
-   * 全部字体列表（系统字体 + 导入字体）
+   * 系统预置字体绝对路径
+   */
+  public getPresetFontPath(fileName: string): string {
+    return FontManager.SYSTEM_FONTS_DIR + '/' + fileName
+  }
+
+  /**
+   * 系统预置字体列表。
+   * 仅返回白名单中在当前设备 /system/fonts 目录下真实存在的字体，
+   * 避免因机型差异出现选中后加载失败的情况。
+   */
+  public getPresetFonts(): FontInfo[] {
+    let result: FontInfo[] = []
+    for (const def of FontManager.PRESET_FONTS) {
+      let path = this.getPresetFontPath(def.fileName)
+      let exists = false
+      try {
+        exists = fs.accessSync(path, fs.AccessModeType.EXIST)
+      } catch (e) {
+        exists = false
+      }
+      if (!exists) {
+        continue
+      }
+      result.push(new FontInfo(def.key, def.name, FontType.PRESET, '', def.fileName, path))
+    }
+    return result
+  }
+
+  /**
+   * 全部字体列表（系统字体 + 系统预置字体 + 导入字体）
    */
   public getAllFonts(): FontInfo[] {
     let list: FontInfo[] = [this.getSystemFont()]
+    list = list.concat(this.getPresetFonts())
     list = list.concat(this.getImportedFonts())
     return list
+  }
+
+  /**
+   * 将字体文件名解析为真实绝对路径。
+   *
+   * 阅读器内核的 resourceRequest 回调只传字体名（如 NotoSansCJK-Regular.ttf），
+   * 且该名取自 fontName 并被内核固定拼接 .ttf 后缀，扩展名未必与真实文件一致
+   * （例如真实文件为 .ttc）。因此这里按"基名（去后缀）"匹配，忽略扩展名差异。
+   *
+   * 字体可能来自两处，按以下优先级查找：
+   * 1. 沙箱导入目录 filesDir/fonts/
+   * 2. 系统预置目录 /system/fonts/
+   *
+   * @returns 真实存在的绝对路径；均不存在时返回空字符串
+   */
+  public resolveFontFileByName(fileName: string): string {
+    if (!fileName) {
+      return ''
+    }
+    // 取纯文件名基名（去路径、去后缀），用于忽略扩展名差异的匹配
+    let baseName = this.displayName(this.getFileName(fileName))
+
+    // 1) 沙箱导入字体：扫描目录，基名相同即命中
+    try {
+      let dir = this.getFontsDir()
+      if (fs.accessSync(dir, fs.AccessModeType.EXIST)) {
+        let files = fs.listFileSync(dir)
+        for (const f of files) {
+          if (XUtil.isFont(f) && this.displayName(f) === baseName) {
+            return this.getFontPath(f)
+          }
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    // 2) 系统预置字体：白名单中基名相同且文件存在即命中
+    for (const def of FontManager.PRESET_FONTS) {
+      if (this.displayName(def.fileName) !== baseName) {
+        continue
+      }
+      let presetPath = this.getPresetFontPath(def.fileName)
+      try {
+        if (fs.accessSync(presetPath, fs.AccessModeType.EXIST)) {
+          return presetPath
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    return ''
   }
 
   /**
@@ -127,18 +239,40 @@ export class FontManager {
   }
 
   /**
+   * 阅读器内核使用的字体名。
+   *
+   * 内核以 fontName 为准，回调时会以 "fontName + .ttf" 的形式向应用索取字体文件，
+   * 因此 fontName 必须是能定位到文件的基名（文件名去后缀），
+   * 不能使用 UI 展示用的中文名。系统字体返回固定 key。
+   */
+  public getKernelFontName(font: FontInfo): string {
+    if (font.isSystem()) {
+      return FontManager.KEY_SYSTEM
+    }
+    return this.displayName(font.fileName)
+  }
+
+  /**
+   * 字体对应的 fontPath（系统字体为空）。
+   */
+  public getFontPathOf(font: FontInfo): string {
+    if (font.isSystem()) {
+      return ''
+    }
+    if (font.isPreset()) {
+      return font.absolutePath
+    }
+    return this.getFontPath(font.fileName)
+  }
+
+  /**
    * 将某字体设为当前使用字体，并持久化到阅读配置。
    * @returns 是否设置成功
    */
   public setCurrentFont(font: FontInfo): boolean {
     let config = this.appPrefer.getBookConfig() ?? FontManager.defaultReaderSetting()
-    if (font.isSystem()) {
-      config.fontName = FontManager.KEY_SYSTEM
-      config.fontPath = ''
-    } else {
-      config.fontName = font.name
-      config.fontPath = this.getFontPath(font.fileName)
-    }
+    config.fontName = this.getKernelFontName(font)
+    config.fontPath = this.getFontPathOf(font)
     this.appPrefer.setBookConfig(config)
     return true
   }
@@ -285,6 +419,13 @@ export class FontManager {
     let all = this.getAllFonts()
     for (const font of all) {
       if (font.isSystem()) {
+        continue
+      }
+      // 系统预置字体：按其 /system/fonts 绝对路径匹配
+      if (font.isPreset()) {
+        if (fontPath === font.absolutePath) {
+          return font
+        }
         continue
       }
       if (fontPath === this.getFontPath(font.fileName)) {

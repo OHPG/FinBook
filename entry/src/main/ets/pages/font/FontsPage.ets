@@ -29,6 +29,9 @@ struct FontsPage {
   /** 系统字体（单项） */
   @State systemRow?: FontRow = undefined
 
+  /** 系统预置字体 */
+  @State presetRows: FontRow[] = []
+
   /** 我的字体（导入） */
   @State importedRows: FontRow[] = []
 
@@ -44,6 +47,7 @@ struct FontsPage {
 
   private async refresh() {
     this.systemRow = this.buildRow(this.fontManager.getSystemFont())
+    this.presetRows = this.fontManager.getPresetFonts().map((info) => this.buildRow(info))
     this.importedRows = this.fontManager.getImportedFonts().map((info) => this.buildRow(info))
     let size = await this.fontManager.getFontsSize()
     this.fontsSize = FileUtil.formatFileSize(size)
@@ -153,6 +157,9 @@ struct FontsPage {
     if (type === FontType.SYSTEM) {
       return $r('sys.symbol.textformat')
     }
+    if (type === FontType.PRESET) {
+      return $r('sys.symbol.textformat')
+    }
     return $r('sys.symbol.folder')
   }
 
@@ -163,12 +170,15 @@ struct FontsPage {
     if (row.current) {
       return $r('app.string.font_status_in_use')
     }
+    if (row.info.type === FontType.PRESET) {
+      return $r('app.string.font_desc_preset')
+    }
     return $r('app.string.font_desc_imported')
   }
 
-  /** 是否允许删除：非系统、非当前 */
+  /** 是否允许删除：仅导入字体、且非当前 */
   private canDelete(row: FontRow): boolean {
-    return !row.info.isSystem() && !row.current
+    return row.info.type === FontType.IMPORTED && !row.current
   }
 
   /** 左滑删除按钮 */
@@ -263,6 +273,17 @@ struct FontsPage {
           }
         }
         .cardStyle()
+
+        // 系统预置字体组（仅当设备存在可用预置字体时展示）
+        if (this.presetRows.length > 0) {
+          this.titleGroup($r('app.string.font_group_preset'))
+          ListItemGroup() {
+            ForEach(this.presetRows, (row: FontRow) => {
+              this.fontListItem(row)
+            }, (row: FontRow) => `${row.info.key}_${row.current}`)
+          }
+          .cardStyle()
+        }
 
         // 我的字体组
         this.titleGroup($r('app.string.font_group_imported'))

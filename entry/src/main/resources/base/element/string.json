@@ -378,6 +378,14 @@
       "value": "系统"
     },
     {
+      "name": "font_group_preset",
+      "value": "系统预置字体"
+    },
+    {
+      "name": "font_desc_preset",
+      "value": "系统内置字体，无需下载"
+    },
+    {
       "name": "font_group_imported",
       "value": "我的字体"
     },
