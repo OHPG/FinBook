@@ -10,6 +10,14 @@ export class XUtil {
     return find ? true : false;
   }
 
+  /**
+   * 提取路径中的文件名部分，兼容 "/" 与 "\\" 分隔符。
+   */
+  public static fileName(path: string): string {
+    let idx = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+    return idx >= 0 ? path.substring(idx + 1) : path;
+  }
+
   // public static loadFont(context: Context, font: string): ArrayBuffer {
   //   let index = font.lastIndexOf('.')
   //   // if (index > 0) {

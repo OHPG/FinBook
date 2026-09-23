@@ -8,7 +8,10 @@ import { XMenuView } from './menu/XMenuView';
 import { AppPrefer } from '../../prefer/AppPrefer';
 import { VolumeKeyHelper } from '../VolumeKeyHelper';
 import { FontManager } from './entity/FontManager';
-import { XUtil } from './util/XUtil';
+import { ImageManager } from './entity/ImageManager';
+import { ReaderResourceManager } from './resource/ReaderResourceManager';
+import { FontResourceResolver } from './resource/FontResourceResolver';
+import { ImageResourceResolver } from './resource/ImageResourceResolver';
 import fs from '@ohos.file.fs';
 
 @Reusable
@@ -18,6 +21,10 @@ export struct DynamicReaderView {
   private appPrefer: AppPrefer = AppStorage.get(AppPrefer.PREFER)!
 
   private fontManager: FontManager = AppStorage.get(FontManager.MANAGER)!
+
+  private imageManager: ImageManager = AppStorage.get(ImageManager.MANAGER)!
+
+  private resourceManager: ReaderResourceManager = new ReaderResourceManager()
 
   @Require @Prop bookPath: string = '';
 
@@ -160,9 +167,13 @@ export struct DynamicReaderView {
   private async parseBook(): Promise<void> {
     await this.bookCtrl.init(this.getUIContext().getHostContext()! as common.UIAbilityContext)
     this.bookCtrlPrepared = true
-    // 注册资源请求回调：内核加载自定义字体（沙箱导入 / 系统预置）时，
-    // 会通过该回调向应用索要字体文件字节。未注册则字体路径不生效、回退系统默认字体。
+    // 组装资源解析责任链：内核加载自定义字体（沙箱导入 / 系统预置）、主题背景图
+    // （rawfile 内置 / 沙箱自定义）时，会通过 resourceRequest 回调向应用索要字节。
+    // 未注册则对应资源不生效（字体回退系统默认、背景图加载失败）。
     // 必须在首次 setPageConfig（onSettingChange）之前注册。
+    this.resourceManager
+      .register(new FontResourceResolver(this.fontManager))
+      .register(new ImageResourceResolver(this.imageManager))
     this.bookCtrl.on('resourceRequest', this.resourceRequest)
     this.onSettingChange()
     this.bookHandler = await bookParser.getDefaultHandler(this.bookPath)
@@ -172,19 +183,11 @@ export struct DynamicReaderView {
 
   /**
    * 内核资源请求回调。
-   * 当阅读器需要加载自定义字体文件时触发，回调仅传入字体文件名（非完整路径），
-   * 需先经 FontManager 还原为真实绝对路径（沙箱导入 / 系统预置），再读取字节返回。
-   * 仅处理字体文件请求，其余资源返回空以交由内核默认逻辑处理。
+   * 当阅读器需要加载自定义字体 / 主题背景图时触发，回调仅传入文件名（非完整路径），
+   * 统一交由资源解析责任链按类型还原并读取字节；未命中返回空以交由内核默认逻辑处理。
    */
   private resourceRequest: bookParser.CallbackRes<string, ArrayBuffer> = (filePath: string): ArrayBuffer => {
-    if (!filePath || !XUtil.isFont(filePath)) {
-      return new ArrayBuffer(0)
-    }
-    let realPath = this.fontManager.resolveFontFileByName(filePath)
-    if (!realPath) {
-      return new ArrayBuffer(0)
-    }
-    return XUtil.loadFileFromPath(realPath)
+    return this.resourceManager.request(filePath)
   }
 
   private registerVolumeKeyListener() {

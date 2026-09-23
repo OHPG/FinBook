@@ -7,6 +7,7 @@ import { imageCache } from "../reader/static/ImageCache";
 import { AppDataStore } from "../store/AppDataStore";
 import { AppThumb } from "../thumb/AppThumb";
 import { FontManager } from "../reader/dynamic/entity/FontManager";
+import { ImageManager } from "../reader/dynamic/entity/ImageManager";
 
 /**
  * @Author peerless2012
@@ -23,6 +24,7 @@ export class App extends AbilityStage {
     let appPrefer = new AppPrefer(this.context.getApplicationContext())
     AppStorage.setOrCreate(AppPrefer.PREFER, appPrefer)
     AppStorage.setOrCreate(FontManager.MANAGER, new FontManager(this.context.getApplicationContext(), appPrefer))
+    AppStorage.setOrCreate(ImageManager.MANAGER, new ImageManager(this.context.getApplicationContext()))
     AppStorage.setOrCreate(AppConfig.CONFIG, new AppConfig(this.context.getApplicationContext()))
     AppStorage.setOrCreate(AppThumb.THUMB, new AppThumb(this.context.getApplicationContext()))
     AppStorage.setOrCreate(AppDataStore.APP_DATA_STORE, new AppDataStore(this.context.getApplicationContext()))
